@@ -3,6 +3,7 @@ const { expressjwt: auth } = require('express-jwt');
 const crypto = require('crypto');
 const { v4: uuid } = require('uuid');
 const blacklist = require('express-jwt-blacklist');
+const JsonResult = require('../results/json');
 require('dotenv').config();
 
 const refreshTokenList = {};
@@ -58,16 +59,22 @@ const generateToken = ({ user, result }, res) => {
     email: user.email,
     permissions: user.permissions,
     refreshToken,
-    expiresIn: '1d',
+    expiresIn: process.env.JWT_EXPIRES_IN,
   }, process.env.JWT_SECRET);
 
-  refreshTokenList[refreshToken] = new Date(new Date().getTime() + (process.env.JWT_REFRESH_EXPIRES * 1000));
-
-  res.header('Authorization', token);
-  res.json({
-    result,
+  refreshTokenList[refreshToken] = {
     token,
-  });
+    expires: Date.now() + (process.env.JWT_EXPIRES_IN * 1000), // ms
+  };
+
+  res.json(new JsonResult({
+    result,
+    data: {
+      token,
+      refreshToken,
+    },
+  }));
+  
 };
 
 module.exports = {
