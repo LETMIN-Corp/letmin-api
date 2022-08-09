@@ -1,52 +1,55 @@
-require('dotenv').config();
-const cookieParser = require('cookie-parser');
-const compression = require('compression');
-const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-const createError = require('http-errors');
+const cors = require("cors");
+const express = require("express");
+const bodyParser = require('body-parser')
+const passport = require("passport");
+const { connect } = require("mongoose");
+const { success, error } = require("consola");
 
-//const logger = require('./utils/logger');
+// Bring in the app constants
+const { DB, PORT, CLIENT_URL } = require("./config");
 
+// Initialize the application
 const app = express();
-const port = process.env.PORT || 3000;
 
-const handleError = require('./middleware/handleError');
-
-// Engine setup
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use(helmet());
-app.use(compression());
+// Middlewares
 app.use(cors({
-  exposedHeaders: ['Authorization'],
+  origin: CLIENT_URL,
+  exposedHeaders: ['Authorization', 'Content-Type'],
   optionsSuccessStatus: 200,
 }));
 
-// Import database and initialize it
-const db = require('./connection/db.js');
+// parse application/json and application/x-www-form-urlencoded
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }))
 
-db.initialize(
-  process.env.MONGO_URI,
-  'users',
-  { useNewUrlParser: true, useUnifiedTopology: true },
-  process.env.DB_RECONNECT_DELAY,
-);
+app.use(passport.initialize());
 
-// Import routes
-const routes = require('./routes/routes.js');
+require("./middlewares/passport")(passport);
 
-app.use(routes);
+// User Router Middleware
+app.use("/api/users", require("./routes/users"));
 
-// catch 404 and forward to error handler
-app.use((req, res, next) => {
-  next(createError(404));
-});
+const startApp = async () => {
+  try {
+    // Connection With DB
+    connect(DB);
 
-// error handler
-app.use(handleError);
+    success({
+      message: `Successfully connected with the Database \n${DB}`,
+      badge: true
+    });
 
-app.listen(port, () => {
-  console.log(`🌍 Server running at http://localhost:${port}/`)
-});
+    // Start Listenting for the server on PORT
+    app.listen(PORT, () =>
+      success({ message: `🌍 Server running at http://localhost:${PORT}/`, badge: true })
+    );
+  } catch (err) {
+    error({
+      message: `❌ Unable to connect with Database \n${err}`,
+      badge: true
+    });
+    startApp();
+  }
+};
+
+startApp();
