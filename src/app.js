@@ -29,6 +29,13 @@ require("./middlewares/passport")(passport);
 // User Router Middleware
 app.use("/api/users", require("./routes/users"));
 
+app.get("/healthcheck", (req, res) => {
+  res.json({
+    message: "Hello World",
+    success: true
+  });
+});
+
 const startApp = async () => {
   try {
     // Connection With DB
