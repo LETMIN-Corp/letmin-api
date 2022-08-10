@@ -9,6 +9,7 @@ const { SECRET } = require("../config");
  */
 const userRegister = async (userDets, role, res) => {
   try {
+    console.log(userDets);
     // check if filds are empty
     if (!userDets.username || !userDets.password || !userDets.email) {
       return res.status(400).json({
@@ -45,7 +46,7 @@ const userRegister = async (userDets, role, res) => {
 
     await newUser.save();
     return res.status(201).json({
-      message: "Hurry! now you are successfully registred. Please now login.",
+      message: "Hurry! now you are successfully registered. Please now login.",
       success: true
     });
   } catch (err) {
@@ -126,14 +127,16 @@ const validateUsername = async username => {
 /**
  * @DESC Passport middleware
  */
-const userAuth = passport.authenticate("jwt", { session: false });
+const userAuth = (req, res, next) => {passport.authenticate("jwt", {session: false})}
 
 /**
  * @DESC Check Role Middleware
  */
 const checkRole = roles => (req, res, next) => {
   !roles.includes(req.user.role)
-  ? res.status(401).json("Unauthorized")
+  ? res.status(401).json({
+    message: "Unauthorized Access",
+  })
   : next();
 }
 

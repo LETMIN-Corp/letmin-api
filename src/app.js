@@ -1,12 +1,11 @@
 const cors = require("cors");
 const express = require("express");
-const bodyParser = require('body-parser')
 const passport = require("passport");
 const { connect } = require("mongoose");
 const { success, error } = require("consola");
 
 // Bring in the app constants
-const { DB, PORT, CLIENT_URL } = require("./config");
+const { DB, PORT, HOST, CLIENT_URL } = require("./config");
 
 // Initialize the application
 const app = express();
@@ -19,8 +18,8 @@ app.use(cors({
 }));
 
 // parse application/json and application/x-www-form-urlencoded
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json());
 
 app.use(passport.initialize());
 
@@ -47,7 +46,7 @@ const startApp = async () => {
     });
 
     // Start Listenting for the server on PORT
-    app.listen(PORT, () =>
+    app.listen(PORT, HOST, () =>
       success({ message: `🌍 Server running at http://localhost:${PORT}/`, badge: true })
     );
   } catch (err) {

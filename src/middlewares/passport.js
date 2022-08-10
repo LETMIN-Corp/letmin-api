@@ -3,6 +3,7 @@ const { SECRET } = require("../config");
 const { Strategy, ExtractJwt } = require("passport-jwt");
 
 const opts = {
+  passReqToCallback: true,
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: SECRET
 };
