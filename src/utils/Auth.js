@@ -101,7 +101,6 @@ const userLogin = async (userCreds, role, res) => {
       role: user.role,
       email: user.email,
       token: `Bearer ${token}`,
-      expiresIn: 168
     };
     return res.header("Authorization", result.token).status(200).json({
 
@@ -127,7 +126,25 @@ const validateUsername = async username => {
 /**
  * @DESC Passport middleware
  */
-const userAuth = (req, res, next) => {passport.authenticate("jwt", {session: false})}
+const userAuth = (req, res, next) => {
+  passport.authenticate(['local-login', 'google'], { session: false }, (err, user) => {
+    if (err) {
+      return res.status(500).json({
+        error: err,
+        message: "Unable to authenticate user.",
+        success: false
+      });
+    }
+    if (!user) {
+      return res.status(403).json({
+        message: "Invalid token.",
+        success: false
+      });
+    }
+    req.user = user;
+    next();
+  })(req, res, next);
+}
 
 /**
  * @DESC Check Role Middleware

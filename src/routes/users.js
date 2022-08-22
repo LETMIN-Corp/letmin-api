@@ -1,4 +1,7 @@
 const router = require("express").Router();
+const passport = require("passport");
+const jwt = require("jsonwebtoken");
+
 // Bring in the User Registration function
 const {
   userAuth,
@@ -8,34 +11,23 @@ const {
   serializeUser
 } = require("../utils/Auth");
 
+require("dotenv").config();
+const { SECRET } = require("../config");
 // Users Registeration Route
-router.post("/register-user", async (req, res) => {
-  await userRegister(req.body, "user", res);
-});
+router.get("/google", userAuth);
 
-// Admin Registration Route
-router.post("/register-admin", async (req, res) => {
-  await userRegister(req.body, "admin", res);
-});
+router.get('/google/callback', passport.authenticate('google', {
+  successRedirect : process.env.CLIENT_URL + '/register',
+  failureRedirect : '/users/register-user'
+}));
 
-// Super Admin Registration Route
-router.post("/register-super-admin", async (req, res) => {
-  await userRegister(req.body, "superadmin", res);
-});
+// async (req, res) => {
+//   await userRegister(req.body, "user", res);
+// });
 
 // Users Login Route
 router.post("/login-user", async (req, res) => {
   await userLogin(req.body, "user", res);
-});
-
-// Admin Login Route
-router.post("/login-admin", async (req, res) => {
-  await userLogin(req.body, "admin", res);
-});
-
-// Super Admin Login Route
-router.post("/login-super-admin", async (req, res) => {
-  await userLogin(req.body, "superadmin", res);
 });
 
 // Profile Route
@@ -52,31 +44,5 @@ router.get("/user-protectd",
   }
 );
 
-// Admin Protected Route
-router.get("/admin-protectd",
-  userAuth,
-  checkRole(["admin"]),
-  async (req, res) => {
-    return res.json("Hello Admin");
-  }
-);
-
-// Super Admin Protected Route
-router.get("/super-admin-protectd",
-  userAuth,
-  checkRole(["superadmin"]),
-  async (req, res) => {
-    return res.json("Hello Super Admin");
-  }
-);
-
-// Super Admin Protected Route
-router.get("/super-admin-and-admin-protectd",
-  userAuth,
-  checkRole(["superadmin", "admin"]),
-  async (req, res) => {
-    return res.json("Super admin and Admin");
-  }
-);
 
 module.exports = router;
