@@ -4,6 +4,7 @@ const { connect } = require("mongoose");
 const { success, error } = require("consola");
 const passport = require("passport");
 const session = require("express-session");
+const helmet = require("helmet");
 
 // Bring in the app constants
 const { DB, PORT, HOST, CLIENT_URL } = require("./config");
@@ -26,9 +27,11 @@ app.use(session({
   resave: true,
   saveUninitialized: true
 }));
+app.use(helmet());
 
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
+require('./middlewares/passport')(passport);
 
 //Routes 
 require("./routes")(app);

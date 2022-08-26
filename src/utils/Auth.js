@@ -3,13 +3,15 @@ const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const User = require("../models/User");
 const { SECRET } = require("../config");
-
+const {OAuth2Client} = require('google-auth-library');
+const jwt_decode = require('jwt-decode');
+require('dotenv').config();
 /**
  * @DESC To register the user (ADMIN, SUPER_ADMIN, USER)
  */
 const userRegister = async (userDets, role, res) => {
+  if (userDets.google)
   try {
-    console.log(userDets);
     // check if filds are empty
     if (!userDets.username || !userDets.password || !userDets.email) {
       return res.status(400).json({
@@ -46,11 +48,10 @@ const userRegister = async (userDets, role, res) => {
 
     await newUser.save();
     return res.status(201).json({
-      message: "Hurry! now you are successfully registered. Please now login.",
+      message: "You are successfully registered. Please now login.",
       success: true
     });
   } catch (err) {
-    // Implement logger function (winston)
     return res.status(500).json({
       error: err,
       message: "Unable to create your account.",
@@ -66,7 +67,7 @@ const userLogin = async (userCreds, role, res) => {
   let { email, password } = userCreds;
   
   // First Check if the email is in the database
-  const user = await User.findOne({ email });
+  let user = await User.findOne({ email });
   if (!user) {
     return res.status(404).json({
       message: "Email is not found. Invalid login credentials.",
@@ -100,12 +101,9 @@ const userLogin = async (userCreds, role, res) => {
       username: user.username,
       role: user.role,
       email: user.email,
-      token: `Bearer ${token}`,
+      token: token,
     };
     return res.header("Authorization", result.token).status(200).json({
-
-
-    //return res.status(200).json({
       ...result,
       message: "Hurray! You are now logged in.",
       success: true
@@ -127,7 +125,7 @@ const validateUsername = async username => {
  * @DESC Passport middleware
  */
 const userAuth = (req, res, next) => {
-  passport.authenticate(['local-login', 'google'], { session: false }, (err, user) => {
+  passport.authenticate('local-login', { session: false }, (err, user) => {
     if (err) {
       return res.status(500).json({
         error: err,
@@ -138,6 +136,32 @@ const userAuth = (req, res, next) => {
     if (!user) {
       return res.status(403).json({
         message: "Invalid token.",
+        success: false
+      });
+    }
+    req.user = user;
+    next();
+  })(req, res, next);
+}
+
+const adminAuth = (req, res, next) => {
+  passport.authenticate('local-login', { session: false }, (err, user) => {
+    if (err) {
+      return res.status(500).json({
+        error: err,
+        message: "Unable to authenticate user.",
+        success: false
+      });
+    }
+    if (!user) {
+      return res.status(403).json({
+        message: "Invalid token.",
+        success: false
+      });
+    }
+    if (user.role !== "admin") {
+      return res.status(403).json({
+        message: "You are not an admin.",
         success: false
       });
     }
@@ -174,8 +198,106 @@ const serializeUser = user => {
   };
 };
 
+const googleAuth = async (req, res, next) => {
+  if (!req.body.token) {
+    console.log('token not verified');
+    return res.status(400).json({
+      message: "Token is required."
+    });
+  }
+  const token = req.body.token;
+  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: process.env.GOOGLE_CLIENT_ID
+  });
+
+  if (!ticket.payload) {
+    return res.status(400).json({
+      message: "Token is not verified."
+    });
+  }
+
+  const { sub, name, email, email_verified, picture } = ticket.payload;
+
+  if (!email_verified) {
+    console.log('email not verified');
+    return res.status(400).json({
+      message: "Email verification failed."
+    });
+  }
+
+  User.findOne({ email })
+  .then(user => {
+    if (user) {
+      const token = jwt.sign(
+        {
+          user_id: user._id,
+          role: user.role,
+          username: user.username,
+          email: user.email
+        },
+        SECRET,
+        { expiresIn: "7 days" }
+      );
+
+      let result = {
+        username: user.username,
+        role: user.role,
+        email: user.email,
+        token: token,
+      };
+      return res.header("Authorization", result.token).status(200).json({
+        ...result,
+        message: "Hurray! You are now logged in.",
+        success: true
+      });
+    } else {
+      let password = email + SECRET;
+      bcrypt.hash(password, 12).then(hashedpassword => {
+        const newUser = new User({
+          username: email.split("@")[0],
+          email,
+          password: hashedpassword,
+          name,
+          role: "user",
+          google: true
+        });
+
+        newUser.save().then(user => {
+          const token = jwt.sign(
+            {
+              user_id: user._id,
+              role: user.role,
+              username: user.username,
+              email: user.email
+            },
+            SECRET,
+            { expiresIn: "7 days" }
+          );
+
+          let result = {
+            username: user.username,
+            role: user.role,
+            email: user.email,
+            token: token,
+          };
+          return res.header("Authorization", result.token).status(200).json({
+            ...result,
+            message: "Hurray! You are now logged in.",
+            success: true
+          });
+        });
+      });
+    }
+  })
+  
+}
+
 module.exports = {
   userAuth,
+  adminAuth,
+  googleAuth,
   checkRole,
   userLogin,
   userRegister,

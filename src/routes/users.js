@@ -1,10 +1,13 @@
 const router = require("express").Router();
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
+const jwt_decode = require("jwt-decode");
 
 // Bring in the User Registration function
 const {
   userAuth,
+  adminAuth,
+  googleAuth,
   userLogin,
   checkRole,
   userRegister,
@@ -12,18 +15,15 @@ const {
 } = require("../utils/Auth");
 
 require("dotenv").config();
-const { SECRET } = require("../config");
+
+
 // Users Registeration Route
-router.get("/google", userAuth);
+router.post("/auth/google", googleAuth );
 
-router.get('/google/callback', passport.authenticate('google', {
-  successRedirect : process.env.CLIENT_URL + '/register',
-  failureRedirect : '/users/register-user'
-}));
-
-// async (req, res) => {
-//   await userRegister(req.body, "user", res);
-// });
+router.get("/logout", (req, res) => {
+	req.logout();
+	res.redirect(process.env.CLIENT_URL);
+});
 
 // Users Login Route
 router.post("/login-user", async (req, res) => {
@@ -31,7 +31,8 @@ router.post("/login-user", async (req, res) => {
 });
 
 // Profile Route
-router.get("/profile", userAuth, async (req, res) => {
+router.get("/profile", adminAuth, async (req, res) => {
+  //console.log(req);
   return res.json(serializeUser(req.user));
 });
 
