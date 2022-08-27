@@ -1,18 +1,41 @@
 {
-    "name": "app",
-    "version": "1.0.0",
-    "description": "",
-    "main": "app.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-        "dotenv": "^16.0.1",
-        "express": "^4.17.1"
-    },
-    "devDependencies": {
-        "nodemon": "^2.0.16"
-    }
+  "name": "letmin-api",
+  "version": "1.0.0",
+  "description": "letmin-api",
+  "main": "app.js",
+  "scripts": {
+    "prod": "NODE_ENV=production npm start",
+    "test": "NODE_ENV=test mocha ./test/app.js --exit --port 8000",
+    "lint": "eslint ./ --fix",
+    "start": "node src/app.js",
+    "publish": "npm run lint && npm run test && npm run prod"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "consola": "^2.11.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.17.1",
+    "express-session": "^1.17.3",
+    "google-auth-library": "^8.4.0",
+    "helmet": "^5.1.1",
+    "joi": "^17.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "jwt-decode": "^3.1.2",
+    "mongoose": "^6.5.1",
+    "passport": "^0.5.3",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.17.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "mocha": "^10.0.0",
+    "nodemon": "^2.0.19"
+  }
 }
