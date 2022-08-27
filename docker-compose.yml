@@ -2,7 +2,7 @@ version: "3.7"
 services:
   app:
     image: kooldev/node:16
-    command: ["npx", "nodemon", "./src/app.js", "-L"]
+    command: ["npx", "nodemon", "src/app.js", "-L"]
     ports:
       - "${KOOL_APP_PORT:-5000}:5000"
     environment:
