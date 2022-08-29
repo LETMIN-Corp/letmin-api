@@ -7,6 +7,7 @@
     "prod": "NODE_ENV=production npm start",
     "test": "NODE_ENV=test mocha ./test/app.js --exit --port 8000",
     "lint": "eslint ./ --fix",
+    "dev": "npx nodemon src/app.js -L",
     "start": "node src/app.js",
     "publish": "npm run lint && npm run test && npm run prod"
   },
