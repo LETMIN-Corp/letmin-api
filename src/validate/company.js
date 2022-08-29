@@ -15,7 +15,7 @@ const companySchema = Joi.object({
         'any.required': `Email é obrigatório`,
         'string.email': `Email inválido`
     }),
-    company_phone: Joi.string().required().regex(/^[0-9]{2} [0-9]{5}\-[0-9]{4}$/).messages({
+    company_phone: Joi.string().required().regex(/^\([0-9]{2}\)[0-9]{5}\-[0-9]{4}$/).messages({
         'string.empty': `Telefone não pode ser vazio`,
         'any.required': `Telefone é obrigatório`,
         'string.pattern.base': `Telefone inválido`
@@ -38,7 +38,7 @@ const companySchema = Joi.object({
         'any.required': `Email é obrigatório`,
         'string.email': `Email inválido`
     }),
-    holder_phone: Joi.string().required().regex(/^[0-9]{2} [0-9]{5}\-[0-9]{4}$/).messages({
+    holder_phone: Joi.string().required().regex(/^\([0-9]{2}\)[0-9]{5}\-[0-9]{4}$/).messages({
         'string.empty': `Telefone não pode ser vazio`,
         'any.required': `Telefone é obrigatório`,
         'string.pattern.base': `Telefone inválido`
@@ -51,7 +51,12 @@ const companySchema = Joi.object({
         'string.empty': `Confirmação de senha não pode ser vazia`,
         'any.required': `Confirmação de senha é obrigatória`
     }),
-    card_type: Joi.string().required().valid('mastercard', 'visa').messages({
+    plan_types: Joi.string().required().valid('Semestral', 'Anual').messages({
+        'string.empty': `Tipo de plano não pode ser vazio`,
+        'any.required': `Tipo de plano é obrigatório`,
+        'any.only': `Tipo de plano inválido`
+    }),
+    card_type: Joi.string().required().valid('Mastercard', 'Visa', 'American Express', 'Hipercard').messages({
         'string.empty': `Tipo de cartão não pode ser vazio`,
         'any.required': `Tipo de cartão é obrigatório`,
         'any.only': `Tipo de cartão inválido`

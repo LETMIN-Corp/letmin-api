@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const User = require("../models/User");
+const Company = require("../models/Company");
 const { SECRET } = require("../config");
 const {OAuth2Client} = require('google-auth-library');
 const jwt_decode = require('jwt-decode');
@@ -284,15 +285,71 @@ const googleAuth = async (req, res, next) => {
           };
           return res.header("Authorization", result.token).status(200).json({
             ...result,
-            message: "Hurray! You are now logged in.",
+            message: "You are now logged in.",
             success: true
           });
         });
       });
     }
   })
-  
+
 }
+
+const companyValidator = require("../validate/company");
+
+
+const registerCompany = async (req, res, next) => {
+  companyValidator.validateAsync(req.body)
+    .then(async (value) => {
+      let company = await Company.findOne({ email: value.email });
+      if (company) {
+        return res.status(400).json({
+          message: "Company already exists.",
+          success: false
+        });
+      }
+      company = new Company({
+        company_name: value.company_name,
+        company_cnpj: value.company_cnpj,
+        company_email: value.company_email,
+        company_phone: value.company_phone,
+        company_address: value.company_address,
+        holder_name: value.holder_name,
+        holder_cpf: value.holder_cpf,
+        holder_email: value.holder_email,
+        holder_phone: value.holder_phone,
+        holder_password: value.holder_password,
+        holder_confirmPassword: value.holder_confirmPassword,
+        plan_types: value.plan_types,
+        card_type: value.card_type
+      });
+      company.save().then(company => {
+        return res.status(201).json({
+          message: "Company created successfully.",
+          success: true
+        });
+      }).catch(err => {
+        return res.status(500).json({
+          message: "Unable to create company.",
+          success: false
+        });
+      });
+    })
+    .catch(err => {
+        // map all the errors in an object with the field name
+        const errors = err.details.reduce((acc, curr) => {  
+            acc[curr.context.key] = curr.message;
+            return acc;
+        }, {});
+
+        return res.status(400).json({
+            message: errors,
+            success: false
+        });
+        
+    });
+}
+
 
 module.exports = {
   userAuth,
@@ -301,5 +358,6 @@ module.exports = {
   checkRole,
   userLogin,
   userRegister,
+  registerCompany,
   serializeUser
 };

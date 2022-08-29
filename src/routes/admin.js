@@ -11,7 +11,7 @@ const {
 
 // Admin Registration Route
 router.post("/register-admin", async (req, res) => {
-    await userRegister(req.body, "admin", res);
+  await userRegister(req.body, "admin", res);
 });
   
 
