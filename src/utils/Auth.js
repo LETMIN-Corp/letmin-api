@@ -201,7 +201,6 @@ const serializeUser = user => {
 
 const googleAuth = async (req, res, next) => {
   if (!req.body.token) {
-    console.log('token not verified');
     return res.status(400).json({
       message: "Token is required."
     });
@@ -292,11 +291,9 @@ const googleAuth = async (req, res, next) => {
       });
     }
   })
-
 }
 
 const companyValidator = require("../validate/company");
-
 
 const registerCompany = async (req, res, next) => {
   companyValidator.validateAsync(req.body)
@@ -309,6 +306,7 @@ const registerCompany = async (req, res, next) => {
         });
       }
       company = new Company({
+        role: "company",
         company_name: value.company_name,
         company_cnpj: value.company_cnpj,
         company_email: value.company_email,
