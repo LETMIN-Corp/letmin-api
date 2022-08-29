@@ -1,7 +1,6 @@
 const router = require("express").Router();
-const passport = require("passport");
-const jwt = require("jsonwebtoken");
-const jwt_decode = require("jwt-decode");
+
+require("dotenv").config();
 
 // Bring in the User Registration function
 const {
@@ -14,16 +13,8 @@ const {
   serializeUser
 } = require("../utils/Auth");
 
-require("dotenv").config();
-
-
 // Users Registeration Route
 router.post("/auth/google", googleAuth );
-
-router.get("/logout", (req, res) => {
-	req.logout();
-	res.redirect(process.env.CLIENT_URL);
-});
 
 // Users Login Route
 router.post("/login-user", async (req, res) => {

@@ -56,27 +56,6 @@ module.exports = (passport) => {
         }
     }));
 
-    // passport.use('local-google', new Strategy({
-    //     secretOrKey: SECRET,
-    //     passReqToCallback: true,
-    //     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    // },
-    // async (req, payload, done) => {
-    //     console.log('payload', payload);
-    //     await User.findById(payload.user_id)
-    //         .then(user => {
-    //             if (user) {
-    //                 return done(null, user);
-    //             }
-    //             return done(null, false);
-    //         })
-    //         .catch(err => {
-    //             console.log(err);
-    //             return done(null, false);
-    //         });
-    // }
-    // ));
-
     passport.serializeUser((user, done) => {
         done(null, user.googleId || user.id);
     });
