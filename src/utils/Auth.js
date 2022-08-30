@@ -7,6 +7,13 @@ const { SECRET } = require("../config");
 const {OAuth2Client} = require('google-auth-library');
 const jwt_decode = require('jwt-decode');
 require('dotenv').config();
+
+const {
+  generateToken,
+  verifyToken,
+  decodeToken
+} = require("../utils/jwt");
+
 /**
  * @DESC To register the user (ADMIN, SUPER_ADMIN, USER)
  */
@@ -87,16 +94,7 @@ const userLogin = async (userCreds, role, res) => {
   let isMatch = await bcrypt.compare(password, user.password);
   if (isMatch) {
     // Sign in the token and issue it to the user
-    let token = jwt.sign(
-      {
-        user_id: user._id,
-        role: user.role,
-        username: user.username,
-        email: user.email
-      },
-      SECRET,
-      { expiresIn: "7 days" }
-    );
+    let token = generateToken(user);
 
     let result = {
       username: user.username,
@@ -104,7 +102,7 @@ const userLogin = async (userCreds, role, res) => {
       email: user.email,
       token: token,
     };
-    return res.header("Authorization", result.token).status(200).json({
+    return res.header("Authorization", token).status(200).json({
       ...result,
       message: "Hurray! You are now logged in.",
       success: true
@@ -230,16 +228,7 @@ const googleAuth = async (req, res, next) => {
   User.findOne({ email })
   .then(user => {
     if (user) {
-      const token = jwt.sign(
-        {
-          user_id: user._id,
-          role: user.role,
-          username: user.username,
-          email: user.email
-        },
-        SECRET,
-        { expiresIn: "7 days" }
-      );
+      const token = generateToken(user);
 
       let result = {
         username: user.username,
@@ -247,7 +236,7 @@ const googleAuth = async (req, res, next) => {
         email: user.email,
         token: token,
       };
-      return res.header("Authorization", result.token).status(200).json({
+      return res.header("Authorization", token).status(200).json({
         ...result,
         message: "Hurray! You are now logged in.",
         success: true
@@ -265,16 +254,7 @@ const googleAuth = async (req, res, next) => {
         });
 
         newUser.save().then(user => {
-          const token = jwt.sign(
-            {
-              user_id: user._id,
-              role: user.role,
-              username: user.username,
-              email: user.email
-            },
-            SECRET,
-            { expiresIn: "7 days" }
-          );
+          const token = generateToken(user);
 
           let result = {
             username: user.username,
