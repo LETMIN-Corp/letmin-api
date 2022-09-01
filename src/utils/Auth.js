@@ -1,69 +1,102 @@
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const passport = require("passport");
+
 const User = require("../models/User");
+const Admin = require("../models/Admin");
+const Company = require("../models/Company");
+
 const { SECRET } = require("../config");
-const {OAuth2Client} = require('google-auth-library');
-const jwt_decode = require('jwt-decode');
+const { OAuth2Client } = require('google-auth-library');
 require('dotenv').config();
+
+const { companyValidator, companyLoginSchema } = require("../validate/company");
+const adminValidator = require("../validate/admin");
+const userValidator = require("../validate/user");
+const formatError = require("./formatError"); 
+
+const {
+  generateToken,
+  verifyToken,
+  decodeToken
+} = require("../utils/jwt");
+
 /**
  * @DESC To register the user (ADMIN, SUPER_ADMIN, USER)
  */
-const userRegister = async (userDets, role, res) => {
-  if (userDets.google)
-  try {
-    // check if filds are empty
-    if (!userDets.username || !userDets.password || !userDets.email) {
-      return res.status(400).json({
-        message: "Please fill all the fields"
-      });
-    }
+const adminRegister = async (adminDets, res) => {
+  const validation = adminValidator.validate(adminDets);
 
-    // Validate the username
-    let usernameNotTaken = await validateUsername(userDets.username || "");
-    if (!usernameNotTaken) {
-      return res.status(400).json({
-        message: `Username is already taken.`,
-        success: false
-      });
-    }
-
-    // validate the email
-    let emailNotRegistered = await validateEmail(userDets.email);
-    if (!emailNotRegistered) {
-      return res.status(400).json({
-        message: `Email is already registered.`,
-        success: false
-      });
-    }
-
-    // Get the hashed password
-    const password = await bcrypt.hash(userDets.password, 12);
-    // create a new user
-    const newUser = new User({
-      ...userDets,
-      password,
-      role
+  if (validation.error) {
+    return res.status(400).json({
+      message: formatError(validation.error),
+      success: false
     });
+  }
 
-    await newUser.save();
+  // Check if email is already taken
+  let admin = await Admin.findOne({ email: adminDets.email });
+  if (admin) {
+    return res.status(400).json({
+      message: "Email is already taken",
+      success: false
+    });
+  }
+
+  // Get the hashed password
+  const password = await bcrypt.hash(adminDets.password, 12);
+  // create a new user
+  const newAdmin = new Admin({
+    email: adminDets.email,
+    password,
+  });
+
+  await newAdmin.save()
+  .then((value) => {
     return res.status(201).json({
       message: "You are successfully registered. Please now login.",
       success: true
     });
-  } catch (err) {
+  })
+  .catch((err) => {
     return res.status(500).json({
       error: err,
       message: "Unable to create your account.",
       success: false
     });
-  }
+  })
 };
 
 /**
- * @DESC To Login the user (ADMIN, SUPER_ADMIN, USER)
+ * @DESC To Login the user
+ * @PATH POST /api/auth/login-user
+ * @ACCESS Public
  */
 const userLogin = async (userCreds, role, res) => {
+  let validation;
+  switch (role) {
+    case "admin":
+      validation = adminValidator.validate(userCreds);
+      break;
+    case "user":
+      validation = userValidator.validate(userCreds);
+      break;
+    case "company":
+      validation = companyLoginSchema.validate(userCreds);
+      break;
+    default:
+      return res.status(400).json({
+        message: "Invalid Login Credentials",
+        success: false
+      });
+  }
+
+  if (validation.error) {
+    return res.status(400).json({
+      message: formatError(validation.error),
+      success: false
+    });
+  }
+ 
   let { email, password } = userCreds;
   
   // First Check if the email is in the database
@@ -86,16 +119,7 @@ const userLogin = async (userCreds, role, res) => {
   let isMatch = await bcrypt.compare(password, user.password);
   if (isMatch) {
     // Sign in the token and issue it to the user
-    let token = jwt.sign(
-      {
-        user_id: user._id,
-        role: user.role,
-        username: user.username,
-        email: user.email
-      },
-      SECRET,
-      { expiresIn: "7 days" }
-    );
+    let token = generateToken(user);
 
     let result = {
       username: user.username,
@@ -103,7 +127,7 @@ const userLogin = async (userCreds, role, res) => {
       email: user.email,
       token: token,
     };
-    return res.header("Authorization", result.token).status(200).json({
+    return res.header("Authorization", token).status(200).json({
       ...result,
       message: "Hurray! You are now logged in.",
       success: true
@@ -114,11 +138,6 @@ const userLogin = async (userCreds, role, res) => {
       success: false
     });
   }
-};
-
-const validateUsername = async username => {
-  let user = await User.findOne({ username });
-  return user ? false : true;
 };
 
 /**
@@ -181,11 +200,6 @@ const checkRole = roles => (req, res, next) => {
   : next();
 }
 
-const validateEmail = async email => {
-  let user = await User.findOne({ email });
-  return user ? false : true;
-};
-
 const serializeUser = user => {
   return {
     role: user.role,
@@ -199,8 +213,8 @@ const serializeUser = user => {
 };
 
 const googleAuth = async (req, res, next) => {
+  console.log(req.body);
   if (!req.body.token) {
-    console.log('token not verified');
     return res.status(400).json({
       message: "Token is required."
     });
@@ -230,16 +244,7 @@ const googleAuth = async (req, res, next) => {
   User.findOne({ email })
   .then(user => {
     if (user) {
-      const token = jwt.sign(
-        {
-          user_id: user._id,
-          role: user.role,
-          username: user.username,
-          email: user.email
-        },
-        SECRET,
-        { expiresIn: "7 days" }
-      );
+      const token = generateToken(user);
 
       let result = {
         username: user.username,
@@ -247,7 +252,7 @@ const googleAuth = async (req, res, next) => {
         email: user.email,
         token: token,
       };
-      return res.header("Authorization", result.token).status(200).json({
+      return res.header("Authorization", token).status(200).json({
         ...result,
         message: "Hurray! You are now logged in.",
         success: true
@@ -265,16 +270,7 @@ const googleAuth = async (req, res, next) => {
         });
 
         newUser.save().then(user => {
-          const token = jwt.sign(
-            {
-              user_id: user._id,
-              role: user.role,
-              username: user.username,
-              email: user.email
-            },
-            SECRET,
-            { expiresIn: "7 days" }
-          );
+          const token = generateToken(user);
 
           let result = {
             username: user.username,
@@ -284,14 +280,47 @@ const googleAuth = async (req, res, next) => {
           };
           return res.header("Authorization", result.token).status(200).json({
             ...result,
-            message: "Hurray! You are now logged in.",
+            message: "You are now logged in.",
             success: true
           });
         });
       });
     }
   })
-  
+}
+
+const registerCompany = async (req, res, next) => {
+  companyValidator.validateAsync(req.body)
+    .then(async (value) => {
+      let company = await Company.findOne({ email: value.email });
+      if (company) {
+        return res.status(400).json({
+          message: "Company already exists.",
+          success: false
+        });
+      }
+      company = new Company({
+        ...value,
+        role: "company",
+      });
+      company.save().then(company => {
+        return res.status(201).json({
+          message: "Company created successfully.",
+          success: true
+        });
+      }).catch(err => {
+        return res.status(500).json({
+          message: "Unable to create company.",
+          success: false
+        });
+      });
+    })
+    .catch(err => {
+      return res.status(400).json({
+        success: false,
+        message: formatError(err),
+      });
+    });
 }
 
 module.exports = {
@@ -300,6 +329,7 @@ module.exports = {
   googleAuth,
   checkRole,
   userLogin,
-  userRegister,
+  adminRegister,
+  registerCompany,
   serializeUser
 };

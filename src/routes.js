@@ -12,4 +12,6 @@ module.exports = (app) => {
   app.use('/api/users', require("./routes/users"));
 
   app.use('/api/users', require("./routes/admin"));
+
+  app.use('/api/users', require("./routes/company"));
 }

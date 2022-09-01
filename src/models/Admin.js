@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 
-const UserSchema = new Schema({
+const AdminSchema = new Schema({
     name: {
       type: String,
       //required: true
@@ -8,15 +8,6 @@ const UserSchema = new Schema({
     email: {
       type: String,
       required: true
-    },
-    role: {
-      type: String,
-      default: "user",
-      enum: ["user", "admin", "superadmin"]
-    },
-    username: {
-      type: String,
-      //required: true
     },
     password: {
       type: String,
@@ -26,4 +17,4 @@ const UserSchema = new Schema({
   { timestamps: true }
 );
 
-module.exports = model("users", UserSchema);
+module.exports = model("admins", AdminSchema);

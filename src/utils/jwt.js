@@ -1,0 +1,59 @@
+const jwt = require("jsonwebtoken");
+const jwt_decode = require('jwt-decode');
+const {OAuth2Client} = require('google-auth-library');
+
+const { SECRET, CLIENT_ID } = require("../config");
+
+const generateToken = (user) => {
+    return jwt.sign(
+        {
+            user_id: user._id,
+            sub: user.id,
+            role: user.role,
+            username: user.username,
+            email: user.email,
+            iat: new Date().getTime(), // Current Time
+            exp: new Date().setDate(new Date().getDate() + 1), // Current Time + 1 day ahead
+        },
+        SECRET,
+        {
+            //expiresIn: "1d",
+        }
+    );
+};
+
+const verifyToken = (token) => {
+    return new Promise((resolve, reject) => {
+        jwt.verify(token, SECRET, (err, payload) => {
+            if (err) return reject(err);
+            resolve(payload);
+        });
+    });
+}
+
+const verifyGoogleToken = async (token) => {
+    const client = new OAuth2Client(CLIENT_ID);
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: CLIENT_ID
+    });
+
+    
+    if (!ticket.payload) {
+        return res.status(400).json({
+            message: "Token is not verified."
+        });
+    }
+    return ticket.payload;
+}
+
+const decodeToken = (token) => {
+    return jwt_decode(token);
+}
+
+module.exports = {
+    generateToken,
+    verifyToken,
+    verifyGoogleToken,
+    decodeToken
+};

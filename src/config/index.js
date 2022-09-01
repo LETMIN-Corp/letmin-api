@@ -6,5 +6,5 @@ module.exports = {
   HOST: process.env.APP_HOST || '0.0.0.0',
   SECRET: process.env.JWT_SECRET,
   CLIENT_URL: process.env.APP_CLIENT_URL,
-  CLIENT_ID: process.env.CLIENT_ID,
+  CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
 };
