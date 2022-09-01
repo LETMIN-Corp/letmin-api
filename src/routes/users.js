@@ -9,7 +9,6 @@ const {
   googleAuth,
   userLogin,
   checkRole,
-  userRegister,
   serializeUser
 } = require("../utils/Auth");
 

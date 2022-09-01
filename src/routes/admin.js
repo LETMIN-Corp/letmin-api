@@ -5,13 +5,13 @@ const {
   adminAuth,
   userLogin,
   checkRole,
-  userRegister,
+  adminRegister,
   serializeUser
 } = require("../utils/Auth");
 
 // Admin Registration Route
 router.post("/register-admin", async (req, res) => {
-  await userRegister(req.body, "admin", res);
+  await adminRegister(req.body, res);
 });
 
 // Admin Login Route

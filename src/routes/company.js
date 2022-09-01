@@ -5,7 +5,6 @@ const {
   adminAuth,
   userLogin,
   checkRole,
-  userRegister,
   serializeUser,
   registerCompany,
 } = require("../utils/Auth");
