@@ -67,7 +67,9 @@ const adminRegister = async (adminDets, res) => {
 };
 
 /**
- * @DESC To Login the user (ADMIN, USER)
+ * @DESC To Login the user
+ * @PATH POST /api/auth/login-user
+ * @ACCESS Public
  */
 const userLogin = async (userCreds, role, res) => {
   let validation;
@@ -93,27 +95,6 @@ const userLogin = async (userCreds, role, res) => {
       message: formatError(validation.error),
       success: false
     });
-  }
-    
-  if (role == 'admin') {
-    const validation = adminValidator.validate(adminDets);
-
-    if (validation.error) {
-      return res.status(400).json({
-        message: formatError(validation.error),
-        success: false
-      });
-    }
-  }
-  if (role == 'user') {
-    const validation = userValidator.validate(userCreds);
-
-    if (validation.error) {
-      return res.status(400).json({
-        message: formatError(validation.error),
-        success: false
-      });
-    }
   }
  
   let { email, password } = userCreds;
@@ -157,11 +138,6 @@ const userLogin = async (userCreds, role, res) => {
       success: false
     });
   }
-};
-
-const validateUsername = async username => {
-  let user = await User.findOne({ username });
-  return user ? false : true;
 };
 
 /**

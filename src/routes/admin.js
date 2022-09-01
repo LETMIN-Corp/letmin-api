@@ -19,7 +19,6 @@ router.post("/login-admin", async (req, res) => {
     await userLogin(req.body, "admin", res);
 });
 
-
 // Admin Protected Route
 router.get("/admin-protectd",
   adminAuth,
