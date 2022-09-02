@@ -6,23 +6,16 @@ require("dotenv").config();
 const {
   userAuth,
   adminAuth,
-  googleAuth,
   userLogin,
   checkRole,
   serializeUser
 } = require("../utils/Auth");
 
 // Users Registeration Route
-router.post("/auth/google", googleAuth );
-
-// Users Login Route
-router.post("/login-user", async (req, res) => {
-  await userLogin(req.body, "user", res);
-});
+router.post("/login-user", userLogin );
 
 // Profile Route
 router.get("/profile", adminAuth, async (req, res) => {
-  //console.log(req);
   return res.json(serializeUser(req.user));
 });
 

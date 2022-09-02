@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-const companySchema = Joi.object({
+const companyValidator = Joi.object({
     company_name: Joi.string().required().messages({
         'string.empty': `Nome da empresa não pode ser vazio`,
         'any.required': `Nome da empresa é obrigatório`
@@ -76,6 +76,6 @@ const companyLoginSchema = Joi.object({
 }).options({ abortEarly: false }).unknown();
 
 module.exports = {
-    companySchema,
+    companyValidator,
     companyLoginSchema
 };

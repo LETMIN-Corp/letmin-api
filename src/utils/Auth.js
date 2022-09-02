@@ -66,29 +66,61 @@ const adminRegister = async (adminDets, res) => {
   })
 };
 
+const companyLogin = async (credentials, res) => {
+  validation = companyLoginSchema.validate(credentials);
+
+  if (validation.error) {
+    return res.status(400).json({
+      message: formatError(validation.error),
+      success: false
+    });
+  }
+
+  let email = credentials.email
+
+  Company.findOne({ company_email: email })
+  .then(async (company) => {
+    let isMatch = await bcrypt.compare(credentials.password, company.holder_password);
+    isMatch = (credentials.password == company.holder_password)
+    console.log(company);
+    if(!isMatch){
+      return res.status(400).json({
+        message: 'Credenciais incorretas',
+        success: false
+      });
+    }
+    let token = generateToken(company);
+
+    let result = {
+      company_name: company.company_name,
+      company_email: company.company_email,
+      holder_name: company.holder_name,
+      holder_email: company.holder_email,
+      holder_phone: company.holder_phone,
+      token: token,
+    };
+    return res.header("Authorization", token).status(200).json({
+      ...result,
+      message: "Hurray! You are now logged in.",
+      success: true
+    });
+  })
+  .catch((err) => {
+    return res.status(400).json({
+      message: 'Error ' + err,
+      success: false
+    });
+  })
+}
+
 /**
  * @DESC To Login the user
  * @PATH POST /api/auth/login-user
  * @ACCESS Public
  */
-const userLogin = async (userCreds, role, res) => {
-  let validation;
-  switch (role) {
-    case "admin":
-      validation = adminValidator.validate(userCreds);
-      break;
-    case "user":
-      validation = userValidator.validate(userCreds);
-      break;
-    case "company":
-      validation = companyLoginSchema.validate(userCreds);
-      break;
-    default:
-      return res.status(400).json({
-        message: "Invalid Login Credentials",
-        success: false
-      });
-  }
+const adminLogin = async (userCreds, res) => {
+
+  let validation = adminValidator.validate(userCreds);
 
   if (validation.error) {
     return res.status(400).json({
@@ -100,44 +132,37 @@ const userLogin = async (userCreds, role, res) => {
   let { email, password } = userCreds;
   
   // First Check if the email is in the database
-  let user = await User.findOne({ email });
+  let user = await Admin.findOne({ email });
   if (!user) {
     return res.status(404).json({
       message: "Email is not found. Invalid login credentials.",
       success: false
     });
   }
-  // We will check the role
-  if (user.role !== role) {
-    return res.status(403).json({
-      message: "Please make sure you are logging in from the right portal/place (permission).",
-      success: false
-    });
-  }
-  // That means user is existing and trying to signin from the right portal
   // Now check for the password
   let isMatch = await bcrypt.compare(password, user.password);
-  if (isMatch) {
-    // Sign in the token and issue it to the user
-    let token = generateToken(user);
 
-    let result = {
-      username: user.username,
-      role: user.role,
-      email: user.email,
-      token: token,
-    };
-    return res.header("Authorization", token).status(200).json({
-      ...result,
-      message: "Hurray! You are now logged in.",
-      success: true
-    });
-  } else {
+  if (!isMatch) {
     return res.status(403).json({
       message: "Incorrect password.",
       success: false
     });
   }
+
+  // Sign in the token and issue it to the user
+  let token = generateToken(user);
+
+  let result = {
+    username: user.username,
+    role: user.role,
+    email: user.email,
+    token: token,
+  };
+  return res.header("Authorization", token).status(200).json({
+    ...result,
+    message: "Hurray! You are now logged in.",
+    success: true
+  });
 };
 
 /**
@@ -212,14 +237,13 @@ const serializeUser = user => {
   };
 };
 
-const googleAuth = async (req, res, next) => {
-  console.log(req.body);
-  if (!req.body.token) {
+const userLogin = async (req, res, next) => {
+  if (!req.body.credential) {
     return res.status(400).json({
       message: "Token is required."
     });
   }
-  const token = req.body.token;
+  const token = req.body.credential;
   const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   const ticket = await client.verifyIdToken({
     idToken: token,
@@ -290,45 +314,47 @@ const googleAuth = async (req, res, next) => {
 }
 
 const registerCompany = async (req, res, next) => {
-  companyValidator.validateAsync(req.body)
-    .then(async (value) => {
-      let company = await Company.findOne({ email: value.email });
-      if (company) {
-        return res.status(400).json({
-          message: "Company already exists.",
-          success: false
-        });
-      }
-      company = new Company({
-        ...value,
-        role: "company",
-      });
-      company.save().then(company => {
-        return res.status(201).json({
-          message: "Company created successfully.",
-          success: true
-        });
-      }).catch(err => {
-        return res.status(500).json({
-          message: "Unable to create company.",
-          success: false
-        });
-      });
-    })
-    .catch(err => {
-      return res.status(400).json({
-        success: false,
-        message: formatError(err),
-      });
+  let credentials = req.body;
+  let validation = companyValidator.validate(credentials);
+
+  if (validation.error) {
+    return res.status(400).json({
+      message: formatError(validation.error),
+      success: false
     });
+  }
+
+  let company = await Company.findOne({ company_cnpj: credentials.company_cnpj });
+  if (company) {
+    return res.status(400).json({
+      message: "Company already exists.",
+      success: false
+    });
+  }
+  company = new Company({
+    ...credentials,
+    role: "company",
+  });
+  company.save().then(company => {
+    return res.status(201).json({
+      message: "Company created successfully.",
+      success: true
+    });
+  }).catch(err => {
+    return res.status(500).json({
+      message: "Unable to create company.",
+      success: false
+    });
+  });
 }
 
 module.exports = {
-  userAuth,
   adminAuth,
-  googleAuth,
-  checkRole,
+  adminLogin,
+  companyLogin,
+  userAuth,
   userLogin,
+  checkRole,
   adminRegister,
   registerCompany,
   serializeUser

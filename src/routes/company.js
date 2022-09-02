@@ -3,7 +3,7 @@ const router = require("express").Router();
 const {
   userAuth,
   adminAuth,
-  userLogin,
+  companyLogin,
   checkRole,
   serializeUser,
   registerCompany,
@@ -16,7 +16,7 @@ router.post("/register-company", registerCompany);
 
 // Company Login Route
 router.post("/login-company",  async (req, res) => {
-    await userLogin(req.body, "company", res);
+    await companyLogin(req.body, res);
 });
 
 module.exports = router;
