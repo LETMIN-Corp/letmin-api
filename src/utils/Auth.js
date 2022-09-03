@@ -37,7 +37,7 @@ const adminRegister = async (adminDets, res) => {
   let admin = await Admin.findOne({ email: adminDets.email });
   if (admin) {
     return res.status(400).json({
-      message: "Email is already taken",
+      message: "Email já cadastrado",
       success: false
     });
   }
@@ -53,14 +53,14 @@ const adminRegister = async (adminDets, res) => {
   await newAdmin.save()
   .then((value) => {
     return res.status(201).json({
-      message: "You are successfully registered. Please now login.",
+      message: "Parabens! Você está logado. Por favor logue.",
       success: true
     });
   })
   .catch((err) => {
     return res.status(500).json({
       error: err,
-      message: "Unable to create your account.",
+      message: "Não foi possivel cadastrar sua conta.",
       success: false
     });
   })
@@ -101,7 +101,7 @@ const companyLogin = async (credentials, res) => {
     };
     return res.header("Authorization", token).status(200).json({
       ...result,
-      message: "Hurray! You are now logged in.",
+      message: "Parabens! Você está logado.",
       success: true
     });
   })
@@ -135,7 +135,7 @@ const adminLogin = async (userCreds, res) => {
   let user = await Admin.findOne({ email });
   if (!user) {
     return res.status(404).json({
-      message: "Email is not found. Invalid login credentials.",
+      message: "Email não encontrado.",
       success: false
     });
   }
@@ -144,7 +144,7 @@ const adminLogin = async (userCreds, res) => {
 
   if (!isMatch) {
     return res.status(403).json({
-      message: "Incorrect password.",
+      message: "Credenciais incorretas.",
       success: false
     });
   }
@@ -160,7 +160,7 @@ const adminLogin = async (userCreds, res) => {
   };
   return res.header("Authorization", token).status(200).json({
     ...result,
-    message: "Hurray! You are now logged in.",
+    message: "Parabens! Você está logado.",
     success: true
   });
 };
@@ -193,19 +193,19 @@ const adminAuth = (req, res, next) => {
     if (err) {
       return res.status(500).json({
         error: err,
-        message: "Unable to authenticate user.",
+        message: "Não foi possivel autenticar usuário.",
         success: false
       });
     }
     if (!user) {
       return res.status(403).json({
-        message: "Invalid token.",
+        message: "Token inválido.",
         success: false
       });
     }
     if (user.role !== "admin") {
       return res.status(403).json({
-        message: "You are not an admin.",
+        message: "Você não tem permissão de admin.",
         success: false
       });
     }
@@ -220,7 +220,7 @@ const adminAuth = (req, res, next) => {
 const checkRole = roles => (req, res, next) => {
   !roles.includes(req.user.role)
   ? res.status(401).json({
-    message: "Unauthorized Access",
+    message: "Acesso não autorizado",
   })
   : next();
 }
@@ -240,7 +240,7 @@ const serializeUser = user => {
 const userLogin = async (req, res, next) => {
   if (!req.body.credential) {
     return res.status(400).json({
-      message: "Token is required."
+      message: "O Token é obrigatório."
     });
   }
   const token = req.body.credential;
@@ -252,16 +252,15 @@ const userLogin = async (req, res, next) => {
 
   if (!ticket.payload) {
     return res.status(400).json({
-      message: "Token is not verified."
+      message: "Token não foi verificado."
     });
   }
 
   const { sub, name, email, email_verified, picture } = ticket.payload;
 
   if (!email_verified) {
-    console.log('email not verified');
     return res.status(400).json({
-      message: "Email verification failed."
+      message: "Email google não verificado."
     });
   }
 
@@ -278,7 +277,7 @@ const userLogin = async (req, res, next) => {
       };
       return res.header("Authorization", token).status(200).json({
         ...result,
-        message: "Hurray! You are now logged in.",
+        message: "Parabens! Você está logado.",
         success: true
       });
     } else {
@@ -304,7 +303,7 @@ const userLogin = async (req, res, next) => {
           };
           return res.header("Authorization", result.token).status(200).json({
             ...result,
-            message: "You are now logged in.",
+            message: "Parabens! Você está logado.",
             success: true
           });
         });
@@ -327,7 +326,7 @@ const registerCompany = async (req, res, next) => {
   let company = await Company.findOne({ company_cnpj: credentials.company_cnpj });
   if (company) {
     return res.status(400).json({
-      message: "Company already exists.",
+      message: "CNPJ já foi cadastrado.",
       success: false
     });
   }
@@ -337,12 +336,13 @@ const registerCompany = async (req, res, next) => {
   });
   company.save().then(company => {
     return res.status(201).json({
-      message: "Company created successfully.",
+      message: "Empresa cadastrada com sucesso.",
       success: true
     });
   }).catch(err => {
     return res.status(500).json({
-      message: "Unable to create company.",
+      message: "Não foi possivel cadastrar a empresa.",
+      error: err,
       success: false
     });
   });

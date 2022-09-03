@@ -12,6 +12,8 @@ const { DB, PORT, HOST, CLIENT_URL } = require("./config");
 // Initialize the application
 const app = express();
 
+process.env.TZ = "America/Sao Paulo";
+
 // Middlewares
 app.use(cors({
   origin: '*', //CLIENT_URL,
