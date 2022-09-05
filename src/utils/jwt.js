@@ -4,12 +4,12 @@ const {OAuth2Client} = require('google-auth-library');
 
 const { SECRET, CLIENT_ID } = require("../config");
 
-const generateToken = (user) => {
+function generateToken(user, role) {
     return jwt.sign(
         {
             user_id: user._id,
             sub: user.id,
-            role: user.role,
+            role: role,
             username: user.username,
             email: user.email,
             iat: new Date().getTime(), // Current Time

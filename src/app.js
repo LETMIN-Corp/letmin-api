@@ -16,7 +16,7 @@ process.env.TZ = "America/Sao Paulo";
 
 // Middlewares
 app.use(cors({
-  origin: '*', //CLIENT_URL,
+  origin: CLIENT_URL,
   exposedHeaders: ['Authorization', 'Content-Type'],
   optionsSuccessStatus: 200,
 }));

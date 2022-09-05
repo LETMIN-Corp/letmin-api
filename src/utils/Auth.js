@@ -13,17 +13,17 @@ const { companyValidator, companyLoginSchema } = require("../validate/company");
 const adminValidator = require("../validate/admin");
 const userValidator = require("../validate/user");
 const formatError = require("./formatError"); 
+const ROLES = require('./constants');
 
 const {
   generateToken,
   verifyToken,
   decodeToken
 } = require("../utils/jwt");
-
 /**
  * @DESC To register the user (ADMIN, SUPER_ADMIN, USER)
  */
-const adminRegister = async (adminDets, res) => {
+const registerAdmin = async (adminDets, res) => {
   const validation = adminValidator.validate(adminDets);
 
   if (validation.error) {
@@ -46,15 +46,15 @@ const adminRegister = async (adminDets, res) => {
   const password = await bcrypt.hash(adminDets.password, 12);
   // create a new user
   const newAdmin = new Admin({
+    name: adminDets.name,
     email: adminDets.email,
-    password,
+    password: password
   });
-
   await newAdmin.save()
   .then((value) => {
     return res.status(201).json({
-      message: "Parabens! Você está logado. Por favor logue.",
-      success: true
+      message: `Parabens ${value.name}! Você está cadastrado. Por favor logue.`,
+      success: true,
     });
   })
   .catch((err) => {
@@ -89,7 +89,7 @@ const companyLogin = async (credentials, res) => {
         success: false
       });
     }
-    let token = generateToken(company);
+    let token = generateToken(company, ROLES.COMPANY);
 
     let result = {
       company_name: company.company_name,
@@ -150,11 +150,9 @@ const adminLogin = async (userCreds, res) => {
   }
 
   // Sign in the token and issue it to the user
-  let token = generateToken(user);
-
+  let token = generateToken(user, ROLES.ADMIN);
   let result = {
     username: user.username,
-    role: user.role,
     email: user.email,
     token: token,
   };
@@ -267,7 +265,7 @@ const userLogin = async (req, res, next) => {
   User.findOne({ email })
   .then(user => {
     if (user) {
-      const token = generateToken(user);
+      const token = generateToken(user, ROLES.USER);
 
       let result = {
         username: user.username,
@@ -293,7 +291,7 @@ const userLogin = async (req, res, next) => {
         });
 
         newUser.save().then(user => {
-          const token = generateToken(user);
+          const token = generateToken(user, ROLES.USER);
 
           let result = {
             username: user.username,
@@ -355,7 +353,7 @@ module.exports = {
   userAuth,
   userLogin,
   checkRole,
-  adminRegister,
+  registerAdmin,
   registerCompany,
   serializeUser
 };
