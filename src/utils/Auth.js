@@ -9,7 +9,7 @@ const { SECRET } = require("../config");
 const { OAuth2Client } = require('google-auth-library');
 require('dotenv').config();
 
-const { companyValidator, companyLoginSchema } = require("../validate/company");
+const { companyValidator, loginCompanySchema } = require("../validate/company");
 const adminValidator = require("../validate/admin");
 const userValidator = require("../validate/user");
 const formatError = require("./formatError"); 
@@ -66,8 +66,8 @@ const registerAdmin = async (adminDets, res) => {
   })
 };
 
-const companyLogin = async (credentials, res) => {
-  validation = companyLoginSchema.validate(credentials);
+const loginCompany = async (credentials, res) => {
+  validation = loginCompanySchema.validate(credentials);
 
   if (validation.error) {
     return res.status(400).json({
@@ -76,13 +76,12 @@ const companyLogin = async (credentials, res) => {
     });
   }
 
-  let email = credentials.email
-
-  Company.findOne({ company_email: email })
+  //{ 'company.cnpj': cnpj }, 
+  Company.findOne({ 'company.email' : credentials.email })
   .then(async (company) => {
-    let isMatch = await bcrypt.compare(credentials.password, company.holder_password);
-    isMatch = (credentials.password == company.holder_password)
     console.log(company);
+    let isMatch = await bcrypt.compare(credentials.password, company.holder.password);
+
     if(!isMatch){
       return res.status(400).json({
         message: 'Credenciais incorretas',
@@ -92,11 +91,15 @@ const companyLogin = async (credentials, res) => {
     let token = generateToken(company, ROLES.COMPANY);
 
     let result = {
-      company_name: company.company_name,
-      company_email: company.company_email,
-      holder_name: company.holder_name,
-      holder_email: company.holder_email,
-      holder_phone: company.holder_phone,
+      company: {
+        name: company.name,
+        email: company.email,
+      },
+      holder: {
+        name: company.name,
+        email: company.email,
+        phone: company.phone,
+      },
       token: token,
     };
     return res.header("Authorization", token).status(200).json({
@@ -118,7 +121,7 @@ const companyLogin = async (credentials, res) => {
  * @PATH POST /api/auth/login-user
  * @ACCESS Public
  */
-const adminLogin = async (userCreds, res) => {
+const loginAdmin = async (userCreds, res) => {
 
   let validation = adminValidator.validate(userCreds);
 
@@ -320,21 +323,42 @@ const registerCompany = async (req, res, next) => {
       success: false
     });
   }
-
-  let company = await Company.findOne({ company_cnpj: credentials.company_cnpj });
+  console.log(credentials);
+  let company = await Company.findOne({ 'company.cnpj' : credentials.company.cnpj });
   if (company) {
     return res.status(400).json({
       message: "CNPJ já foi cadastrado.",
       success: false
     });
   }
+
+  credentials.holder.password = await bcrypt.hash(credentials.holder.password, 12);
+
   company = new Company({
     ...credentials,
-    role: "company",
+    role: ROLES.COMPANY,
   });
-  company.save().then(company => {
-    return res.status(201).json({
-      message: "Empresa cadastrada com sucesso.",
+
+  company.save()
+  .then(company => {
+
+    let token = generateToken(company, ROLES.COMPANY);
+    console.log(company);
+    let result = {
+      company: {
+        name: company.name,
+        email: company.email,
+      },
+      holder: {
+        name: company.name,
+        email: company.email,
+        phone: company.phone,
+      },
+      token: token,
+    };
+    return res.header("Authorization", token).status(201).json({
+      ...result,
+      message: "Parabens! Você está cadastrado e logado.",
       success: true
     });
   }).catch(err => {
@@ -348,8 +372,8 @@ const registerCompany = async (req, res, next) => {
 
 module.exports = {
   adminAuth,
-  adminLogin,
-  companyLogin,
+  loginAdmin,
+  loginCompany,
   userAuth,
   userLogin,
   checkRole,

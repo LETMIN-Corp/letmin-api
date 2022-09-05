@@ -3,7 +3,7 @@ const router = require("express").Router();
 const {
   userAuth,
   adminAuth,
-  adminLogin,
+  loginAdmin,
   checkRole,
   registerAdmin,
   serializeUser
@@ -16,7 +16,7 @@ router.post("/register-admin", async (req, res) => {
 
 // Admin Login Route
 router.post("/login-admin", async (req, res) => {
-    await adminLogin(req.body, res);
+    await loginAdmin(req.body, res);
 });
 
 // Admin Protected Route
