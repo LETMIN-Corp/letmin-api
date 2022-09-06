@@ -75,11 +75,10 @@ const loginCompany = async (credentials, res) => {
       success: false
     });
   }
-
-  //{ 'company.cnpj': cnpj }, 
+ 
   Company.findOne({ 'company.email' : credentials.email })
   .then(async (company) => {
-    console.log(company);
+
     let isMatch = await bcrypt.compare(credentials.password, company.holder.password);
 
     if(!isMatch){
@@ -323,7 +322,7 @@ const registerCompany = async (req, res, next) => {
       success: false
     });
   }
-  console.log(credentials);
+
   let company = await Company.findOne({ 'company.cnpj' : credentials.company.cnpj });
   if (company) {
     return res.status(400).json({
@@ -343,7 +342,7 @@ const registerCompany = async (req, res, next) => {
   .then(company => {
 
     let token = generateToken(company, ROLES.COMPANY);
-    console.log(company);
+
     let result = {
       company: {
         name: company.name,
