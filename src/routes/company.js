@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const { getCompanyData } = require("../entities/company");
 // Bring in the User Registration function
 const {
   userAuth,
@@ -18,5 +19,7 @@ router.post("/register-company", registerCompany);
 router.post("/login-company",  async (req, res) => {
     await loginCompany(req.body, res);
 });
+
+router.post("/get-company-data", getCompanyData);
 
 module.exports = router;

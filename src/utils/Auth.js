@@ -102,7 +102,7 @@ const loginCompany = async (credentials, res) => {
     };
     return res.header("Authorization", token).status(200).json({
       ...result,
-      message: "Parabens! Você está logado.",
+      message: "Parabéns! Você está logado.",
       success: true
     });
   })
@@ -352,7 +352,7 @@ const registerCompany = async (req, res, next) => {
     };
     return res.header("Authorization", token).status(201).json({
       ...result,
-      message: "Parabens! Você está cadastrado e logado.",
+      message: "Parabéns! Você está cadastrado e logado.",
       success: true
     });
   }).catch(err => {
