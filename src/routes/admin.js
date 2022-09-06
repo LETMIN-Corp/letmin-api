@@ -3,20 +3,20 @@ const router = require("express").Router();
 const {
   userAuth,
   adminAuth,
-  userLogin,
+  loginAdmin,
   checkRole,
-  adminRegister,
+  registerAdmin,
   serializeUser
 } = require("../utils/Auth");
 
 // Admin Registration Route
 router.post("/register-admin", async (req, res) => {
-  await adminRegister(req.body, res);
+  await registerAdmin(req.body, res);
 });
 
 // Admin Login Route
 router.post("/login-admin", async (req, res) => {
-    await userLogin(req.body, "admin", res);
+    await loginAdmin(req.body, res);
 });
 
 // Admin Protected Route

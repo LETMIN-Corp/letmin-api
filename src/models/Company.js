@@ -1,58 +1,82 @@
 const { Schema, model } = require("mongoose");
 
 const CompanySchema = new Schema({
-    company_name: {
-        type: String,
-        required: true
+    company: {
+        name: {
+            type: String,
+            required: true
+        },
+        cnpj: {
+            type: String,
+            required: true
+        },
+        email: {
+            type: String,
+            required: true
+        },
+        phone: {
+            type: String,
+            required: true
+        },
+        address: {
+            type: String,
+            required: true
+        },
     },
-    company_email: {
-        type: String,
-        required: true
+    holder: {
+        name: {
+            type: String,
+            required: true
+        },
+        cpf: {
+            type: String,
+            required: true
+        },
+        email: {
+            type: String,
+            required: true
+        },
+        phone: {
+            type: String,
+            required: true
+        },
+        password: {
+            type: String,
+            required: true
+        },
     },
-    company_cnpj: {
-        type: String,
-        required: true
+    plan: {
+        selected: {
+            type: String,
+            required: true
+        },
+        // price: {
+        //     type: Number,
+        //     required: true
+        // },
     },
-    company_phone: {
-        type: String,
-        required: true
+    card: {
+        type: {
+            type: String,
+            required: true
+        },
+        number: {
+            type: String,
+            required: true
+        },
+        code: {
+            type: String,
+            required: true
+        },
+        expiration: {
+            type: String,
+            required: true
+        },
+        owner: {
+            type: String,
+            required: true
+        },
     },
-    company_address: {
-        type: String,
-        required: true
-    },
-    holder_name: {
-        type: String,
-        required: true
-    },
-    holder_cpf: {
-        type: String,
-        required: true
-    },
-    holder_email: {
-        type: String,
-        required: true
-    },
-    holder_phone: {
-        type: String,
-        required: true
-    },
-    holder_password: {
-        type: String,
-        required: true
-    },
-    holder_confirmPassword: {
-        type: String,
-        required: true
-    },
-    plan_types: {
-        type: String,
-        required: true
-    },
-    card_type: {
-        type: String,
-        required: true
-    }
 });
 
 module.exports = model("companies", CompanySchema);
