@@ -260,9 +260,11 @@ const userLogin = async (req, res, next) => {
       const token = generateToken(user, ROLES.USER);
 
       let result = {
+        _id: user._id,
         username: user.username,
         role: user.role,
         email: user.email,
+        picture: user.picture,
         token: token,
       };
       return res.header("Authorization", token).status(200).json({
@@ -287,8 +289,10 @@ const userLogin = async (req, res, next) => {
       const token = generateToken(user, ROLES.USER);
 
       let result = {
+        _id: user._id,
         username: user.username,
         role: user.role,
+        picture: user.picture,
         email: user.email,
         token: token,
       };
