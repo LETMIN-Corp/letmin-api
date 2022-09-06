@@ -6,17 +6,16 @@ const Admin = require("../models/Admin");
 const Company = require("../models/Company");
 
 const { SECRET } = require("../config");
-const { OAuth2Client } = require('google-auth-library');
-require('dotenv').config();
 
 const { companyValidator, loginCompanySchema } = require("../validate/company");
 const adminValidator = require("../validate/admin");
-const userValidator = require("../validate/user");
+const { userValidator } = require("../validate/user");
 const formatError = require("./formatError"); 
 const ROLES = require('./constants');
 
 const {
   generateToken,
+  verifyGoogleToken,
   verifyToken,
   decodeToken
 } = require("../utils/jwt");
@@ -243,20 +242,10 @@ const userLogin = async (req, res, next) => {
       message: "O Token é obrigatório."
     });
   }
-  const token = req.body.credential;
-  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-  const ticket = await client.verifyIdToken({
-    idToken: token,
-    audience: process.env.GOOGLE_CLIENT_ID
-  });
 
-  if (!ticket.payload) {
-    return res.status(400).json({
-      message: "Token não foi verificado."
-    });
-  }
-
-  const { sub, name, email, email_verified, picture } = ticket.payload;
+  let payload = await verifyGoogleToken(res, req.body.credential);
+  console.log(payload);
+  const { sub, name, email, email_verified, picture } = payload;
 
   if (!email_verified) {
     return res.status(400).json({
@@ -265,7 +254,8 @@ const userLogin = async (req, res, next) => {
   }
 
   User.findOne({ email })
-  .then(user => {
+  .then( async (user) => {
+    // User already exists
     if (user) {
       const token = generateToken(user, ROLES.USER);
 
@@ -280,36 +270,41 @@ const userLogin = async (req, res, next) => {
         message: "Parabens! Você está logado.",
         success: true
       });
-    } else {
-      let password = email + SECRET;
-      bcrypt.hash(password, 12).then(hashedpassword => {
-        const newUser = new User({
-          username: email.split("@")[0],
-          email,
-          password: hashedpassword,
-          name,
-          role: "user",
-          google: true
-        });
-
-        newUser.save().then(user => {
-          const token = generateToken(user, ROLES.USER);
-
-          let result = {
-            username: user.username,
-            role: user.role,
-            email: user.email,
-            token: token,
-          };
-          return res.header("Authorization", result.token).status(200).json({
-            ...result,
-            message: "Parabens! Você está logado.",
-            success: true
-          });
-        });
-      });
     }
+    // User does not exist
+    let hashedpassword = await bcrypt.hash(email + SECRET, 12);
+    const newUser = new User({
+      username: email.split("@")[0],
+      email,
+      password: hashedpassword,
+      name,
+      picture,
+      role: "user",
+      google: true
+    });
+
+    newUser.save().then(user => {
+      const token = generateToken(user, ROLES.USER);
+
+      let result = {
+        username: user.username,
+        role: user.role,
+        email: user.email,
+        token: token,
+      };
+      return res.header("Authorization", result.token).status(200).json({
+        ...result,
+        message: "Parabens! Você está logado.",
+        success: true
+      });
+    });
   })
+  .catch((err) => {
+    return res.status(400).json({
+      message: 'Error ' + err,
+      success: false
+    });
+  });
 }
 
 const registerCompany = async (req, res, next) => {

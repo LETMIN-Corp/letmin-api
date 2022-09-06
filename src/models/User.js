@@ -9,11 +9,6 @@ const UserSchema = new Schema({
       type: String,
       required: true
     },
-    role: {
-      type: String,
-      default: "user",
-      enum: ["user", "admin", "superadmin"]
-    },
     username: {
       type: String,
       //required: true
@@ -21,7 +16,11 @@ const UserSchema = new Schema({
     password: {
       type: String,
       required: true
-    }
+    },
+    picture: {
+      type: String,
+      //required: true
+    },
   },
   { timestamps: true }
 );
