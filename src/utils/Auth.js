@@ -22,7 +22,8 @@ const {
 /**
  * @DESC To register the user (ADMIN, SUPER_ADMIN, USER)
  */
-const registerAdmin = async (adminDets, res) => {
+const registerAdmin = async (req, res) => {
+  const adminDets = req.body;
   const validation = adminValidator.validate(adminDets);
 
   if (validation.error) {
@@ -65,7 +66,8 @@ const registerAdmin = async (adminDets, res) => {
   })
 };
 
-const loginCompany = async (credentials, res) => {
+const loginCompany = async (req, res) => {
+  const credentials = req.body;
   validation = loginCompanySchema.validate(credentials);
 
   if (validation.error) {
@@ -119,8 +121,8 @@ const loginCompany = async (credentials, res) => {
  * @PATH POST /api/auth/login-user
  * @ACCESS Public
  */
-const loginAdmin = async (userCreds, res) => {
-
+const loginAdmin = async (req, res) => {
+  const userCreds = req.body;
   let validation = adminValidator.validate(userCreds);
 
   if (validation.error) {

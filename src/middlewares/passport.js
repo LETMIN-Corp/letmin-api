@@ -1,11 +1,7 @@
 const User = require("../models/User");
 const { SECRET } = require("../config");
-const { Strategy } = require("passport-jwt");
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-
-require('dotenv').config();
 
 module.exports = (passport) => {
     passport.use('local-login', new JwtStrategy({

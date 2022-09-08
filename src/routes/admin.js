@@ -10,14 +10,10 @@ const {
 } = require("../utils/Auth");
 
 // Admin Registration Route
-router.post("/register-admin", async (req, res) => {
-  await registerAdmin(req.body, res);
-});
+router.post("/register-admin", registerAdmin);
 
 // Admin Login Route
-router.post("/login-admin", async (req, res) => {
-    await loginAdmin(req.body, res);
-});
+router.post("/login-admin", loginAdmin);
 
 // Admin Protected Route
 router.get("/admin-protectd",
