@@ -1,7 +1,7 @@
 const Jobs = require('../models/jobs');
 
-// Job CRUD
-const insertJob = async (req, res) => {
+// Vacancy CRUD
+const insertVacancy = async (req, res) => {
     try {
         const job = new Jobs(req.body);
         await job.save();
@@ -18,7 +18,7 @@ const insertJob = async (req, res) => {
     }
 };
 
-const getJobs = async (req, res) => {
+const getVacancies = async (req, res) => {
     console.log(req.query);
     let company_id = req.query.company_id;
     try {
@@ -36,7 +36,7 @@ const getJobs = async (req, res) => {
     }
 }
 
-const getJob = async (req, res) => {
+const getVacancy = async (req, res) => {
     try {
         const job = await Jobs.findById(req.params.id);
         return res.json({
@@ -52,7 +52,7 @@ const getJob = async (req, res) => {
     }
 }
 
-const updateJob = async (req, res) => {
+const confirmVacancy = async (req, res) => {
     try {
         const job = await Jobs.findByIdAndUpdate(req.params.id, req.body, { new: true });
         return res.json({
@@ -68,7 +68,7 @@ const updateJob = async (req, res) => {
     }
 }
 
-const deleteJob = async (req, res) => {
+const closeVacancy = async (req, res) => {
     try {
         await Jobs.findByIdAndDelete(req.params.id);
         return res.json({
@@ -84,9 +84,9 @@ const deleteJob = async (req, res) => {
 }
 
 module.exports = {
-    insertJob,
-    getJobs,
-    getJob,
-    updateJob,
-    deleteJob,
+    insertVacancy,
+    getVacancies,
+    getVacancy,
+    confirmVacancy,
+    closeVacancy,
 };
