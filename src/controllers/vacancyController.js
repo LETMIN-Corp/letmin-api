@@ -50,10 +50,9 @@ const insertVacancy = async (req, res) => {
 };
 
 const getAllVacancies = async (req, res) => {
-
-    let company = getCompanyId(req);
-
     try {
+        let company = getCompanyId(req);
+
         const vacancies = await Vacancy.find({ company });
         return res.json({
             message: 'Vacancy fetched successfully',
@@ -69,10 +68,9 @@ const getAllVacancies = async (req, res) => {
 }
 
 const getVacancy = async (req, res) => {
-
-    let company = getCompanyId(req);
-
     try {
+        let company = getCompanyId(req);
+
         const job = await Vacancy.findById(req.params.id);
         return res.json({
             message: 'Job fetched successfully',
@@ -88,11 +86,9 @@ const getVacancy = async (req, res) => {
 }
 
 const confirmVacancy = async (req, res) => {
-
-    let company = getCompanyId(req);
-
     try {
-        // update vacancy closed to true
+        let company = getCompanyId(req);
+
         const vacancy = await Vacancy.findByIdAndUpdate(req.params.id, {
             closed: true,
         });
@@ -111,6 +107,8 @@ const confirmVacancy = async (req, res) => {
 
 const closeVacancy = async (req, res) => {
     try {
+        let company = getCompanyId(req);
+
         await Vacancy.findByIdAndDelete(req.params.id);
         return res.json({
             message: 'Job deleted successfully',
@@ -122,7 +120,7 @@ const closeVacancy = async (req, res) => {
             success: false,
         });
     }
-}
+} 
 
 module.exports = {
     insertVacancy,

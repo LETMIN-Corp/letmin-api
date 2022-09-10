@@ -1,5 +1,6 @@
 const Company = require("../models/Company");
 const bcrypt = require("bcryptjs");
+const ObjectId = require('mongoose').Types.ObjectId;
 
 const ROLES = require('../utils/constants');
 
@@ -100,7 +101,59 @@ const registerCompany = async (req, res, next) => {
     });
 }
 
+const getCompanyData = async (req, res) => {
+    let token = req.headers.authorization;
+
+    
+    let _id = ObjectId(decodeToken(token).user_id);
+    console.log(_id);
+    await Company.findById({ _id : _id })
+    .then((company) => {
+      console.log(company);
+
+      let result = {
+        company: {
+          name: company.company.name,
+          cnpj: company.company.cnpj,
+          email: company.company.email,
+          phone: company.company.phone,
+          address: company.company.address,
+        },
+        holder: {
+          name: company.holder.name,
+          cpf: company.holder.cpf,
+          email: company.holder.email,
+          phone: company.holder.phone,
+        },
+        plan: {
+          selected: company.plan.selected,
+        },
+        card: {
+          type: company.card.type,
+          number: company.card.number,
+          code: company.card.code,
+          expiration: company.card.expiration,
+          owner: company.card.owner,
+        },
+      };
+
+      return res.status(200).json({
+        data: result,
+        message: "Dados da empresa.",
+        success: true
+      });
+    })
+    .catch((err) => {
+      return res.status(400).json({
+        message: 'Error ' + err,
+        success: false
+      });
+    })
+    
+}
+
 module.exports = {
     registerCompany,
     loginCompany,
+    getCompanyData
 }

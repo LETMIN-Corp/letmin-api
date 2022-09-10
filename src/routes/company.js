@@ -2,14 +2,22 @@ const router = require("express").Router();
 const validation = require("../middlewares/validation");
 const { vacancyValidator } = require("../validate/vacancy");
 const { companyValidator, loginCompanySchema } = require("../validate/company");
-const { insertVacancy, getAllVacancies, getVacancy, confirmVacancy, closeVacancy } = require("../controllers/vacancyController");
-const { registerCompany, loginCompany } = require("../controllers/companyController");
+const { 
+    insertVacancy,
+    getAllVacancies,
+    getVacancy,
+    confirmVacancy,
+    closeVacancy
+} = require("../controllers/vacancyController");
+const { registerCompany, loginCompany, getCompanyData } = require("../controllers/companyController");
 
 // Company Registration Route
 router.post("/register-company", validation(companyValidator), registerCompany);
 
 // Company Login Route
 router.post("/login-company", validation(loginCompanySchema), loginCompany);
+
+router.get("/company-data", getCompanyData);
 
 // Vacancy Crud Routes
 router.post("/register-vacancy", validation(vacancyValidator), insertVacancy);
