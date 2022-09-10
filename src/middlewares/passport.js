@@ -10,7 +10,7 @@ module.exports = (passport) => {
         passReqToCallback: true
     },
     async (req, payload, done) => {
-        console.log('payload', payload);
+        //console.log('payload', payload);
         await User.findById(payload.user_id)
             .then(user => {
                 if (user) {
@@ -19,7 +19,7 @@ module.exports = (passport) => {
                 return done(null, false);
             })
             .catch(err => {
-                console.log(err);
+                //console.log(err);
                 return done(null, false);
             });
     }));
