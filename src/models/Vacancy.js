@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 
-const JobsSchema = new Schema({
+const VacancySchema = new Schema({
     role: {
         type: String,
         required: true
@@ -48,7 +48,11 @@ const JobsSchema = new Schema({
     company: {
         type: Schema.Types.ObjectId,
         ref: "companies"
+    },
+    closed: {
+        type: Boolean,
+        default: false
     }
 });
 
-module.exports = model("jobs", JobsSchema);
+module.exports = model("vacancy", VacancySchema);

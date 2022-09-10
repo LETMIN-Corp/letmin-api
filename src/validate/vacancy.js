@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-const jobsValidator = Joi.object({
+const vacancyValidator = Joi.object({
     role: Joi.string().required().messages({
         'string.empty': `Cargo não pode ser vazio`,
         'any.required': `Cargo é obrigatório`
@@ -46,15 +46,15 @@ const jobsValidator = Joi.object({
         'date.base': `Data de fechamento inválida`,
         'typeError': `Data de fechamento deve ser uma data`
     }),
-    // candidates: Joi.array().items(Joi.string()).messages({
-    //     'array.base': `Candidatos deve ser um array`
-    // }),
-    company: Joi.string().required().messages({
-        'string.empty': `Empresa não pode ser vazia`,
-        'any.required': `Empresa é obrigatória`
-    })
+    candidates: Joi.array().items(Joi.string()).messages({
+        'array.base': `Candidatos deve ser um array`
+    }),
+    // company: Joi.string().required().messages({
+    //     'string.empty': `Empresa não pode ser vazia`,
+    //     'any.required': `Empresa é obrigatória`
+    // })
 }).options({ abortEarly: false }).unknown();
 
 module.exports = {
-    jobsValidator
+    vacancyValidator
 };

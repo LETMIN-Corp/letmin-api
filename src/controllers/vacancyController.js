@@ -1,9 +1,40 @@
-const Jobs = require('../models/jobs');
+const Vacancy = require('../models/Vacancy');
+const ObjectId = require('mongoose').Types.ObjectId;
+const {
+    decodeToken,
+    jwtSign,
+    jwtVerify,
+} = require('../utils/jwt');
+
+function getCompanyId(req) {
+    if (!req.headers.authorization) {
+        return res.status(401).json({
+            message: 'Unauthorized',
+            success: false,
+        });
+    }
+
+    // get company_id from jwt authorization header
+    let jwt = req.headers.authorization;
+
+    let company_id = decodeToken(jwt).user_id;
+
+    let company = new ObjectId(company_id);
+
+    return company;
+}
 
 // Vacancy CRUD
 const insertVacancy = async (req, res) => {
+
+    let company = getCompanyId(req);
+
     try {
-        const job = new Jobs(req.body);
+        const job = new Vacancy({
+            ...req.body,
+            company,
+        });
+
         await job.save();
         return res.json({
             message: 'Job inserted successfully',
@@ -18,15 +49,16 @@ const insertVacancy = async (req, res) => {
     }
 };
 
-const getVacancies = async (req, res) => {
-    console.log(req.query);
-    let company_id = req.query.company_id;
+const getAllVacancies = async (req, res) => {
+
+    let company = getCompanyId(req);
+
     try {
-        const jobs = await Jobs.find({ company_id });
+        const vacancies = await Vacancy.find({ company });
         return res.json({
-            message: 'Jobs fetched successfully',
+            message: 'Vacancy fetched successfully',
             success: true,
-            jobs,
+            vacancies,
         });
     } catch (err) {
         return res.status(400).json({
@@ -37,8 +69,11 @@ const getVacancies = async (req, res) => {
 }
 
 const getVacancy = async (req, res) => {
+
+    let company = getCompanyId(req);
+
     try {
-        const job = await Jobs.findById(req.params.id);
+        const job = await Vacancy.findById(req.params.id);
         return res.json({
             message: 'Job fetched successfully',
             success: true,
@@ -53,12 +88,18 @@ const getVacancy = async (req, res) => {
 }
 
 const confirmVacancy = async (req, res) => {
+
+    let company = getCompanyId(req);
+
     try {
-        const job = await Jobs.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        // update vacancy closed to true
+        const vacancy = await Vacancy.findByIdAndUpdate(req.params.id, {
+            closed: true,
+        });
         return res.json({
-            message: 'Job updated successfully',
+            message: 'Vacancy confirmed successfully',
             success: true,
-            job,
+            vacancy,
         });
     } catch (err) {
         return res.status(400).json({
@@ -70,7 +111,7 @@ const confirmVacancy = async (req, res) => {
 
 const closeVacancy = async (req, res) => {
     try {
-        await Jobs.findByIdAndDelete(req.params.id);
+        await Vacancy.findByIdAndDelete(req.params.id);
         return res.json({
             message: 'Job deleted successfully',
             success: true,
@@ -85,7 +126,7 @@ const closeVacancy = async (req, res) => {
 
 module.exports = {
     insertVacancy,
-    getVacancies,
+    getAllVacancies,
     getVacancy,
     confirmVacancy,
     closeVacancy,
