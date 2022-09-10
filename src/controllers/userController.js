@@ -1,5 +1,8 @@
 const User = require("../models/User");
 const ROLES = require("../utils/constants");
+const bcrypt = require("bcryptjs");
+
+const { SECRET } = require("../config");
 
 const {
     generateToken,
