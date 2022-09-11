@@ -7,7 +7,7 @@ const session = require("express-session");
 const helmet = require("helmet");
 
 // Bring in the app constants
-const { DB, PORT, HOST, CLIENT_URL } = require("./config");
+const { DB, PORT, HOST, CLIENT_URL, SECRET } = require("./config");
 
 // Initialize the application
 const app = express();
@@ -25,7 +25,7 @@ app.use(cors({
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(session({
-  secret: "secret",
+  secret: SECRET,
   resave: true,
   saveUninitialized: true
 }));

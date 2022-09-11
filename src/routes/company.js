@@ -1,25 +1,29 @@
 const router = require("express").Router();
-const { getCompanyData } = require("../entities/company");
-// Bring in the User Registration function
-const {
-  userAuth,
-  adminAuth,
-  loginCompany,
-  checkRole,
-  serializeUser,
-  registerCompany,
-} = require("../utils/Auth");
-
-const companyValidator = require("../validate/company");
+const validation = require("../middlewares/validation");
+const { vacancyValidator } = require("../validate/vacancy");
+const { companyValidator, loginCompanySchema } = require("../validate/company");
+const { 
+    insertVacancy,
+    getAllVacancies,
+    getVacancy,
+    confirmVacancy,
+    closeVacancy
+} = require("../controllers/vacancyController");
+const { registerCompany, loginCompany, getCompanyData } = require("../controllers/companyController");
 
 // Company Registration Route
-router.post("/register-company", registerCompany);
+router.post("/register-company", validation(companyValidator), registerCompany);
 
 // Company Login Route
-router.post("/login-company",  async (req, res) => {
-    await loginCompany(req.body, res);
-});
+router.post("/login-company", validation(loginCompanySchema), loginCompany);
 
-router.post("/get-company-data", getCompanyData);
+router.get("/company-data", getCompanyData);
+
+// Vacancy Crud Routes
+router.post("/register-vacancy", validation(vacancyValidator), insertVacancy);
+router.get("/get-all-vacancies", getAllVacancies);
+router.get("/get-vacancy/:id", getVacancy);
+router.patch("/confirm-vacancy/:id", confirmVacancy);
+router.delete("/close-vacancy/:id", closeVacancy);
 
 module.exports = router;
