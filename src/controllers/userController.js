@@ -37,6 +37,7 @@ const userLogin = async (req, res, next) => {
         let result = {
           username: user.username,
           role: user.role,
+          picture: user.picture,
           email: user.email,
           token: token,
         };
@@ -64,6 +65,7 @@ const userLogin = async (req, res, next) => {
         let result = {
           username: user.username,
           role: user.role,
+          picture: user.picture,
           email: user.email,
           token: token,
         };

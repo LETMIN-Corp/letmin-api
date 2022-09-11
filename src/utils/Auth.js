@@ -65,6 +65,7 @@ const serializeUser = user => {
     role: user.role,
     username: user.username,
     email: user.email,
+    picture: user.picture,
     name: user.name,
     _id: user._id,
     updatedAt: user.updatedAt,
