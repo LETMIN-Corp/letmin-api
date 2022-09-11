@@ -1,4 +1,9 @@
 const router = require("express").Router();
+const validation = require("../middlewares/validation");
+const adminValidator = require("../validate/admin");
+
+const { adminLogin, adminRegister } = require("../controllers/adminController");
+
 // Bring in the User Registration function
 const {
   userAuth,
@@ -10,14 +15,10 @@ const {
 } = require("../utils/Auth");
 
 // Admin Registration Route
-router.post("/register-admin", async (req, res) => {
-  await registerAdmin(req.body, res);
-});
+router.post("/register-admin", validation(adminValidator), adminRegister);
 
 // Admin Login Route
-router.post("/login-admin", async (req, res) => {
-    await loginAdmin(req.body, res);
-});
+router.post("/login-admin", validation(adminValidator), adminLogin);
 
 // Admin Protected Route
 router.get("/admin-protectd",

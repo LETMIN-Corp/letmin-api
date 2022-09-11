@@ -2,11 +2,12 @@ const router = require("express").Router();
 
 require("dotenv").config();
 
+const { userLogin } = require("../controllers/userController");
+
 // Bring in the User Registration function
 const {
   userAuth,
   adminAuth,
-  userLogin,
   checkRole,
   serializeUser
 } = require("../utils/Auth");

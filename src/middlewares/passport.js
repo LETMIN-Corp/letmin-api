@@ -1,11 +1,7 @@
 const User = require("../models/User");
 const { SECRET } = require("../config");
-const { Strategy } = require("passport-jwt");
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-
-require('dotenv').config();
 
 module.exports = (passport) => {
     passport.use('local-login', new JwtStrategy({
@@ -14,7 +10,7 @@ module.exports = (passport) => {
         passReqToCallback: true
     },
     async (req, payload, done) => {
-        console.log('payload', payload);
+        //console.log('payload', payload);
         await User.findById(payload.user_id)
             .then(user => {
                 if (user) {
@@ -23,7 +19,7 @@ module.exports = (passport) => {
                 return done(null, false);
             })
             .catch(err => {
-                console.log(err);
+                //console.log(err);
                 return done(null, false);
             });
     }));
