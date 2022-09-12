@@ -12,7 +12,6 @@ const {
 // Bring in the User Registration function
 const {
   passportAuth,
-  passportAuth,
   checkRole,
   serializeUser
 } = require("../utils/Auth");

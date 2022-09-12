@@ -7,7 +7,6 @@ const { userLogin } = require("../controllers/userController");
 // Bring in the User Registration function
 const {
   passportAuth,
-  passportAuth,
   checkRole,
   serializeUser
 } = require("../utils/Auth");
