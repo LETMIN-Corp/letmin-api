@@ -85,5 +85,5 @@ const userLogin = async (req, res, next) => {
 }
 
 module.exports = {
-    userLogin
+    userLogin,
 }

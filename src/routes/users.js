@@ -3,6 +3,7 @@ const router = require("express").Router();
 require("dotenv").config();
 
 const { userLogin } = require("../controllers/userController");
+const { getVacancies } = require("../controllers/vacancyController");
 
 // Bring in the User Registration function
 const {
@@ -13,12 +14,13 @@ const {
 } = require("../utils/Auth");
 
 // Users Registeration Route
-router.post("/login-user", userLogin );
-
+router.post("/login-user", userLogin);
 // Profile Route
 router.get("/profile", adminAuth, async (req, res) => {
   return res.json(serializeUser(req.user));
 });
+
+router.get("/vacancy", getVacancies);
 
 // Users Protected Route
 router.get("/user-protectd",
