@@ -80,7 +80,8 @@ const CompanySchema = new Schema({
     status: {
         blocked: {
             type: Boolean,
-            required: true
+            required: true,
+            default: false
         },
         reason: {
             type: String,
