@@ -2,15 +2,13 @@ const router = require("express").Router();
 const validation = require("../middlewares/validation");
 const adminValidator = require("../validate/admin");
 
-const { adminLogin, adminRegister } = require("../controllers/adminController");
+const { adminLogin, adminRegister, getAllCompanies } = require("../controllers/adminController");
 
 // Bring in the User Registration function
 const {
   userAuth,
   adminAuth,
-  loginAdmin,
   checkRole,
-  registerAdmin,
   serializeUser
 } = require("../utils/Auth");
 
@@ -19,6 +17,8 @@ router.post("/register-admin", validation(adminValidator), adminRegister);
 
 // Admin Login Route
 router.post("/login-admin", validation(adminValidator), adminLogin);
+
+router.get("/get-all-companies", adminAuth, getAllCompanies);
 
 // Admin Protected Route
 router.get("/admin-protectd",

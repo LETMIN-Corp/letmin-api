@@ -1,4 +1,5 @@
 const Admin = require("../models/Admin");
+const Company = require("../models/Company")
 const bcrypt = require("bcryptjs");
 const ROLES = require('../utils/constants');
 
@@ -87,7 +88,27 @@ const adminLogin = async (req, res) => {
     });
 };
 
+const getAllCompanies = async (req, res) => {
+    
+    Company.find().select('-holder.password')
+    .then((companies) => {
+        return res.status(200).json({
+            message: "Lista de empresas",
+            success: true,
+            companies: companies
+        });
+    })
+    .catch((err) => {
+        return res.status(500).json({
+            message: "Não foi possivel listar as empresas",
+            success: false
+        });
+    });
+
+}
+
 module.exports = {
     adminRegister,
-    adminLogin
+    adminLogin,
+    getAllCompanies
 }
