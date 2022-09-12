@@ -38,12 +38,6 @@ const adminAuth = (req, res, next) => {
         success: false
       });
     }
-    if (user.role !== "admin") {
-      return res.status(403).json({
-        message: "Você não tem permissão de admin.",
-        success: false
-      });
-    }
     req.user = user;
     next();
   })(req, res, next);
