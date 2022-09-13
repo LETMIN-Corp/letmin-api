@@ -114,10 +114,9 @@ const registerCompany = async (req, res, next) => {
 const getCompanyData = async (req, res) => {
     let token = req.headers.authorization;
 
-    
     let _id = ObjectId(decodeToken(token).user_id);
-    console.log(_id);
-    await Company.findById({ _id : _id })
+
+    await Company.findById({ _id })
     .then((company) => {
       console.log(company);
 

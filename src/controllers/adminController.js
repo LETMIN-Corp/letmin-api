@@ -2,6 +2,7 @@ const Admin = require("../models/Admin");
 const Company = require("../models/Company")
 const bcrypt = require("bcryptjs");
 const ROLES = require('../utils/constants');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 const {
     generateToken,
@@ -109,21 +110,38 @@ const getAllCompanies = async (req, res) => {
 const changeCompanyBlockStatus = async (req, res) => {
     const { company_id } = req.body;
 
-    Company.findById( company_id , (err, company) => {
+    if(!company_id) {
+        return res.status(400).json({
+            message: "ID da empresa não informado",
+            success: false
+        });
+    }
+
+    let _id = ObjectId(company_id);
+
+    Company.findById( _id , (err, company) => {
         if (err) {
             return res.status(500).json({
-                message: "Não foi possivel bloquear a empresa",
+                message: "Não foi possivel encontrar a empresa",
                 success: false
             });
         }
-        let status = company.status.blocked;
-        company.status.blocked = !status;
-        company.save();
-        return res.status(200).json({
-            message: `Empresa ${company.status.blocked ? '': 'des'}bloqueada com sucesso`,
-            success: true
-        });
-    })
+        if (company) {
+            console.log(company);
+            company.status.blocked = !company.status.blocked;
+            company.save().then(async (value) => {
+                let message = value.status.blocked ? "bloqueada" : "desbloqueada";
+
+                let updatedCompanies = await Company.find().select('-holder.password');
+
+                return res.status(200).json({
+                    message: `Empresa ${message} com sucesso`,
+                    success: true,
+                    companies: updatedCompanies
+                });
+            });
+        }
+    });
 };
 
 module.exports = {

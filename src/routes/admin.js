@@ -24,7 +24,7 @@ router.post("/login-admin", validation(adminValidator), adminLogin);
 
 router.get("/get-all-companies", passportAuth, getAllCompanies);
 
-router.get("/company-block", passportAuth, changeCompanyBlockStatus);
+router.patch("/company-block", passportAuth, changeCompanyBlockStatus);
 
 // Admin Protected Route
 router.get("/admin-protectd",
