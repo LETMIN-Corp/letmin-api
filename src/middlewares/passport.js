@@ -1,4 +1,6 @@
 const User = require("../models/User");
+const Company = require("../models/Company");
+const Admin = require("../models/Admin");
 const { SECRET } = require("../config");
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
@@ -10,8 +12,24 @@ module.exports = (passport) => {
         passReqToCallback: true
     },
     async (req, payload, done) => {
+        let schema;
+
+        switch (payload.role) {
+            case 'user':
+                schema = User;
+                break;
+            case 'company':
+                schema = Company;
+                break;
+            case 'admin':
+                schema = Admin;
+                break;
+            default:
+                return done(null, false);
+        }
+
         //console.log('payload', payload);
-        await User.findById(payload.user_id)
+        await schema.findById(payload.user_id)
             .then(user => {
                 if (user) {
                     return done(null, user);

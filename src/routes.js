@@ -14,4 +14,11 @@ module.exports = (app) => {
   app.use('/api/users', require("./routes/admin"));
 
   app.use('/api/users', require("./routes/company"));
+
+  app.use((req, res, next) => {
+    res.status(404).json({
+      message: "Route not Found", 
+      success: false
+    });
+  });
 }

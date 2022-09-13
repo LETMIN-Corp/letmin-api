@@ -6,8 +6,7 @@ const { userLogin } = require("../controllers/userController");
 
 // Bring in the User Registration function
 const {
-  userAuth,
-  adminAuth,
+  passportAuth,
   checkRole,
   serializeUser
 } = require("../utils/Auth");
@@ -16,13 +15,13 @@ const {
 router.post("/login-user", userLogin );
 
 // Profile Route
-router.get("/profile", adminAuth, async (req, res) => {
+router.get("/profile", passportAuth, async (req, res) => {
   return res.json(serializeUser(req.user));
 });
 
 // Users Protected Route
 router.get("/user-protectd",
-  userAuth,
+  passportAuth,
   checkRole(["user"]),
   async (req, res) => {
     return res.json("Hello User");
