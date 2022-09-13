@@ -107,38 +107,11 @@ const getCompanyData = async (req, res) => {
     
     let _id = ObjectId(decodeToken(token).user_id);
     console.log(_id);
-    await Company.findById({ _id : _id })
+    await Company.findById({ _id }).select('-holder.password -_id')
     .then((company) => {
-      console.log(company);
-
-      let result = {
-        company: {
-          name: company.company.name,
-          cnpj: company.company.cnpj,
-          email: company.company.email,
-          phone: company.company.phone,
-          address: company.company.address,
-        },
-        holder: {
-          name: company.holder.name,
-          cpf: company.holder.cpf,
-          email: company.holder.email,
-          phone: company.holder.phone,
-        },
-        plan: {
-          selected: company.plan.selected,
-        },
-        card: {
-          type: company.card.type,
-          number: company.card.number,
-          code: company.card.code,
-          expiration: company.card.expiration,
-          owner: company.card.owner,
-        },
-      };
-
+      
       return res.status(200).json({
-        data: result,
+        data: company,
         message: "Dados da empresa.",
         success: true
       });
