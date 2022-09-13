@@ -48,26 +48,7 @@ module.exports = (passport) => {
         passReqToCallback: true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
     },
     async (req, email, password, done) => {
-        if (email) {
-            User.findOne({ 'email': email }, (err, user) => {
-                if (err) {
-                    return done(err);
-                }
-                if (user) {
-                    return done(null, false);
-                } else {
-                    const newUser = new User();
-                    newUser.email = email;
-                    newUser.password = newUser.generateHash(password);
-                    newUser.save((err) => {
-                        if (err) {
-                            return done(err);
-                        }
-                        return done(null, newUser);
-                    });
-                }
-            });
-        }
+        
     }));
 
     passport.serializeUser((user, done) => {
