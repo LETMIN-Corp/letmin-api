@@ -66,18 +66,17 @@ const adminLogin = async (req, res) => {
     }
     // Now check for the password
     let isMatch = await bcrypt.compare(password, user.password);
-  
     if (!isMatch) {
-        return res.status(403).json({
-            message: "Credenciais incorretas.",
+        return res.status(400).json({
+            message: "Senha incorreta.",
             success: false
         });
     }
-  
+
     // Sign in the token and issue it to the user
     let token = generateToken(user, ROLES.ADMIN);
     let result = {
-        username: user.username,
+        name: user.name,
         email: user.email,
         token: token,
     };
@@ -105,10 +104,31 @@ const getAllCompanies = async (req, res) => {
         });
     });
 
-}
+};
+
+const changeCompanyBlockStatus = async (req, res) => {
+    const { company_id } = req.body;
+
+    Company.findById( company_id , (err, company) => {
+        if (err) {
+            return res.status(500).json({
+                message: "Não foi possivel bloquear a empresa",
+                success: false
+            });
+        }
+        let status = company.status.blocked;
+        company.status.blocked = !status;
+        company.save();
+        return res.status(200).json({
+            message: `Empresa ${company.status.blocked ? '': 'des'}bloqueada com sucesso`,
+            success: true
+        });
+    })
+};
 
 module.exports = {
     adminRegister,
     adminLogin,
-    getAllCompanies
+    getAllCompanies,
+    changeCompanyBlockStatus,
 }
