@@ -16,6 +16,13 @@ const loginCompany = async (req, res) => {
   Company.findOne({ 'company.email' : credentials.email })
   .then(async (company) => {
 
+    if (company.status.blocked) {
+      return res.status(401).json({
+        message: "Empresa bloqueada, entre em contato com o adminsitrador.",
+        success: false
+      });
+    }
+
     let isMatch = await bcrypt.compare(credentials.password, company.holder.password);
 
     if(!isMatch){
@@ -55,10 +62,14 @@ const loginCompany = async (req, res) => {
 const registerCompany = async (req, res, next) => {
     let credentials = req.body;
   
-    let company = await Company.findOne({ 'company.cnpj' : credentials.company.cnpj }).select('+company.cnpj');
+    let company = await Company.findOne({
+      'company.cnpj' : credentials.company.cnpj,
+      'company.email' : credentials.company.email 
+    }).select('+company.cnpj +company.email');
+
     if (company) {
       return res.status(400).json({
-        message: "CNPJ já foi cadastrado.",
+        message: "CNPJ ou email já foi cadastrado.",
         success: false
       });
     }
