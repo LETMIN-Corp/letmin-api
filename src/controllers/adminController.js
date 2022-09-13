@@ -9,6 +9,7 @@ const {
     verifyToken,
     decodeToken
 } = require("../utils/jwt");
+const User = require("../models/User");
 
 /**
  * @DESC To register the user (ADMIN, SUPER_ADMIN, USER)
@@ -144,9 +145,56 @@ const changeCompanyBlockStatus = async (req, res) => {
     });
 };
 
+const getAllUsers = async (req, res) => {
+    User.find().select('-password')
+    .then((users) => {
+        return res.status(200).json({
+            message: "Lista de usuários",
+            success: true,
+            users: users
+        });
+    })
+};
+
+const changeUserBlockStatus = async (req, res) => {
+    const { user_id } = req.body;
+
+    if(!user_id) {
+        return res.status(400).json({
+            message: "ID do usuário não informado",
+            success: false
+        });
+    }
+
+    let _id = ObjectId(user_id);
+
+    User.findById( _id , (err, user) => {
+        if (err) {
+            return res.status(500).json({
+                message: "Não foi possivel encontrar o usuário",
+                success: false
+            });
+        }
+        user.blocked = !user.blocked;
+        user.save().then(async (value) => {
+            let message = value.blocked ? "bloqueado" : "desbloqueado";
+
+            let updatedUsers = await User.find().select('-password');
+
+            return res.status(200).json({
+                message: `Usuário ${message} com sucesso`,
+                success: true,
+                users: updatedUsers
+            });
+        });
+    });
+};
+
 module.exports = {
     adminRegister,
     adminLogin,
     getAllCompanies,
     changeCompanyBlockStatus,
+    getAllUsers,
+    changeUserBlockStatus,
 }

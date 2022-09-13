@@ -6,7 +6,9 @@ const {
   adminLogin,
   adminRegister,
   getAllCompanies,
-  changeCompanyBlockStatus
+  changeCompanyBlockStatus,
+  getAllUsers,
+  changeUserBlockStatus,
 } = require("../controllers/adminController");
 
 // Bring in the User Registration function
@@ -23,8 +25,10 @@ router.post("/register-admin", validation(adminValidator), adminRegister);
 router.post("/login-admin", validation(adminValidator), adminLogin);
 
 router.get("/get-all-companies", passportAuth, getAllCompanies);
-
 router.patch("/company-block", passportAuth, changeCompanyBlockStatus);
+
+router.get("/get-all-users", passportAuth, getAllUsers);
+router.patch("/user-block", passportAuth, changeUserBlockStatus);
 
 // Admin Protected Route
 router.get("/admin-protectd",

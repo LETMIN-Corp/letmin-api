@@ -32,6 +32,13 @@ const userLogin = async (req, res, next) => {
     .then( async (user) => {
       // User already exists
       if (user) {
+        if (user.blocked) {
+          return res.status(401).json({
+            message: "Usuário bloqueado, entre em contato com o adminsitrador.",
+            success: false
+          });
+        }
+
         const token = generateToken(user, ROLES.USER);
   
         let result = {

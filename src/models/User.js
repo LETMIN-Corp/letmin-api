@@ -23,6 +23,11 @@ const UserSchema = new Schema({
       type: String,
       //required: true
     },
+    blocked: {
+      required: true,
+      type: Boolean,
+      default: false
+    }
   },
   { timestamps: true }
 );
