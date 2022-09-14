@@ -22,7 +22,7 @@ const userLogin = async (req, res, next) => {
     //console.log(payload);
     const { sub, name, email, email_verified, picture } = payload;
   
-    if (!email_verified) {
+    if (!payload || !email_verified) {
       return res.status(400).json({
         message: "Email google não verificado."
       });
