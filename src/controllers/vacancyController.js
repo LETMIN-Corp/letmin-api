@@ -1,4 +1,5 @@
 const Vacancy = require('../models/Vacancy');
+const Company = require('../models/Company');
 const ObjectId = require('mongoose').Types.ObjectId;
 const {
     decodeToken,
@@ -49,7 +50,7 @@ const insertVacancy = async (req, res) => {
     }
 };
 
-const getAllVacancies = async (req, res) => {
+const getAllCompanyVacancies = async (req, res) => {
     try {
         let company = getCompanyId(req);
 
@@ -122,10 +123,26 @@ const closeVacancy = async (req, res) => {
     }
 } 
 
+const getVacancies = async (req, res, next) => {
+    try {
+        const vacancies = await Vacancy.find();
+        return res.json({
+            success: true,
+            vacancies,
+        });
+    } catch (err) {
+        return res.status(400).json({
+            message: err,
+            success: false,
+        });
+    }
+}
+
 module.exports = {
     insertVacancy,
-    getAllVacancies,
+    getAllCompanyVacancies,
     getVacancy,
     confirmVacancy,
     closeVacancy,
+    getVacancies,
 };

@@ -4,7 +4,7 @@ const { vacancyValidator } = require("../validate/vacancy");
 const { companyValidator, loginCompanySchema } = require("../validate/company");
 const { 
     insertVacancy,
-    getAllVacancies,
+    getAllCompanyVacancies,
     getVacancy,
     confirmVacancy,
     closeVacancy
@@ -21,7 +21,7 @@ router.get("/company-data", getCompanyData);
 
 // Vacancy Crud Routes
 router.post("/register-vacancy", validation(vacancyValidator), insertVacancy);
-router.get("/get-all-vacancies", getAllVacancies);
+router.get("/get-all-vacancies", getAllCompanyVacancies);
 router.get("/get-vacancy/:id", getVacancy);
 router.patch("/confirm-vacancy/:id", confirmVacancy);
 router.delete("/close-vacancy/:id", closeVacancy);
