@@ -28,7 +28,6 @@ module.exports = (passport) => {
                 return done(null, false);
         }
 
-        //console.log('payload', payload);
         await schema.findById(payload.user_id)
             .then(user => {
                 if (user) {
@@ -37,7 +36,6 @@ module.exports = (passport) => {
                 return done(null, false);
             })
             .catch(err => {
-                //console.log(err);
                 return done(null, false);
             });
     }));

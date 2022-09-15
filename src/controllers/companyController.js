@@ -118,8 +118,6 @@ const getCompanyData = async (req, res) => {
 
     await Company.findById({ _id })
     .then((company) => {
-      console.log(company);
-
       let result = {
         company: {
           name: company.company.name,

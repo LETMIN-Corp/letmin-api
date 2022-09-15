@@ -128,7 +128,6 @@ const changeCompanyBlockStatus = async (req, res) => {
             });
         }
         if (company) {
-            console.log(company);
             company.status.blocked = !company.status.blocked;
             company.save().then(async (value) => {
                 let message = value.status.blocked ? "bloqueada" : "desbloqueada";

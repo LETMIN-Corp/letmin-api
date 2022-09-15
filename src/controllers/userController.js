@@ -19,7 +19,6 @@ const userLogin = async (req, res, next) => {
     }
   
     let payload = await verifyGoogleToken(res, req.body.credential);
-    //console.log(payload);
     const { sub, name, email, email_verified, picture } = payload;
   
     if (!payload || !email_verified) {
