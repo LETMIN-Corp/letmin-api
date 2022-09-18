@@ -77,6 +77,10 @@ const CompanySchema = new Schema({
             required: true
         },
     },
+    vacancies: [{
+        type: Schema.Types.ObjectId,
+        ref: "Vacancy",
+    }],
     status: {
         blocked: {
             type: Boolean,
@@ -90,5 +94,5 @@ const CompanySchema = new Schema({
     },
 });
 
-module.exports = model("companies", CompanySchema);
+module.exports = model("Company", CompanySchema, "companies");
  

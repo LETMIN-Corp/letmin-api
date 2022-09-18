@@ -21,7 +21,7 @@ const UserSchema = new Schema({
     },
     picture: {
       type: String,
-      //required: true
+      required: true
     },
     blocked: {
       required: true,
@@ -58,4 +58,4 @@ UserSchema.methods.comparePassword = function(candidatePassword, cb) {
     });
 };
 
-module.exports = model("users", UserSchema);
+module.exports = model("User", UserSchema, "users");

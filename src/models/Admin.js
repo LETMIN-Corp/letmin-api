@@ -18,4 +18,4 @@ const AdminSchema = new Schema(
 	{ timestamps: true }
 );
 
-module.exports = model("admins", AdminSchema);
+module.exports = model("Admin", AdminSchema, "admins");

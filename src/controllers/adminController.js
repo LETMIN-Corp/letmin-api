@@ -12,7 +12,7 @@ const {
 const User = require("../models/User");
 
 /**
- * @DESC To register the user (ADMIN, SUPER_ADMIN, USER)
+ * @DESC To register the admin
  */
 const adminRegister = async (req, res) => {
     const adminDets = req.body;
