@@ -3,26 +3,27 @@ const router = require("express").Router();
 require("dotenv").config();
 
 const { userLogin } = require("../controllers/userController");
+const { searchVacancies } = require("../controllers/vacancyController");
 
 // Bring in the User Registration function
 const {
-  userAuth,
-  adminAuth,
+  passportAuth,
   checkRole,
   serializeUser
 } = require("../utils/Auth");
 
 // Users Registeration Route
-router.post("/login-user", userLogin );
-
+router.post("/login-user", userLogin);
 // Profile Route
-router.get("/profile", adminAuth, async (req, res) => {
+router.get("/profile", passportAuth, async (req, res) => {
   return res.json(serializeUser(req.user));
 });
 
+router.get("/vacancy", searchVacancies);
+
 // Users Protected Route
 router.get("/user-protectd",
-  userAuth,
+  passportAuth,
   checkRole(["user"]),
   async (req, res) => {
     return res.json("Hello User");

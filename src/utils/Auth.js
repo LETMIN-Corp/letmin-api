@@ -3,27 +3,7 @@ const passport = require("passport");
 /**
  * @DESC Passport middleware
  */
-const userAuth = (req, res, next) => {
-  passport.authenticate('local-login', { session: false }, (err, user) => {
-    if (err) {
-      return res.status(500).json({
-        error: err,
-        message: "Unable to authenticate user.",
-        success: false
-      });
-    }
-    if (!user) {
-      return res.status(403).json({
-        message: "Invalid token.",
-        success: false
-      });
-    }
-    req.user = user;
-    next();
-  })(req, res, next);
-}
-
-const adminAuth = (req, res, next) => {
+const passportAuth = (req, res, next) => {
   passport.authenticate('local-login', { session: false }, (err, user) => {
     if (err) {
       return res.status(500).json({
@@ -38,17 +18,10 @@ const adminAuth = (req, res, next) => {
         success: false
       });
     }
-    if (user.role !== "admin") {
-      return res.status(403).json({
-        message: "Você não tem permissão de admin.",
-        success: false
-      });
-    }
     req.user = user;
     next();
   })(req, res, next);
 }
-
 /**
  * @DESC Check Role Middleware
  */
@@ -74,8 +47,7 @@ const serializeUser = user => {
 };
 
 module.exports = {
-  adminAuth,
-  userAuth,
+  passportAuth,
   checkRole,
   serializeUser
 };

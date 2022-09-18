@@ -5,6 +5,6 @@ module.exports = {
   PORT: process.env.APP_PORT || 5000,
   HOST: process.env.APP_HOST || '0.0.0.0',
   SECRET: process.env.JWT_SECRET,
-  CLIENT_URL: process.env.APP_CLIENT_URL,
+  CLIENT_URL: process.env.APP_CLIENT_URL.split(' '),
   CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
 };

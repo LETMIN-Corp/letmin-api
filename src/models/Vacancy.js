@@ -2,17 +2,24 @@ const { Schema, model } = require("mongoose");
 
 const VacancySchema = new Schema({
     role: {
+        index: true,
         type: String,
         required: true
     },
     sector: {
+        index: true,
         type: String,
         required: true,
         enum: ["Recursos Humanos", "Tecnologia", "Administrativo", "Financeiro", "Operacional"]
     },
     description: {
+        index: true,
         type: String,
         required: true
+    },
+    views: {
+        type: Number,
+        default: 0
     },
     salary: {
         type: String,
@@ -43,16 +50,17 @@ const VacancySchema = new Schema({
     },
     candidates: [{
         type: Schema.Types.ObjectId,
-        ref: "users"
+        ref: "User"
     }],
     company: {
+        required: true,
         type: Schema.Types.ObjectId,
-        ref: "companies"
+        ref: "Company"
     },
     closed: {
         type: Boolean,
         default: false
-    }
+    },
 });
 
-module.exports = model("vacancy", VacancySchema);
+module.exports = model("Vacancy", VacancySchema, "vacancies");

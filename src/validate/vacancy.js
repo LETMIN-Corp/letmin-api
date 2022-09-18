@@ -46,13 +46,6 @@ const vacancyValidator = Joi.object({
         'date.base': `Data de fechamento inválida`,
         'typeError': `Data de fechamento deve ser uma data`
     }),
-    candidates: Joi.array().items(Joi.string()).messages({
-        'array.base': `Candidatos deve ser um array`
-    }),
-    // company: Joi.string().required().messages({
-    //     'string.empty': `Empresa não pode ser vazia`,
-    //     'any.required': `Empresa é obrigatória`
-    // })
 }).options({ abortEarly: false }).unknown();
 
 module.exports = {

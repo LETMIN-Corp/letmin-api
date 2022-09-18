@@ -19,10 +19,9 @@ const userLogin = async (req, res, next) => {
     }
   
     let payload = await verifyGoogleToken(res, req.body.credential);
-    //console.log(payload);
     const { sub, name, email, email_verified, picture } = payload;
   
-    if (!email_verified) {
+    if (!payload || !email_verified) {
       return res.status(400).json({
         message: "Email google não verificado."
       });
@@ -32,6 +31,13 @@ const userLogin = async (req, res, next) => {
     .then( async (user) => {
       // User already exists
       if (user) {
+        if (user.blocked) {
+          return res.status(401).json({
+            message: "Usuário bloqueado, entre em contato com o adminsitrador.",
+            success: false
+          });
+        }
+
         const token = generateToken(user, ROLES.USER);
   
         let result = {
@@ -55,16 +61,14 @@ const userLogin = async (req, res, next) => {
         password: hashedpassword,
         name,
         picture,
-        role: "user",
-        google: true
       });
   
-      newUser.save().then(user => {
+      newUser.save((err, user) => {
         const token = generateToken(user, ROLES.USER);
   
         let result = {
-          username: user.username,
-          role: user.role,
+          username: user.username,  
+          role: 'user',
           picture: user.picture,
           email: user.email,
           token: token,
@@ -85,5 +89,5 @@ const userLogin = async (req, res, next) => {
 }
 
 module.exports = {
-    userLogin
+    userLogin,
 }

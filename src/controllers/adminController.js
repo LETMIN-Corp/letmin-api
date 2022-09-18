@@ -1,15 +1,18 @@
 const Admin = require("../models/Admin");
+const Company = require("../models/Company")
 const bcrypt = require("bcryptjs");
 const ROLES = require('../utils/constants');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 const {
     generateToken,
     verifyToken,
     decodeToken
 } = require("../utils/jwt");
+const User = require("../models/User");
 
 /**
- * @DESC To register the user (ADMIN, SUPER_ADMIN, USER)
+ * @DESC To register the admin
  */
 const adminRegister = async (req, res) => {
     const adminDets = req.body;
@@ -65,18 +68,17 @@ const adminLogin = async (req, res) => {
     }
     // Now check for the password
     let isMatch = await bcrypt.compare(password, user.password);
-  
     if (!isMatch) {
-        return res.status(403).json({
-            message: "Credenciais incorretas.",
+        return res.status(400).json({
+            message: "Senha incorreta.",
             success: false
         });
     }
-  
+
     // Sign in the token and issue it to the user
     let token = generateToken(user, ROLES.ADMIN);
     let result = {
-        username: user.username,
+        name: user.name,
         email: user.email,
         token: token,
     };
@@ -87,7 +89,111 @@ const adminLogin = async (req, res) => {
     });
 };
 
+const getAllCompanies = async (req, res) => {
+    
+    Company.find().select('-holder.password')
+    .then((companies) => {
+        return res.status(200).json({
+            message: "Lista de empresas",
+            success: true,
+            companies: companies
+        });
+    })
+    .catch((err) => {
+        return res.status(500).json({
+            message: "Não foi possivel listar as empresas",
+            success: false
+        });
+    });
+
+};
+
+const changeCompanyBlockStatus = async (req, res) => {
+    const { company_id } = req.body;
+
+    if(!company_id) {
+        return res.status(400).json({
+            message: "ID da empresa não informado",
+            success: false
+        });
+    }
+
+    let _id = ObjectId(company_id);
+
+    Company.findById( _id , (err, company) => {
+        if (err) {
+            return res.status(500).json({
+                message: "Não foi possivel encontrar a empresa",
+                success: false
+            });
+        }
+        if (company) {
+            company.status.blocked = !company.status.blocked;
+            company.save().then(async (value) => {
+                let message = value.status.blocked ? "bloqueada" : "desbloqueada";
+
+                let updatedCompanies = await Company.find().select('-holder.password');
+
+                return res.status(200).json({
+                    message: `Empresa ${message} com sucesso`,
+                    success: true,
+                    companies: updatedCompanies
+                });
+            });
+        }
+    });
+};
+
+const getAllUsers = async (req, res) => {
+    User.find().select('-password')
+    .then((users) => {
+        return res.status(200).json({
+            message: "Lista de usuários",
+            success: true,
+            users: users
+        });
+    })
+};
+
+const changeUserBlockStatus = async (req, res) => {
+    const { user_id } = req.body;
+
+    if(!user_id) {
+        return res.status(400).json({
+            message: "ID do usuário não informado",
+            success: false
+        });
+    }
+
+    let _id = ObjectId(user_id);
+
+    User.findById( _id , (err, user) => {
+        if (err) {
+            return res.status(500).json({
+                message: "Não foi possivel encontrar o usuário",
+                success: false
+            });
+        }
+        user.blocked = !user.blocked;
+        user.save().then(async (value) => {
+            let message = value.blocked ? "bloqueado" : "desbloqueado";
+
+            let updatedUsers = await User.find().select('-password');
+
+            return res.status(200).json({
+                message: `Usuário ${message} com sucesso`,
+                success: true,
+                users: updatedUsers
+            });
+        });
+    });
+};
+
 module.exports = {
     adminRegister,
-    adminLogin
+    adminLogin,
+    getAllCompanies,
+    changeCompanyBlockStatus,
+    getAllUsers,
+    changeUserBlockStatus,
 }
