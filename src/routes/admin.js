@@ -1,51 +1,51 @@
-const router = require("express").Router();
-const validation = require("../middlewares/validation");
-const adminValidator = require("../validate/admin");
+const router = require('express').Router();
+const validation = require('../middlewares/validation');
+const adminValidator = require('../validate/admin');
 
 const { 
-  adminLogin,
-  adminRegister,
-  getAllCompanies,
-  changeCompanyBlockStatus,
-  getAllUsers,
-  changeUserBlockStatus,
-} = require("../controllers/adminController");
+	adminLogin,
+	adminRegister,
+	getAllCompanies,
+	changeCompanyBlockStatus,
+	getAllUsers,
+	changeUserBlockStatus,
+} = require('../controllers/adminController');
 
 // Bring in the User Registration function
 const {
-  passportAuth,
-  checkRole,
-  serializeUser
-} = require("../utils/Auth");
+	passportAuth,
+	checkRole,
+	serializeUser
+} = require('../utils/Auth');
 
 // Admin Registration Route
-router.post("/register-admin", validation(adminValidator), adminRegister);
+router.post('/register-admin', validation(adminValidator), adminRegister);
 
 // Admin Login Route
-router.post("/login-admin", validation(adminValidator), adminLogin);
+router.post('/login-admin', validation(adminValidator), adminLogin);
 
-router.get("/get-all-companies", passportAuth, getAllCompanies);
-router.patch("/company-block", passportAuth, changeCompanyBlockStatus);
+router.get('/get-all-companies', passportAuth, getAllCompanies);
+router.patch('/company-block', passportAuth, changeCompanyBlockStatus);
 
-router.get("/get-all-users", passportAuth, getAllUsers);
-router.patch("/user-block", passportAuth, changeUserBlockStatus);
+router.get('/get-all-users', passportAuth, getAllUsers);
+router.patch('/user-block', passportAuth, changeUserBlockStatus);
 
 // Admin Protected Route
-router.get("/admin-protectd",
-  passportAuth,
-  checkRole(["admin"]),
-  async (req, res) => {
-    return res.json("Hello Admin");
-  }
+router.get('/admin-protectd',
+	passportAuth,
+	checkRole(['admin']),
+	async (req, res) => {
+		return res.json('Hello Admin');
+	}
 );
 
 // Super Admin Protected Route
-router.get("/super-admin-and-admin-protectd",
-  passportAuth,
-  checkRole(["superadmin", "admin"]),
-  async (req, res) => {
-    return res.json("Super admin and Admin");
-  }
+router.get('/super-admin-and-admin-protectd',
+	passportAuth,
+	checkRole(['superadmin', 'admin']),
+	async (req, res) => {
+		return res.json('Super admin and Admin');
+	}
 );
 
 module.exports = router;
