@@ -11,19 +11,25 @@ const {
 } = require("../utils/jwt");
 
 const loginCompany = async (req, res) => {
-  const credentials = req.body;
+  let { email, password } = req.body;
   
-  Company.findOne({ 'company.email' : credentials.email })
+  Company.findOne({ 'company.email' : email })
   .then(async (company) => {
-
-    if (company.status.blocked) {
-      return res.status(401).json({
-        message: "Empresa bloqueada, entre em contato com o adminsitrador.",
-        success: false
+    if (!company) {
+      return res.status(400).json({
+        success: false,
+        message: "Email não cadastrado.",
       });
     }
 
-    let isMatch = await bcrypt.compare(credentials.password, company.holder.password);
+    if (company.status.blocked) {
+      return res.status(401).json({
+        success: false,
+        message: "Empresa bloqueada, entre em contato com o adminsitrador.",
+      });
+    }
+
+    let isMatch = await bcrypt.compare(password, company.holder.password);
 
     if(!isMatch){
         return res.status(400).json({
