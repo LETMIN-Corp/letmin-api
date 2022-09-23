@@ -11,24 +11,15 @@ const {
 	checkRole,
 	serializeUser
 } = require('../utils/Auth');
+const { USER } = require('../utils/constants');
 
 // Users Registeration Route
 router.post('/login-user', userLogin);
 // Profile Route
-router.get('/profile', passportAuth, async (req, res) => {
+router.get('/profile', passportAuth, checkRole(USER), async (req, res) => {
 	return res.json(serializeUser(req.user));
 });
 
 router.get('/vacancy', searchVacancies);
-
-// Users Protected Route
-router.get('/user-protectd',
-	passportAuth,
-	checkRole(['user']),
-	async (req, res) => {
-		return res.json('Hello User');
-	}
-);
-
 
 module.exports = router;

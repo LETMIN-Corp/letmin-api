@@ -17,6 +17,7 @@ const {
 	checkRole,
 	serializeUser
 } = require('../utils/Auth');
+const { ADMIN } = require('../utils/constants');
 
 // Admin Registration Route
 router.post('/register-admin', validation(adminValidator), adminRegister);
@@ -24,28 +25,10 @@ router.post('/register-admin', validation(adminValidator), adminRegister);
 // Admin Login Route
 router.post('/login-admin', validation(adminValidator), adminLogin);
 
-router.get('/get-all-companies', passportAuth, getAllCompanies);
-router.patch('/company-block', passportAuth, changeCompanyBlockStatus);
+router.get('/get-all-companies', passportAuth, checkRole(ADMIN), getAllCompanies);
+router.patch('/company-block', passportAuth, checkRole(ADMIN), changeCompanyBlockStatus);
 
-router.get('/get-all-users', passportAuth, getAllUsers);
-router.patch('/user-block', passportAuth, changeUserBlockStatus);
-
-// Admin Protected Route
-router.get('/admin-protectd',
-	passportAuth,
-	checkRole(['admin']),
-	async (req, res) => {
-		return res.json('Hello Admin');
-	}
-);
-
-// Super Admin Protected Route
-router.get('/super-admin-and-admin-protectd',
-	passportAuth,
-	checkRole(['superadmin', 'admin']),
-	async (req, res) => {
-		return res.json('Super admin and Admin');
-	}
-);
+router.get('/get-all-users', passportAuth, checkRole(ADMIN), getAllUsers);
+router.patch('/user-block', passportAuth, checkRole(ADMIN), changeUserBlockStatus);
 
 module.exports = router;

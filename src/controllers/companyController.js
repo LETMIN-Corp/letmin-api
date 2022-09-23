@@ -9,6 +9,7 @@ const {
 	verifyToken,
 	decodeToken
 } = require('../utils/jwt');
+const { serializeUser } = require('passport');
 
 const loginCompany = async (req, res) => {
 	const credentials = req.body;
@@ -18,8 +19,8 @@ const loginCompany = async (req, res) => {
 
 			if (company.status.blocked) {
 				return res.status(401).json({
+					success: false,
 					message: 'Empresa bloqueada, entre em contato com o adminsitrador.',
-					success: false
 				});
 			}
 
@@ -27,8 +28,8 @@ const loginCompany = async (req, res) => {
 
 			if(!isMatch){
 				return res.status(400).json({
+					success: false,
 					message: 'Credenciais incorretas',
-					success: false
 				});
 			}
 			let token = generateToken(company, ROLES.COMPANY);
@@ -46,15 +47,15 @@ const loginCompany = async (req, res) => {
 				token: token,
 			};
 			return res.header('Authorization', token).status(200).json({
-				...result,
+				success: true,
 				message: 'Parabens! Você está logado.',
-				success: true
+				...result,
 			});
 		})
 		.catch((err) => {
 			return res.status(400).json({
+				success: false,
 				message: 'Error ' + err,
-				success: false
 			});
 		});
 };
@@ -69,8 +70,8 @@ const registerCompany = async (req, res, next) => {
 
 	if (company) {
 		return res.status(400).json({
+			success: false,
 			message: 'CNPJ ou email já foi cadastrado.',
-			success: false
 		});
 	}
   
@@ -104,9 +105,9 @@ const registerCompany = async (req, res, next) => {
 			});
 		}).catch(err => {
 			return res.status(500).json({
+				success: false,
 				message: 'Não foi possivel cadastrar a empresa.',
 				error: err,
-				success: false
 			});
 		});
 };
@@ -145,15 +146,15 @@ const getCompanyData = async (req, res) => {
 			};
 
 			return res.status(200).json({
-				data: result,
+				success: true,
 				message: 'Dados da empresa.',
-				success: true
+				data: result,
 			});
 		})
 		.catch((err) => {
 			return res.status(400).json({
+				success: false,
 				message: 'Error ' + err,
-				success: false
 			});
 		});
 };

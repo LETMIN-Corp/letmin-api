@@ -7,11 +7,12 @@ const {
 	jwtVerify,
 } = require('../utils/jwt');
 
+// Deprecated, should be removed later
 function getCompanyId(req, res) {
 	if (!req.headers.authorization) {
 		return res.status(401).json({
-			message: 'Unauthorized',
 			success: false,
+			message: 'Não Autorizado',
 		});
 	}
 
@@ -39,8 +40,8 @@ const insertVacancy = async (req, res) => {
 		await vacancy.save(async (err, vacancy) => {
 			if (err) {
 				return res.status(400).json({
-					message: 'Error ' + err,
 					success: false,
+					message: 'Error ' + err,
 				});
 			}
             
@@ -51,8 +52,8 @@ const insertVacancy = async (req, res) => {
 			await company.save();
 
 			return res.json({
-				message: 'Vaga criada com sucesso',
 				success: true,
+				message: 'Vaga criada com sucesso',
 				vacancy,
 			});
 
@@ -60,8 +61,8 @@ const insertVacancy = async (req, res) => {
 
 	} catch (err) {
 		return res.status(400).json({
-			message: err,
 			success: false,
+			message: err,
 		});
 	}
 };
@@ -73,14 +74,14 @@ const getAllCompanyVacancies = async (req, res) => {
 		const values = await Company.findById(company).populate('vacancies').select('vacancies -_id');
 
 		return res.json({
-			message: 'Vagas encontradas com sucesso',
 			success: true,
+			message: 'Vagas encontradas com sucesso',
 			vacancies: values.vacancies,
 		});
 	} catch (err) {
 		return res.status(400).json({
-			message: err,
 			success: false,
+			message: err,
 		});
 	}
 };
@@ -94,8 +95,8 @@ const getVacancy = async (req, res) => {
 			.then((vacancy) => {
 				if (!vacancy) {
 					return res.status(404).json({
+						success: false,
 						message: 'Vaga não encontrada.',
-						success: false
 					});
 				}
             
@@ -103,15 +104,15 @@ const getVacancy = async (req, res) => {
 				vacancy.save();
 
 				return res.json({
-					message: 'Vaga encontrada com sucesso',
 					success: true,
+					message: 'Vaga encontrada com sucesso',
 					vacancy,
 				});
 			});
 	} catch (err) {
 		return res.status(400).json({
-			message: err,
 			success: false,
+			message: err,
 		});
 	}
 };
@@ -125,22 +126,22 @@ const confirmVacancy = async (req, res) => {
 		}).then((vacancy) => {
 			if (!vacancy) {
 				return res.status(404).json({
+					success: false,
 					message: 'Vaga não encontrada.',
-					success: false
 				});
 			}
 
 			return res.json({
-				message: 'Vaga confirmada com sucesso',
 				success: true,
+				message: 'Vaga confirmada com sucesso',
 				vacancy,
 			});
 		});
 
 	} catch (err) {
 		return res.status(400).json({
-			message: err,
 			success: false,
+			message: err,
 		});
 	}
 };
@@ -153,19 +154,19 @@ const closeVacancy = async (req, res) => {
 			.then((vacancy) => {
 				if (!vacancy) {
 					return res.status(404).json({
+						success: false,
 						message: 'Vaga não encontrada.',
-						success: false
 					});
 				}
 				return res.json({
-					message: 'Vaga excluída com sucesso',
 					success: true,
+					message: 'Vaga excluída com sucesso',
 				});
 			});
 	} catch (err) {
 		return res.status(400).json({
-			message: err,
 			success: false,
+			message: err,
 		});
 	}
 };
@@ -179,8 +180,8 @@ const getAllVacancies = async (req, res) => {
 		});
 	} catch (err) {
 		return res.status(400).json({
-			message: err,
 			success: false,
+			message: err,
 		});
 	}
 };
@@ -205,21 +206,20 @@ const searchVacancies = async (req, res) => {
 		.then((vacancies) => { 
 			if (!vacancies) {
 				return res.status(404).json({
+					success: false,
 					message: 'Vaga não encontrada.',
-					success: false
 				});
 			}
 			return res.status(200).json({
-				// put all vacancies in one array
-				vacancies:vacancies.reduce((acc, val) => acc.concat(val.vacancies), []),
+				success: true,
 				message: 'Vagas encotradas.',
-				success: true
+				vacancies: vacancies.reduce((acc, val) => acc.concat(val.vacancies), []),
 			});
 		})
 		.catch((err) => {
 			return res.status(400).json({
-				message: err,
 				success: false,
+				message: err,
 			});
 		});
 };

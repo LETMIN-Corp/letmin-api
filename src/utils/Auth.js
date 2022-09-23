@@ -2,20 +2,21 @@ const passport = require('passport');
 
 /**
  * @DESC Passport middleware
+ * Check if user is authenticated
  */
 const passportAuth = (req, res, next) => {
-	passport.authenticate('local-login', { session: false }, (err, user) => {
+	passport.authenticate('jwt', { session: false }, (err, user) => {
 		if (err) {
 			return res.status(500).json({
-				error: err,
+				success: false,
 				message: 'Não foi possivel autenticar usuário.',
-				success: false
+				error: err,
 			});
 		}
 		if (!user) {
 			return res.status(403).json({
+				success: false,
 				message: 'Token inválido.',
-				success: false
 			});
 		}
 		req.user = user;
@@ -28,6 +29,7 @@ const passportAuth = (req, res, next) => {
 const checkRole = roles => (req, res, next) => {
 	!roles.includes(req.user.role)
 		? res.status(401).json({
+			success: false,
 			message: 'Acesso não autorizado',
 		})
 		: next();

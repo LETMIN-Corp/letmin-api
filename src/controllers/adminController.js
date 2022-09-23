@@ -21,8 +21,8 @@ const adminRegister = async (req, res) => {
 	let admin = await Admin.findOne({ email: adminDets.email });
 	if (admin) {
 		return res.status(400).json({
+			success: false,
 			message: 'Email já cadastrado',
-			success: false
 		});
 	}
   
@@ -37,15 +37,15 @@ const adminRegister = async (req, res) => {
 	await newAdmin.save()
 		.then((value) => {
 			return res.status(201).json({
-				message: `Parabens ${value.name}! Você está cadastrado. Por favor logue.`,
 				success: true,
+				message: `Parabens ${value.name}! Você está cadastrado. Por favor logue.`,
 			});
 		})
 		.catch((err) => {
 			return res.status(500).json({
-				error: err,
+				success: false,
 				message: 'Não foi possivel cadastrar sua conta.',
-				success: false
+				error: err,
 			});
 		});
 };
@@ -62,16 +62,16 @@ const adminLogin = async (req, res) => {
 	let user = await Admin.findOne({ email });
 	if (!user) {
 		return res.status(404).json({
+			success: false,
 			message: 'Email não encontrado.',
-			success: false
 		});
 	}
 	// Now check for the password
 	let isMatch = await bcrypt.compare(password, user.password);
 	if (!isMatch) {
 		return res.status(400).json({
+			success: false,
 			message: 'Senha incorreta.',
-			success: false
 		});
 	}
 
@@ -83,9 +83,9 @@ const adminLogin = async (req, res) => {
 		token: token,
 	};
 	return res.header('Authorization', token).status(200).json({
-		...result,
+		success: true,
 		message: 'Parabens! Você está logado.',
-		success: true
+		...result,
 	});
 };
 
@@ -94,53 +94,52 @@ const getAllCompanies = async (req, res) => {
 	Company.find().select('-holder.password')
 		.then((companies) => {
 			return res.status(200).json({
-				message: 'Lista de empresas',
 				success: true,
+				message: 'Lista de empresas',
 				companies: companies
 			});
 		})
 		.catch((err) => {
 			return res.status(500).json({
+				success: false,
 				message: 'Não foi possivel listar as empresas',
-				success: false
 			});
 		});
 
 };
 
 const changeCompanyBlockStatus = async (req, res) => {
+
 	const { company_id } = req.body;
 
 	if(!company_id) {
 		return res.status(400).json({
+			success: false,
 			message: 'ID da empresa não informado',
-			success: false
 		});
 	}
 
 	let _id = ObjectId(company_id);
 
 	Company.findById( _id , (err, company) => {
-		if (err) {
+		if (!company || err) {
 			return res.status(500).json({
+				success: false,
 				message: 'Não foi possivel encontrar a empresa',
-				success: false
 			});
 		}
-		if (company) {
-			company.status.blocked = !company.status.blocked;
-			company.save().then(async (value) => {
-				let message = value.status.blocked ? 'bloqueada' : 'desbloqueada';
+		company.status.blocked = !company.status.blocked;
+		company.save().then(async (value) => {
+			let message = value.status.blocked ? 'bloqueada' : 'desbloqueada';
 
-				let updatedCompanies = await Company.find().select('-holder.password');
+			let updatedCompanies = await Company.find().select('-holder.password');
 
-				return res.status(200).json({
-					message: `Empresa ${message} com sucesso`,
-					success: true,
-					companies: updatedCompanies
-				});
+			return res.status(200).json({
+				success: true,
+				message: `Empresa ${message} com sucesso`,
+				companies: updatedCompanies
 			});
-		}
+		});
 	});
 };
 
@@ -148,8 +147,8 @@ const getAllUsers = async (req, res) => {
 	User.find().select('-password')
 		.then((users) => {
 			return res.status(200).json({
-				message: 'Lista de usuários',
 				success: true,
+				message: 'Lista de usuários',
 				users: users
 			});
 		});
@@ -160,8 +159,8 @@ const changeUserBlockStatus = async (req, res) => {
 
 	if(!user_id) {
 		return res.status(400).json({
+			success: false,
 			message: 'ID do usuário não informado',
-			success: false
 		});
 	}
 
@@ -170,8 +169,8 @@ const changeUserBlockStatus = async (req, res) => {
 	User.findById( _id , (err, user) => {
 		if (err) {
 			return res.status(500).json({
+				success: false,
 				message: 'Não foi possivel encontrar o usuário',
-				success: false
 			});
 		}
 		user.blocked = !user.blocked;
@@ -181,8 +180,8 @@ const changeUserBlockStatus = async (req, res) => {
 			let updatedUsers = await User.find().select('-password');
 
 			return res.status(200).json({
-				message: `Usuário ${message} com sucesso`,
 				success: true,
+				message: `Usuário ${message} com sucesso`,
 				users: updatedUsers
 			});
 		});

@@ -14,6 +14,7 @@ const {
 const userLogin = async (req, res, next) => {
 	if (!req.body.credential) {
 		return res.status(400).json({
+			success: false,
 			message: 'O Token é obrigatório.'
 		});
 	}
@@ -23,6 +24,7 @@ const userLogin = async (req, res, next) => {
   
 	if (!payload || !email_verified) {
 		return res.status(400).json({
+			success: false,
 			message: 'Email google não verificado.'
 		});
 	}
@@ -33,8 +35,8 @@ const userLogin = async (req, res, next) => {
 			if (user) {
 				if (user.blocked) {
 					return res.status(401).json({
+						success: false,
 						message: 'Usuário bloqueado, entre em contato com o adminsitrador.',
-						success: false
 					});
 				}
 
@@ -48,9 +50,9 @@ const userLogin = async (req, res, next) => {
 					token: token,
 				};
 				return res.header('Authorization', token).status(200).json({
-					...result,
+					success: true,
 					message: 'Parabens! Você está logado.',
-					success: true
+					...result,
 				});
 			}
 			// User does not exist
@@ -82,8 +84,8 @@ const userLogin = async (req, res, next) => {
 		})
 		.catch((err) => {
 			return res.status(400).json({
+				success: false,
 				message: 'Error ' + err,
-				success: false
 			});
 		});
 };

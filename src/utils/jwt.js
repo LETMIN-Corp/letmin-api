@@ -38,6 +38,7 @@ async function verifyGoogleToken(res, token) {
     
 	if (!ticket.payload) {
 		return res.status(400).json({
+			success: false,
 			message: 'Token não foi verificado.'
 		});
 	}

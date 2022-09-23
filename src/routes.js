@@ -1,14 +1,12 @@
-//const passport = require('passport');
-
 module.exports = (app) => {
 
 	app.get('/healthcheck', (req, res) => {
 		res.json({
-			message: 'Hello World',
-			success: true
+			success: true,
+			message: 'Olá Mundo',
 		});
 	});
-
+	
 	app.use('/api/users', require('./routes/users'));
 
 	app.use('/api/users', require('./routes/admin'));
@@ -17,8 +15,8 @@ module.exports = (app) => {
 
 	app.use((req, res) => {
 		res.status(404).json({
-			message: 'Route not Found', 
-			success: false
+			success: false,
+			message: 'Route não encontrada.', 
 		});
 	});
 };
