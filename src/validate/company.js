@@ -6,8 +6,7 @@ const companyValidator = Joi.object({
 			'string.empty': 'Nome da empresa não pode ser vazio',
 			'any.required': 'Nome da empresa é obrigatório'
 		}),
-		//.regex(/^[0-9]{2}\.[0-9]{3}\.[0-9]{3}\/[0-9]{4}\-[0-9]{2}$/)
-		cnpj: Joi.string().required().messages({
+		cnpj: Joi.string().required().regex(/^[0-9]{2}\.[0-9]{3}\.[0-9]{3}\/[0-9]{4}-[0-9]{2}$/).messages({
 			'string.empty': 'CNPJ não pode ser vazio',
 			'any.required': 'CNPJ é obrigatório',
 			'string.pattern.base': 'CNPJ inválido'
@@ -17,11 +16,11 @@ const companyValidator = Joi.object({
 			'any.required': 'Email é obrigatório',
 			'string.email': 'Email inválido'
 		}),
-		//.regex(/^\([0-9]{2}\)[0-9]{5}\-[0-9]{4}$/)
-		phone: Joi.string().required().messages({
+		// regex for (44) 44444-4444 or (44) 4444-4444 allowing spaces
+		phone: Joi.string().required().regex(/^\([0-9]{2}\)\s[0-9]{4,5}-[0-9]{4}$/).messages({
 			'string.empty': 'Telefone não pode ser vazio',
 			'any.required': 'Telefone é obrigatório',
-			'string.pattern.base': 'Telefone inválido'
+			'string.pattern.base': 'Telefone da empresa inválido'
 		}),
 		address: Joi.string().required().messages({
 			'string.empty': 'Endereço não pode ser vazio',
@@ -30,39 +29,39 @@ const companyValidator = Joi.object({
 	},
 	holder: {
 		name: Joi.string().required().messages({
-			'string.empty': 'Nome do responsável não pode ser vazio',
-			'any.required': 'Nome do responsável é obrigatório'
+			'string.empty': 'Nome do Titular não pode ser vazio',
+			'any.required': 'Nome do Titular é obrigatório'
 		}),
-		cpf: Joi.string().required().regex(/^[0-9]{3}\.[0-9]{3}\.[0-9]{3}\-[0-9]{2}$/).messages({
-			'string.empty': 'CPF não pode ser vazio',
-			'any.required': 'CPF é obrigatório',
-			'string.pattern.base': 'CPF inválido'
+		cpf: Joi.string().required().regex(/^[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}$/).messages({
+			'string.empty': 'CPF do Titular não pode ser vazio',
+			'any.required': 'CPF do Titular é obrigatório',
+			'string.pattern.base': 'CPF do Titular inválido'
 		}),
 		email: Joi.string().email().required().messages({
-			'string.empty': 'Email não pode ser vazio',
-			'any.required': 'Email é obrigatório',
-			'string.email': 'Email inválido'
+			'string.empty': 'Email do Titular não pode ser vazio',
+			'any.required': 'Email do Titular é obrigatório',
+			'string.email': 'Email do Titular inválido'
 		}),
-		//.regex(/^\([0-9]{2}\)[0-9]{5}\-[0-9]{4}$/)
-		phone: Joi.string().required().messages({
-			'string.empty': 'Telefone não pode ser vazio',
-			'any.required': 'Telefone é obrigatório',
-			'string.pattern.base': 'Telefone inválido'
+		// regex for (44) 44444-4444 or (44) 4444-4444 allowing spaces
+		phone: Joi.string().required().regex(/^\([0-9]{2}\)\s[0-9]{4,5}-[0-9]{4}$/).messages({
+			'string.empty': 'Telefone do Titular não pode ser vazio',
+			'any.required': 'Telefone do Titular é obrigatório',
+			'string.pattern.base': 'Telefone do Titular inválido'
 		}),
 		password: Joi.string().required().messages({
-			'string.empty': 'Senha não pode ser vazia',
-			'any.required': 'Senha é obrigatória'
+			'string.empty': 'Senha do Titular não pode ser vazia',
+			'any.required': 'Senha do Titular é obrigatória'
 		}),
 		confirmPassword: Joi.string().required().messages({
-			'string.empty': 'Confirmação de senha não pode ser vazia',
-			'any.required': 'Confirmação de senha é obrigatória'
+			'string.empty': 'Confirmação de senha do Titular não pode ser vazia',
+			'any.required': 'Confirmação de senha do Titular é obrigatória'
 		}),
 	},
 	plan: {
 		selected: Joi.string().required().valid('Semestral', 'Anual').messages({
 			'string.empty': 'Tipo de plano não pode ser vazio',
 			'any.required': 'Tipo de plano é obrigatório',
-			'any.only': 'Tipo de plano inválido'
+			'any.only': 'Tipo de plano inválido',
 		}),
 	},
 	card: {
@@ -84,8 +83,8 @@ const companyValidator = Joi.object({
 			'any.required': 'Data de vencimento é obrigatória'
 		}),
 		owner: Joi.string().required().messages({
-			'string.empty': 'Nome do titular não pode ser vazio',
-			'any.required': 'Nome do titular é obrigatório'
+			'string.empty': 'Nome do Titular não pode ser vazio',
+			'any.required': 'Nome do Titular é obrigatório'
 		}),
 	}
 }).options({ abortEarly: false }).unknown();
