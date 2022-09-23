@@ -1,38 +1,34 @@
-const formatError = require("../utils/formatError");
-const {
-    decodeToken,
-    jwtSign,
-    jwtVerify,
-} = require('../utils/jwt');
+const formatError = require('../utils/formatError');
 
+// Check if the use of this function is still valid, will be deprecated in the future
 module.exports = (schema, checkBearer = false) => {
-    return (req, res, next) => {
-        try {
-            if (checkBearer) {
-                if (!req.headers.authorization) {
-                    return res.status(401).json({
-                        message: 'No token provided',
-                        success: false,
-                    });
-                }
-            }
+	return (req, res, next) => {
+		try {
+			if (checkBearer) {
+				if (!req.headers.authorization) {
+					return res.status(401).json({
+						success: false,
+						message: 'Nenhum Token fornecido',
+					});
+				}
+			}
 
-            const validation = schema.validate(req.body);
+			const validation = schema.validate(req.body);
 
-            if (validation.error) {
-                return res.status(400).json({
-                    message: formatError(validation.error),
-                    success: false
-                });
-            }
+			if (validation.error) {
+				return res.status(400).json({
+					success: false,
+					message: formatError(validation.error),
+				});
+			}
 
-            next();
+			next();
 
-        } catch (err) {
-            return res.status(400).json({
-                message: err,
-                success: false
-            });
-        }
-    }
-}
+		} catch (err) {
+			return res.status(400).json({
+				success: false,
+				message: err,
+			});
+		}
+	};
+};
