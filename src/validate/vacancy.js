@@ -34,18 +34,6 @@ const vacancyValidator = Joi.object({
 		'any.required': 'Região é obrigatória',
 		'any.only': 'Região inválida'
 	}),
-	insertDate: Joi.date().required().messages({
-		'string.empty': 'Data de inserção não pode ser vazia',
-		'any.required': 'Data de inserção é obrigatória',
-		'date.base': 'Data de inserção inválida',
-		'typeError': 'Data de inserção deve ser uma data'
-	}),
-	expirationDate: Joi.date().required().messages({
-		'string.empty': 'Data de fechamento não pode ser vazia',
-		'any.required': 'Data de fechamento é obrigatória',
-		'date.base': 'Data de fechamento inválida',
-		'typeError': 'Data de fechamento deve ser uma data'
-	}),
 }).options({ abortEarly: false }).unknown();
 
 module.exports = {

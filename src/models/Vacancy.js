@@ -40,14 +40,6 @@ const VacancySchema = new Schema({
 		required: true,
 		enum: ['Sul', 'Sudeste', 'Centro-Oeste', 'Norte', 'Nordeste']
 	},
-	insertDate: {
-		type: Date,
-		required: true
-	},
-	expirationDate: {
-		type: Date,
-		required: true
-	},
 	candidates: [{
 		type: Schema.Types.ObjectId,
 		ref: 'User'
