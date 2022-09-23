@@ -88,6 +88,56 @@ const userLogin = async (req, res, next) => {
     });
 }
 
+const getUserData = async (req, res, next) => {
+    const { id } = req.params;
+
+    User.findById(id)
+    .then((user) => {
+        if (!user) {
+            return res.status(400).json({
+                message: "Usuário não encontrado.",
+                success: false
+            });
+        }
+        return res.status(200).json({
+            user,
+            success: true
+        });
+    })
+    .catch((err) => {
+        return res.status(400).json({
+            message: 'Error ' + err,
+            success: false
+        });
+    });
+}
+
+const updateUser = async (req, res, next) => {
+    const { id } = req.params;
+
+    User.findByIdAndUpdate(id, req.body, { new: true })
+    .then((user) => {
+        if (!user) {
+            return res.status(400).json({
+                message: "Usuário não encontrado.",
+                success: false
+            });
+        }
+        return res.status(200).json({
+            user,
+            success: true
+        });
+    })
+    .catch((err) => {
+        return res.status(400).json({
+            message: 'Error ' + err,
+            success: false
+        });
+    });
+}
+
 module.exports = {
     userLogin,
+    getUserData,
+    updateUser
 }

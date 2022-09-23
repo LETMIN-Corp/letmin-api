@@ -2,7 +2,7 @@ const router = require("express").Router();
 
 require("dotenv").config();
 
-const { userLogin } = require("../controllers/userController");
+const { userLogin, getUserData, updateUser } = require("../controllers/userController");
 const { searchVacancies } = require("../controllers/vacancyController");
 
 // Bring in the User Registration function
@@ -20,6 +20,8 @@ router.get("/profile", passportAuth, async (req, res) => {
 });
 
 router.get("/vacancy", searchVacancies);
+router.get("/get-user", passportAuth, getUserData);
+router.get("/update-user", passportAuth, updateUser);
 
 // Users Protected Route
 router.get("/user-protectd",
