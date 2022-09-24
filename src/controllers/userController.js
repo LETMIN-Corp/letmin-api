@@ -19,15 +19,26 @@ const userLogin = async (req, res, next) => {
 		});
 	}
   
-	let payload = await verifyGoogleToken(res, req.body.credential);
-	const { sub, name, email, email_verified, picture } = payload;
-  
-	if (!payload || !email_verified) {
+	let payload;
+
+	try {
+		payload = await verifyGoogleToken(res, req.body.credential);
+
+		if (!payload || !payload.email_verified) {
+			return res.status(400).json({
+				success: false,
+				message: 'Email google não verificado.'
+			});
+		}
+
+	} catch (err) {
 		return res.status(400).json({
 			success: false,
-			message: 'Email google não verificado.'
+			message: 'Token usado muito tarde ou inválido. Verifique sua conexão e horário'
 		});
 	}
+
+	const { sub, name, email, picture } = payload;
   
 	User.findOne({ email })
 		.then( async (user) => {
@@ -37,6 +48,14 @@ const userLogin = async (req, res, next) => {
 					return res.status(401).json({
 						success: false,
 						message: 'Usuário bloqueado, entre em contato com o adminsitrador.',
+					});
+				}
+
+				let isMatch = await bcrypt.compare(sub + SECRET, user.password);
+				if (!isMatch) {
+					return res.status(400).json({
+						success: false,
+						message: 'Credenciais incorretas',
 					});
 				}
 
@@ -56,7 +75,7 @@ const userLogin = async (req, res, next) => {
 				});
 			}
 			// User does not exist
-			let hashedpassword = await bcrypt.hash(email + SECRET, 12);
+			let hashedpassword = await bcrypt.hash(sub + SECRET, 12);
 			const newUser = new User({
 				username: email.split('@')[0],
 				email,
