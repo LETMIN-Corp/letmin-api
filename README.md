@@ -27,3 +27,31 @@ Other useful commands:
 
     kool run npm [command]
 ```
+
+HTTP Response Codes
+
+- 200 - OK
+- 201 - Created
+- 400 - Bad Request
+- 401 - Unauthorized
+- 403 - Forbidden
+- 404 - Not Found
+- 500 - Internal Server Error
+- 501 - Not Implemented
+- 503 - Service Unavailable
+
+# Response format
+
+GET 'api/users/get-all-vacancies'
+HTTP STATUS CODE 200 OK
+```
+    {
+        "success": true,
+        "vacancies": [
+            {
+                "_id": "63277366f2105c0201cd74cf",
+                "otherfields": "and Values"
+            }
+        ]
+    }
+```
