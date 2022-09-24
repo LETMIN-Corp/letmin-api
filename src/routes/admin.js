@@ -19,11 +19,7 @@ const {
 } = require('../utils/Auth');
 const { ADMIN } = require('../utils/constants');
 
-// Admin Registration Route
-router.post('/register-admin', validation(adminValidator), adminRegister);
 
-// Admin Login Route
-router.post('/login-admin', validation(adminValidator), adminLogin);
 
 router.get('/get-all-companies', passportAuth, checkRole(ADMIN), getAllCompanies);
 router.patch('/company-block', passportAuth, checkRole(ADMIN), changeCompanyBlockStatus);
