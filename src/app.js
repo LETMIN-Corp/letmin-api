@@ -28,7 +28,13 @@ app.use(passport.initialize());
 require('./middlewares/passport')(passport);
 
 //Routes 
-require('./routes')(app);
+app.use('/api', require('./routes/routes'));
+app.use((req, res) => {
+	res.status(404).json({
+		success: false,
+		message: 'Route não encontrada.', 
+	});
+});
 
 const startApp = async () => {
 	try {
