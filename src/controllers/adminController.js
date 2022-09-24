@@ -167,7 +167,7 @@ const changeUserBlockStatus = async (req, res) => {
 	let _id = ObjectId(user_id);
 
 	User.findById( _id , (err, user) => {
-		if (err) {
+		if (err || !user) {
 			return res.status(500).json({
 				success: false,
 				message: 'Não foi possivel encontrar o usuário',
@@ -185,7 +185,7 @@ const changeUserBlockStatus = async (req, res) => {
 				users: updatedUsers
 			});
 		});
-	});
+	})
 };
 
 module.exports = {
