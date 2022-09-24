@@ -10,10 +10,12 @@ const {
 	searchVacancies,
 	closeVacancy,
 } = require('../controllers/vacancyController');
-const { getCompanyData } = require('../controllers/companyController');
+const { getCompanyData, updateCompanyData, updateHolderData } = require('../controllers/companyController');
 
 // Company Profile Route
 router.get('/company-data', getCompanyData);
+router.post('/update-company-company', updateCompanyData);
+router.post('/update-company-holder', updateHolderData);
 
 const {
 	passportAuth,

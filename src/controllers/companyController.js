@@ -133,8 +133,67 @@ const getCompanyData = async (req, res) => {
 		});
 };
 
+const updateCompanyData = async (req, res) => {
+	try {
+		console.log(req.body);
+		let credentials = req.body;
+		return;
+		await Company.findByIdAndUpdate(req.params.id, {
+			credentials
+		}).then((vacancy) => {
+			if (!vacancy) {
+				return res.status(404).json({
+					success: false,
+					message: 'Vaga não encontrada.',
+				});
+			}
+
+			return res.json({
+				success: true,
+				message: 'Vaga confirmada com sucesso',
+				vacancy,
+			});
+		});
+
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: err,
+		});
+	}
+};
+const updateHolderData = async (req, res) => {
+	try {
+
+		await Vacancy.findByIdAndUpdate(req.params.id, {
+			closed: true,
+		}).then((vacancy) => {
+			if (!vacancy) {
+				return res.status(404).json({
+					success: false,
+					message: 'Vaga não encontrada.',
+				});
+			}
+
+			return res.json({
+				success: true,
+				message: 'Vaga confirmada com sucesso',
+				vacancy,
+			});
+		});
+
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: err,
+		});
+	}
+};
+
 module.exports = {
 	registerCompany,
 	loginCompany,
-	getCompanyData
+	getCompanyData,
+	updateCompanyData,
+	updateHolderData
 };
