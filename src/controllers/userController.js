@@ -160,5 +160,5 @@ const updateUser = async (req, res, next) => {
 module.exports = {
     userLogin,
     getUserData,
-    updateUser
+    updateUser,
 }
