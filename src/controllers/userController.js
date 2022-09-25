@@ -11,6 +11,10 @@ const {
 	decodeToken
 } = require('../utils/jwt');
 
+/**
+ * User Login/Registration via Google
+ * @route POST /api/auth/google
+ */
 const userLogin = async (req, res, next) => {
 	if (!req.body.credential) {
 		return res.status(400).json({
@@ -87,6 +91,15 @@ const userLogin = async (req, res, next) => {
 			newUser.save((err, user) => {
 				const token = generateToken(user, ROLES.USER);
   
+				const sendMail = require('../utils/mailer');
+				const email = require('../utils/emailTemplates/userRegister')(user);
+
+				sendMail(email).then(() => {
+					console.log('Email enviado com sucesso');
+				}).catch((err) => {
+					console.log('Erro ao enviar email', err);
+				});
+
 				let result = {
 					username: user.username,  
 					role: 'user',

@@ -92,6 +92,26 @@ const CompanySchema = new Schema({
 			required: false
 		},
 	},
+	forgotPassword: [
+		{
+			selector: {
+				type: String,
+				required: true
+			},
+			token: {
+				type: String,
+				required: false
+			},
+			issuedAt: {
+				type: Date,
+				required: false
+			},
+			ip: {
+				type: String,
+				required: false
+			},
+		}
+	]
 });
 
 module.exports = model('Company', CompanySchema, 'companies');

@@ -109,7 +109,6 @@ const getAllCompanies = async (req, res) => {
 };
 
 const changeCompanyBlockStatus = async (req, res) => {
-
 	const { company_id } = req.body;
 
 	if(!company_id) {

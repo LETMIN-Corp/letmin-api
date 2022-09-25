@@ -3,10 +3,10 @@ const bcrypt = require('bcryptjs');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 const ROLES = require('../utils/constants');
+const { CLIENT_URL } = require('../config');
 
 const {
 	generateToken,
-	verifyToken,
 	decodeToken
 } = require('../utils/jwt');
 const { serializeUser } = require('passport');
@@ -117,38 +117,12 @@ const getCompanyData = async (req, res) => {
 
 	let _id = ObjectId(decodeToken(token).user_id);
 
-	await Company.findById({ _id })
+	await Company.findById({ _id }).select('-holder.password')
 		.then((company) => {
-			let result = {
-				company: {
-					name: company.company.name,
-					cnpj: company.company.cnpj,
-					email: company.company.email,
-					phone: company.company.phone,
-					address: company.company.address,
-				},
-				holder: {
-					name: company.holder.name,
-					cpf: company.holder.cpf,
-					email: company.holder.email,
-					phone: company.holder.phone,
-				},
-				plan: {
-					selected: company.plan.selected,
-				},
-				card: {
-					type: company.card.type,
-					number: company.card.number,
-					code: company.card.code,
-					expiration: company.card.expiration,
-					owner: company.card.owner,
-				},
-			};
-
 			return res.status(200).json({
 				success: true,
 				message: 'Dados da empresa.',
-				data: result,
+				data: company,
 			});
 		})
 		.catch((err) => {
@@ -159,8 +133,108 @@ const getCompanyData = async (req, res) => {
 		});
 };
 
+const sendEmail = require('../utils/mailer');
+
+const createForgotPasswordToken = async (req, res) => {
+	const { email } = req.body;
+
+	const company = await Company.findOne({ 'company.email': email });
+
+	if (!company) {
+		return res.status(400).json({
+			success: false,
+			message: 'Email não cadastrado.',
+		});
+	}
+
+	const ipRequest = req.socket.remoteAddress;
+	const selector = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+	const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+	const hashedToken = await bcrypt.hash(token, 12);
+
+	const url = `${CLIENT_URL}/new-password?selector=${selector}&validator=${token}`;
+
+	const linkemail = require('../utils/emailTemplates/forgotPassword')(company, url);
+
+	await sendEmail(linkemail)
+	.then(async (err, info) => {
+		if(err) {
+			res.status(500).json({
+				success: false,
+				message: 'Erro ao enviar email',
+				error: err,
+			});
+		}
+
+		Company.findByIdAndUpdate(company._id, {
+			'forgotPassword.selector': selector,
+			'forgotPassword.token': hashedToken,
+			'forgotPassword.issuedAt': Date.now(),
+			'forgotPassword.ip': ipRequest,
+		}, { new: true })
+			.then((company) => {
+				return res.status(200).json({
+					success: true,
+					message: 'Email enviado com sucesso.',
+				});
+			})
+			
+	})
+	.catch((err) => {
+		return res.status(400).json({
+			success: false,
+			message: 'Error ' + err,
+		});
+	});
+};
+
+const checkToken = async (req, res) => {
+	const { selector, token } = req.params;
+
+	const company = await Company.findOne({ 'forgotPassword.token': selector });
+	const tokenIsValid = await bcrypt.compare(token, company.forgotPassword.token);
+
+	if (!company || !tokenIsValid) {
+		return res.status(400).json({
+			success: false,
+			message: 'Token inválido.',
+		});
+	}
+
+	return res.status(200).json({
+		success: true,
+		message: 'Token válido.',
+	});
+};
+
+const resetPassword = async (req, res) => {
+	const { selector, token } = req.params;
+
+	const company = await Company.findOne({ 'forgotPassword.token': selector });
+	const tokenIsValid = await bcrypt.compare(token, company.forgotPassword.token);
+
+	if (!company || !tokenIsValid) {
+		return res.status(400).json({
+			success: false,
+			message: 'Token inválido.',
+		});
+	}
+
+	company.holder.password = await bcrypt.hash(password, 12);
+
+	await company.save();
+
+	res.status(200).json({
+		success: true,
+		message: 'Senha alterada com sucesso.',
+	});
+};
+
 module.exports = {
 	registerCompany,
 	loginCompany,
-	getCompanyData
+	getCompanyData,
+	checkToken,
+	createForgotPasswordToken,
+	resetPassword,
 };

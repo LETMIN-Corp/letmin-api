@@ -20,7 +20,6 @@ const {
 const { ADMIN } = require('../utils/constants');
 
 
-
 router.get('/get-all-companies', passportAuth, checkRole(ADMIN), getAllCompanies);
 router.patch('/company-block', passportAuth, checkRole(ADMIN), changeCompanyBlockStatus);
 

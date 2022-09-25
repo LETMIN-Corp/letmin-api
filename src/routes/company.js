@@ -21,6 +21,7 @@ const {
 	serializeUser
 } = require('../utils/Auth');
 
+
 // Vacancy Crud Routes
 router.post('/register-vacancy', validation(vacancyValidator), insertVacancy);
 router.get('/get-all-vacancies', getAllVacancies);
