@@ -10,7 +10,7 @@ const {
 	searchVacancies,
 	closeVacancy,
 } = require('../controllers/vacancyController');
-const { getCompanyData } = require('../controllers/companyController');
+const { getCompanyData, searchUsers } = require('../controllers/companyController');
 
 // Company Profile Route
 router.get('/company-data', getCompanyData);
@@ -29,5 +29,6 @@ router.get('/get-vacancy/:id', getVacancy);
 router.get('/search-vacancies/:search?', searchVacancies);
 router.patch('/confirm-vacancy/:id', confirmVacancy);
 router.delete('/close-vacancy/:id', closeVacancy);
+router.get('/user', searchUsers);
 
 module.exports = router;

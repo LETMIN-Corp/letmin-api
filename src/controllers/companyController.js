@@ -1,7 +1,7 @@
 const Company = require('../models/Company');
 const bcrypt = require('bcryptjs');
 const ObjectId = require('mongoose').Types.ObjectId;
-
+const User = require('../models/User');
 const ROLES = require('../utils/constants');
 
 const {
@@ -159,8 +159,37 @@ const getCompanyData = async (req, res) => {
 		});
 };
 
+const searchUsers = async (req, res) => {
+	let search = req.params.search || '';
+
+	User.find({
+		$or: [
+			{ 'user.name': { $regex: search, $options: 'i' } },
+		]
+	}).then((users) => {
+		if (!users) {
+			return res.status(404).json({
+				success: false,
+				message: 'Usuários não encontrados.',
+			});
+		}
+
+		return res.status(200).json({
+			success: true,
+			message: 'Usuários encontrados.',
+			users: users,
+		});
+	}).catch((err) => {
+		return res.status(400).json({
+			success: false,
+			message: err,
+		});
+	});
+};
+
 module.exports = {
 	registerCompany,
 	loginCompany,
-	getCompanyData
+	getCompanyData,
+	searchUsers,
 };
