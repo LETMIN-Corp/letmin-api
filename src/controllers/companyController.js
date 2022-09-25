@@ -141,9 +141,6 @@ const updateCompanyData = async (req, res) => {
 
 		let credentials = req.body;
 
-		console.log("id:", _id);
-		// console.log("credentials:", credentials);
-
 		await Company.findByIdAndUpdate(_id, {
 			'company.name': credentials.company.name,
 			'company.cnpj': credentials.company.cnpj,
@@ -151,7 +148,6 @@ const updateCompanyData = async (req, res) => {
 			'company.phone': credentials.company.phone,
 			'company.address': credentials.company.address
 		}).then((company) => {
-			console.log( "company:", company);
 			if (!company) {
 				return res.status(404).json({
 					success: false,
@@ -180,7 +176,6 @@ const updateHolderData = async (req, res) => {
 		let _id = ObjectId(decodeToken(token).user_id);
 
 		let credentials = req.body;
-
 
 		await Company.findByIdAndUpdate(_id, {
 			'holder.name': credentials.holder.name,

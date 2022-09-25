@@ -106,7 +106,7 @@ const updateCompanyValidator = Joi.object({
 			'string.email': 'Email inválido'
 		}),
 		// regex for (44) 44444-4444 or (44) 4444-4444 allowing spaces
-		phone: Joi.string().required().regex(/^\([0-9]{2}\)\s[0-9]{4,5}-[0-9]{4}$/).messages({
+		phone: Joi.string().required().regex(/^\([0-9]{2}\)\s?[0-9]{4,5}-[0-9]{4}$/).messages({
 			'string.empty': 'Telefone não pode ser vazio',
 			'any.required': 'Telefone é obrigatório',
 			'string.pattern.base': 'Telefone da empresa inválido'
