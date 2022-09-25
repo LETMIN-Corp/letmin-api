@@ -60,7 +60,7 @@ const loginCompany = async (req, res) => {
 		});
 };
 
-const registerCompany = async (req, res, next) => {
+const registerCompany = async (req, res) => {
 	let credentials = req.body;
   
 	let company = await Company.findOne({
@@ -135,11 +135,24 @@ const getCompanyData = async (req, res) => {
 
 const updateCompanyData = async (req, res) => {
 	try {
-
 		let token = req.headers.authorization;
 		let _id = ObjectId(decodeToken(token).user_id);
 
 		let credentials = req.body;
+
+		// check if email/cnpj is already in use by another company
+		let company = await Company.findOne({
+			'company.email' : credentials.company.email,
+			'company.cnpj' : credentials.company.cnpj,
+			_id: { $ne: _id }
+		}).select('+company.email');
+
+		if (company && company._id != _id) {
+			return res.status(400).json({
+				success: false,
+				message: 'Email ou CNPJ já está em uso.',
+			});
+		}
 
 		await Company.findByIdAndUpdate(_id, {
 			'company.name': credentials.company.name,
@@ -164,7 +177,7 @@ const updateCompanyData = async (req, res) => {
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
-			message: err,
+			message: 'Ocorreu um erro ao atualizar os dados da empresa.' + err,
 		});
 	}
 };
