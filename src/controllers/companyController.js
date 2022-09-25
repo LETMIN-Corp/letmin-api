@@ -135,23 +135,30 @@ const getCompanyData = async (req, res) => {
 
 const updateCompanyData = async (req, res) => {
 	try {
-		console.log(req.body);
+
+		let token = req.headers.authorization;
+		let _id = ObjectId(decodeToken(token).user_id);
+
 		let credentials = req.body;
-		return;
-		await Company.findByIdAndUpdate(req.params.id, {
+
+		console.log("id:", _id);
+		// console.log("credentials:", credentials);
+
+		await Company.findByIdAndUpdate(_id, {
 			credentials
-		}).then((vacancy) => {
-			if (!vacancy) {
+		}).then((company) => {
+			console.log( "company:", company);
+			if (!company) {
 				return res.status(404).json({
 					success: false,
-					message: 'Vaga não encontrada.',
+					message: 'Empresa não encontrada',
 				});
 			}
 
 			return res.json({
 				success: true,
-				message: 'Vaga confirmada com sucesso',
-				vacancy,
+				message: 'Empresa atualizada com sucesso',
+				company,
 			});
 		});
 
@@ -162,32 +169,33 @@ const updateCompanyData = async (req, res) => {
 		});
 	}
 };
+
 const updateHolderData = async (req, res) => {
-	try {
+	// try {
 
-		await Vacancy.findByIdAndUpdate(req.params.id, {
-			closed: true,
-		}).then((vacancy) => {
-			if (!vacancy) {
-				return res.status(404).json({
-					success: false,
-					message: 'Vaga não encontrada.',
-				});
-			}
+	// 	await Vacancy.findByIdAndUpdate(req.params.id, {
+	// 		closed: true,
+	// 	}).then((vacancy) => {
+	// 		if (!vacancy) {
+	// 			return res.status(404).json({
+	// 				success: false,
+	// 				message: 'Vaga não encontrada.',
+	// 			});
+	// 		}
 
-			return res.json({
-				success: true,
-				message: 'Vaga confirmada com sucesso',
-				vacancy,
-			});
-		});
+	// 		return res.json({
+	// 			success: true,
+	// 			message: 'Vaga confirmada com sucesso',
+	// 			vacancy,
+	// 		});
+	// 	});
 
-	} catch (err) {
-		return res.status(400).json({
-			success: false,
-			message: err,
-		});
-	}
+	// } catch (err) {
+	// 	return res.status(400).json({
+	// 		success: false,
+	// 		message: err,
+	// 	});
+	// }
 };
 
 module.exports = {
