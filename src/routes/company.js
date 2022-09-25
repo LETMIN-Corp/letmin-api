@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const validation = require('../middlewares/validation');
 const { vacancyValidator } = require('../validate/vacancy');
+const { updateCompanyValidator, updateHolderValidator } = require('../validate/company');
 const { 
 	insertVacancy,
 	getAllVacancies,
@@ -14,8 +15,8 @@ const { getCompanyData, updateCompanyData, updateHolderData } = require('../cont
 
 // Company Profile Route
 router.get('/company-data', getCompanyData);
-router.post('/update-company-company', updateCompanyData);
-router.post('/update-company-holder', updateHolderData);
+router.post('/update-company-company', validation(updateCompanyValidator), updateCompanyData);
+router.post('/update-company-holder', validation(updateHolderValidator), updateHolderData);
 
 const {
 	passportAuth,

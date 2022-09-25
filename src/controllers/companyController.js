@@ -145,7 +145,11 @@ const updateCompanyData = async (req, res) => {
 		// console.log("credentials:", credentials);
 
 		await Company.findByIdAndUpdate(_id, {
-			credentials
+			'company.name': credentials.company.name,
+			'company.cnpj': credentials.company.cnpj,
+			'company.email': credentials.company.email,
+			'company.phone': credentials.company.phone,
+			'company.address': credentials.company.address
 		}).then((company) => {
 			console.log( "company:", company);
 			if (!company) {
@@ -155,9 +159,8 @@ const updateCompanyData = async (req, res) => {
 				});
 			}
 
-			return res.json({
+			return res.status(201).json({
 				success: true,
-				message: 'Empresa atualizada com sucesso',
 				company,
 			});
 		});
@@ -171,31 +174,39 @@ const updateCompanyData = async (req, res) => {
 };
 
 const updateHolderData = async (req, res) => {
-	// try {
+	try {
 
-	// 	await Vacancy.findByIdAndUpdate(req.params.id, {
-	// 		closed: true,
-	// 	}).then((vacancy) => {
-	// 		if (!vacancy) {
-	// 			return res.status(404).json({
-	// 				success: false,
-	// 				message: 'Vaga não encontrada.',
-	// 			});
-	// 		}
+		let token = req.headers.authorization;
+		let _id = ObjectId(decodeToken(token).user_id);
 
-	// 		return res.json({
-	// 			success: true,
-	// 			message: 'Vaga confirmada com sucesso',
-	// 			vacancy,
-	// 		});
-	// 	});
+		let credentials = req.body;
 
-	// } catch (err) {
-	// 	return res.status(400).json({
-	// 		success: false,
-	// 		message: err,
-	// 	});
-	// }
+
+		await Company.findByIdAndUpdate(_id, {
+			'holder.name': credentials.holder.name,
+			'holder.cpf': credentials.holder.cpf,
+			'holder.email': credentials.holder.email,
+			'holder.phone': credentials.holder.phone,
+		}).then((company) => {
+			if (!company) {
+				return res.status(404).json({
+					success: false,
+					message: 'Empresa não encontrada',
+				});
+			}
+
+			return res.status(201).json({
+				success: true,
+				company,
+			});
+		});
+
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: err,
+		});
+	}
 };
 
 module.exports = {
