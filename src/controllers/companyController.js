@@ -16,6 +16,12 @@ const loginCompany = async (req, res) => {
   
 	Company.findOne({ 'company.email' : credentials.email })
 		.then(async (company) => {
+			if (!company) {
+				return res.status(404).json({
+					success: false,
+					message: 'Email ou senha incorretos.',
+				});
+			}
 
 			if (company.status.blocked) {
 				return res.status(401).json({
