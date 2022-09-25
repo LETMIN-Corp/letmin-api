@@ -88,6 +88,61 @@ const companyValidator = Joi.object({
 	}
 }).options({ abortEarly: false }).unknown();
 
+
+const updateCompanyValidator = Joi.object({
+	company: {
+		name: Joi.string().required().messages({
+			'string.empty': 'Nome da empresa não pode ser vazio',
+			'any.required': 'Nome da empresa é obrigatório'
+		}),
+		cnpj: Joi.string().required().regex(/^[0-9]{2}\.[0-9]{3}\.[0-9]{3}\/[0-9]{4}-[0-9]{2}$/).messages({
+			'string.empty': 'CNPJ não pode ser vazio',
+			'any.required': 'CNPJ é obrigatório',
+			'string.pattern.base': 'CNPJ inválido'
+		}),
+		email: Joi.string().email().required().messages({
+			'string.empty': 'Email não pode ser vazio',
+			'any.required': 'Email é obrigatório',
+			'string.email': 'Email inválido'
+		}),
+		// regex for (44) 44444-4444 or (44) 4444-4444 allowing spaces
+		phone: Joi.string().required().regex(/^\([0-9]{2}\)\s?[0-9]{4,5}-[0-9]{4}$/).messages({
+			'string.empty': 'Telefone não pode ser vazio',
+			'any.required': 'Telefone é obrigatório',
+			'string.pattern.base': 'Telefone da empresa inválido'
+		}),
+		address: Joi.string().required().messages({
+			'string.empty': 'Endereço não pode ser vazio',
+			'any.required': 'Endereço é obrigatório'
+		})
+	}
+}).options({ abortEarly: false }).unknown();
+
+
+const updateHolderValidator = Joi.object({
+	holder: {
+		name: Joi.string().required().messages({
+			'string.empty': 'Nome do Titular não pode ser vazio',
+			'any.required': 'Nome do Titular é obrigatório'
+		}),
+		cpf: Joi.string().required().regex(/^[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}$/).messages({
+			'string.empty': 'CPF do Titular não pode ser vazio',
+			'any.required': 'CPF do Titular é obrigatório',
+			'string.pattern.base': 'CPF do Titular inválido'
+		}),
+		email: Joi.string().email().required().messages({
+			'string.empty': 'Email do Titular não pode ser vazio',
+			'any.required': 'Email do Titular é obrigatório',
+			'string.email': 'Email do Titular inválido'
+		}),
+		phone: Joi.string().required().regex(/^\([0-9]{2}\)\s[0-9]{4,5}-[0-9]{4}$/).messages({
+			'string.empty': 'Telefone do Titular não pode ser vazio',
+			'any.required': 'Telefone do Titular é obrigatório',
+			'string.pattern.base': 'Telefone do Titular inválido'
+		})
+	}
+}).options({ abortEarly: false }).unknown();
+
 const loginCompanySchema = Joi.object({
 	email: Joi.string().email().required().messages({
 		'string.empty': 'Email não pode ser vazio',
@@ -106,5 +161,7 @@ const loginCompanySchema = Joi.object({
 
 module.exports = {
 	companyValidator,
+	updateCompanyValidator,
+	updateHolderValidator,
 	loginCompanySchema
 };
