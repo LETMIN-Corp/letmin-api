@@ -6,6 +6,7 @@ const {
 	jwtSign,
 	jwtVerify,
 } = require('../utils/jwt');
+const User = require('../models/User');
 
 // Vacancy CRUD
 const insertVacancy = async (req, res) => {
@@ -77,7 +78,7 @@ const getVacancy = async (req, res) => {
 						message: 'Vaga não encontrada.',
 					});
 				}
-            
+				
 				vacancy.views += 1;
 				vacancy.save();
 
@@ -147,7 +148,7 @@ const closeVacancy = async (req, res) => {
 };
 
 /**
- * Get all vacancies in the database
+ * Get all vacancies from one company
  * @route GET api/company/get-all-vacancies
  */
 const getAllVacancies = async (req, res) => {
@@ -155,7 +156,7 @@ const getAllVacancies = async (req, res) => {
 	let _id = req.user._id;
 
 	try {
-		const vacancies = await Vacancy.find({ company: _id });
+		const vacancies = await Vacancy.find({ company: _id }).populate('candidates', 'name email');
 		return res.json({
 			success: true,
 			vacancies,
@@ -188,7 +189,6 @@ const searchVacancies = async (req, res) => {
 		],
 	}).populate('company', 'company.name').select('role description sector region company')
 		.then((vacancies) => { 
-			console.log(vacancies);
 			if (!vacancies) {
 				return res.status(404).json({
 					success: false,
@@ -202,12 +202,72 @@ const searchVacancies = async (req, res) => {
 			});
 		})
 		.catch((err) => {
-			console.log(err);
 			return res.status(400).json({
 				success: false,
 				message: err,
 			});
 		});
+};
+
+const applyToVacancy = async (req, res) => {
+	try {
+		const { vacancy_id } = req.body;
+
+		const user_id = req.user._id
+
+		const vacancy = await Vacancy.findById(vacancy_id);
+
+		if (!vacancy) {
+			return res.status(404).json({
+				success: false,
+				message: 'Vaga não encontrada.',
+			});
+		}
+
+		if (vacancy.candidates.includes(user_id)) {
+			return res.status(400).json({
+				success: false,
+				message: 'Você já se candidatou a essa vaga.',
+			});
+		}
+
+		vacancy.candidates.push(user_id);
+		vacancy.save();
+
+		return res.json({
+			success: true,
+			message: 'Candidatura realizada com sucesso',
+		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: err,
+		});
+	}
+};
+
+const getAllCandidates = async (req, res) => {
+	try {
+		const vacancy = await Vacancy.findById(req.params.id).populate('candidates', 'name email');
+
+		if (!vacancy) {
+			return res.status(404).json({
+				success: false,
+				message: 'Vaga não encontrada.',
+			});
+		}
+
+		return res.json({
+			success: true,
+			message: 'Candidatos encontrados',
+			candidates: vacancy.candidates,
+		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: err,
+		});
+	}
 };
 
 module.exports = {
@@ -218,4 +278,6 @@ module.exports = {
 	confirmVacancy,
 	closeVacancy,
 	searchVacancies,
+	applyToVacancy,
+	getAllCandidates,
 };
