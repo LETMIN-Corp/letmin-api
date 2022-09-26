@@ -251,7 +251,9 @@ const applyToVacancy = async (req, res) => {
 
 const getAllCandidates = async (req, res) => {
 	try {
-		const vacancy = await Vacancy.findById(req.params.id).populate('candidates', 'name email');
+		const vacancy = await Vacancy.findById(req.params.id)
+			.select('candidates role')
+			.populate('candidates', 'name email');
 
 		if (!vacancy) {
 			return res.status(404).json({
@@ -263,7 +265,10 @@ const getAllCandidates = async (req, res) => {
 		return res.json({
 			success: true,
 			message: 'Candidatos encontrados',
-			candidates: vacancy.candidates,
+			data: {
+				candidates: vacancy.candidates,
+				role: vacancy.role
+			}
 		});
 	} catch (err) {
 		return res.status(400).json({
