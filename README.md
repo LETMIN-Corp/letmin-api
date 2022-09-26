@@ -40,15 +40,15 @@ HTTP Response Codes
 - 501 - Not Implemented
 - 503 - Service Unavailable
 
-# Response format
+# Response format example
 
-GET 'api/users/get-all-vacancies'
+GET 'api/company/get-all-vacancies'
 HTTP STATUS CODE 200 OK
 ```
     {
         "success": true,
         "vacancies": [
-            {
+            0: {
                 "_id": "63277366f2105c0201cd74cf",
                 "otherfields": "and Values"
             }

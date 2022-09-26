@@ -1,7 +1,7 @@
 const Company = require('../models/Company');
 const bcrypt = require('bcryptjs');
 const ObjectId = require('mongoose').Types.ObjectId;
-
+const User = require('../models/User');
 const ROLES = require('../utils/constants');
 
 const {
@@ -16,6 +16,12 @@ const loginCompany = async (req, res) => {
   
 	Company.findOne({ 'company.email' : credentials.email })
 		.then(async (company) => {
+			if (!company) {
+				return res.status(404).json({
+					success: false,
+					message: 'Email ou senha incorretos.',
+				});
+			}
 
 			if (company.status.blocked) {
 				return res.status(401).json({
@@ -60,7 +66,7 @@ const loginCompany = async (req, res) => {
 		});
 };
 
-const registerCompany = async (req, res, next) => {
+const registerCompany = async (req, res) => {
 	let credentials = req.body;
   
 	let company = await Company.findOne({
@@ -117,38 +123,12 @@ const getCompanyData = async (req, res) => {
 
 	let _id = ObjectId(decodeToken(token).user_id);
 
-	await Company.findById({ _id })
+	await Company.findById({ _id }).select('-holder.password')
 		.then((company) => {
-			let result = {
-				company: {
-					name: company.company.name,
-					cnpj: company.company.cnpj,
-					email: company.company.email,
-					phone: company.company.phone,
-					address: company.company.address,
-				},
-				holder: {
-					name: company.holder.name,
-					cpf: company.holder.cpf,
-					email: company.holder.email,
-					phone: company.holder.phone,
-				},
-				plan: {
-					selected: company.plan.selected,
-				},
-				card: {
-					type: company.card.type,
-					number: company.card.number,
-					code: company.card.code,
-					expiration: company.card.expiration,
-					owner: company.card.owner,
-				},
-			};
-
 			return res.status(200).json({
 				success: true,
 				message: 'Dados da empresa.',
-				data: result,
+				data: company,
 			});
 		})
 		.catch((err) => {
@@ -159,8 +139,123 @@ const getCompanyData = async (req, res) => {
 		});
 };
 
+const searchUsers = async (req, res) => {
+	let search = req.params.search || '';
+
+	User.find({
+		$or: [
+			{ 'user.name': { $regex: search, $options: 'i' } },
+		]
+	}).then((users) => {
+		if (!users) {
+			return res.status(404).json({
+				success: false,
+				message: 'Usuários não encontrados.',
+			});
+		}
+
+		return res.status(200).json({
+			success: true,
+			message: 'Usuários encontrados.',
+			users: users,
+		});
+	}).catch((err) => {
+		return res.status(400).json({
+			success: false,
+			message: 'Error ' + err,
+		});
+	});
+};
+
+const updateCompanyData = async (req, res) => {
+	try {
+		let token = req.headers.authorization;
+		let _id = ObjectId(decodeToken(token).user_id);
+
+		let credentials = req.body;
+
+		// check if email/cnpj is already in use by another company
+		let company = await Company.findOne({
+			'company.email' : credentials.company.email,
+			'company.cnpj' : credentials.company.cnpj,
+			_id: { $ne: _id }
+		}).select('+company.email');
+
+		if (company && company._id != _id) {
+			return res.status(400).json({
+				success: false,
+				message: 'Email ou CNPJ já está em uso.',
+			});
+		}
+
+		await Company.findByIdAndUpdate(_id, {
+			'company.name': credentials.company.name,
+			'company.cnpj': credentials.company.cnpj,
+			'company.email': credentials.company.email,
+			'company.phone': credentials.company.phone,
+			'company.address': credentials.company.address
+		}).then((company) => {
+			if (!company) {
+				return res.status(404).json({
+					success: false,
+					message: 'Empresa não encontrada',
+				});
+			}
+
+			return res.status(201).json({
+				success: true,
+				company,
+			});
+		});
+
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Ocorreu um erro ao atualizar os dados da empresa.' + err,
+		});
+	}
+};
+
+const updateHolderData = async (req, res) => {
+	try {
+
+		let token = req.headers.authorization;
+		let _id = ObjectId(decodeToken(token).user_id);
+
+		let credentials = req.body;
+
+		await Company.findByIdAndUpdate(_id, {
+			'holder.name': credentials.holder.name,
+			'holder.cpf': credentials.holder.cpf,
+			'holder.email': credentials.holder.email,
+			'holder.phone': credentials.holder.phone,
+		}).then((company) => {
+			if (!company) {
+				return res.status(404).json({
+					success: false,
+					message: 'Empresa não encontrada',
+				});
+			}
+
+			return res.status(201).json({
+				success: true,
+				company,
+			});
+		});
+
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: err,
+		});
+	}
+};
+
 module.exports = {
 	registerCompany,
 	loginCompany,
-	getCompanyData
+	getCompanyData,
+	searchUsers,
+	updateCompanyData,
+	updateHolderData
 };
