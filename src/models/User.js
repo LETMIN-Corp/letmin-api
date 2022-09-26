@@ -27,7 +27,41 @@ const UserSchema = new Schema({
 		required: true,
 		type: Boolean,
 		default: false
-	}
+	},
+	formations: [{
+		name : {
+			type: String,
+		},
+		institution: {
+			type: String,
+		},
+		start: {
+			type: Date,
+		},
+		finish: {
+			type: Date,
+		},
+		description: {
+			type: String,
+		},
+	}],
+	experiences: [{
+		role: {
+			type: String,
+		},
+		company: {
+			type: String,
+		},
+		start: {
+			type: Date,
+		},
+		finish: {
+			type: Date,
+		},
+		description: {
+			type: String,
+		},
+	}],
 },
 { timestamps: true }
 );
