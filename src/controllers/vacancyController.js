@@ -70,7 +70,7 @@ const getAllCompanyVacancies = async (req, res) => {
 const getVacancy = async (req, res) => {
 	try {
 		// get vacancy and only one company
-		Vacancy.findById(req.params.id).populate('company', 'company.name')
+		Vacancy.findById(req.params.id).populate('company candidates', 'company.name')
 			.then((vacancy) => {
 				if (!vacancy) {
 					return res.status(404).json({
@@ -170,7 +170,8 @@ const getAllVacancies = async (req, res) => {
 };
 
 /**
- * Search vacancies by role, description, sector and company name not including closed ones
+ * Search vacancies by role, description, sector, region and company name not including closed ones
+ * and sort by date and include candidates if the user is one of them
  * @route   GET api/users/search-vacancies/:search
  */
 const searchVacancies = async (req, res) => {
@@ -178,16 +179,17 @@ const searchVacancies = async (req, res) => {
 
 	Vacancy.find({
 		$and: [
+			{ closed: false },
 			{
 				$or: [
 					{ role: { $regex: search, $options: 'i' } },
 					{ description: { $regex: search, $options: 'i' } },
 					{ sector: { $regex: search, $options: 'i' } },
+					{ 'company.name': { $regex: search, $options: 'i' } },
 				],
 			},
-			{ closed: false },
 		],
-	}).populate('company', 'company.name').select('role description sector region company')
+	}).populate('company', 'company.name').select('role description sector region company candidates').sort({ createdAt: -1 })
 		.then((vacancies) => { 
 			if (!vacancies) {
 				return res.status(404).json({
@@ -195,6 +197,7 @@ const searchVacancies = async (req, res) => {
 					message: 'Vaga não encontrada.',
 				});
 			}
+
 			return res.status(200).json({
 				success: true,
 				message: 'Vagas encotradas.',
@@ -204,7 +207,7 @@ const searchVacancies = async (req, res) => {
 		.catch((err) => {
 			return res.status(400).json({
 				success: false,
-				message: err,
+				message: 'Erro ao buscar vagas.' + err,
 			});
 		});
 };
