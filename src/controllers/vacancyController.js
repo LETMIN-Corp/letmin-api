@@ -6,30 +6,11 @@ const {
 	jwtSign,
 	jwtVerify,
 } = require('../utils/jwt');
-
-// Deprecated, should be removed later
-function getCompanyId(req, res) {
-	if (!req.headers.authorization) {
-		return res.status(401).json({
-			success: false,
-			message: 'Não Autorizado',
-		});
-	}
-
-	// get company_id from jwt authorization header
-	let jwt = req.headers.authorization;
-
-	let company_id = decodeToken(jwt).user_id;
-
-	let company = new ObjectId(company_id);
-
-	return company;
-}
+const User = require('../models/User');
 
 // Vacancy CRUD
 const insertVacancy = async (req, res) => {
-
-	let _id = getCompanyId(req, res);
+	let _id = req.user._id;
 
 	try {
 		const vacancy = new Vacancy({
@@ -69,9 +50,9 @@ const insertVacancy = async (req, res) => {
 
 const getAllCompanyVacancies = async (req, res) => {
 	try {
-		let company = getCompanyId(req, res);
+		let _id = req.user._id;
 
-		const values = await Company.findById(company).populate('vacancies').select('vacancies -_id');
+		const values = await Company.findById(_id).populate('vacancies').select('vacancies -_id');
 
 		return res.json({
 			success: true,
@@ -88,8 +69,6 @@ const getAllCompanyVacancies = async (req, res) => {
 
 const getVacancy = async (req, res) => {
 	try {
-		let company = getCompanyId(req, res);
-
 		// get vacancy and only one company
 		Vacancy.findById(req.params.id).populate('company', 'company.name')
 			.then((vacancy) => {
@@ -99,7 +78,7 @@ const getVacancy = async (req, res) => {
 						message: 'Vaga não encontrada.',
 					});
 				}
-            
+				
 				vacancy.views += 1;
 				vacancy.save();
 
@@ -117,27 +96,26 @@ const getVacancy = async (req, res) => {
 	}
 };
 
+// Change vacancy status to the opposite
 const confirmVacancy = async (req, res) => {
 	try {
-		let company = getCompanyId(req, res);
+		Vacancy.findById(req.params.id)
+			.then((vacancy) => {
+				if (!vacancy) {
+					return res.status(404).json({
+						success: false,
+						message: 'Vaga não encontrada.',
+					});
+				}
+			
+				vacancy.closed = !vacancy.closed;
+				vacancy.save();
 
-		await Vacancy.findByIdAndUpdate(req.params.id, {
-			closed: true,
-		}).then((vacancy) => {
-			if (!vacancy) {
-				return res.status(404).json({
-					success: false,
-					message: 'Vaga não encontrada.',
+				return res.json({
+					success: true,
+					message: 'Vaga atualizada com sucesso',
 				});
-			}
-
-			return res.json({
-				success: true,
-				message: 'Vaga confirmada com sucesso',
-				vacancy,
 			});
-		});
-
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
@@ -148,8 +126,6 @@ const confirmVacancy = async (req, res) => {
 
 const closeVacancy = async (req, res) => {
 	try {
-		let company = getCompanyId(req, res);
-
 		await Vacancy.findByIdAndDelete(req.params.id)
 			.then((vacancy) => {
 				if (!vacancy) {
@@ -171,9 +147,16 @@ const closeVacancy = async (req, res) => {
 	}
 };
 
+/**
+ * Get all vacancies from one company
+ * @route GET api/company/get-all-vacancies
+ */
 const getAllVacancies = async (req, res) => {
+
+	let _id = req.user._id;
+
 	try {
-		const vacancies = await Vacancy.find();
+		const vacancies = await Vacancy.find({ company: _id }).populate('candidates', 'name email');
 		return res.json({
 			success: true,
 			vacancies,
@@ -187,22 +170,24 @@ const getAllVacancies = async (req, res) => {
 };
 
 /**
- * Search vacancies by role, description, sector and company name
+ * Search vacancies by role, description, sector and company name not including closed ones
  * @route   GET api/users/search-vacancies/:search
  */
 const searchVacancies = async (req, res) => {
-	let company = getCompanyId(req, res);
-
 	let search = req.params.search || '';
 
-	Company.find({
-		$or: [
-			{ 'vacancies.role': { $regex: search, $options: 'i' } },
-			{ 'vacancies.description': { $regex: search, $options: 'i' } },
-			{ 'vacancies.sector': { $regex: search, $options: 'i' } },
-			{ 'company.name': { $regex: search, $options: 'i' } },
-		]
-	}).populate('vacancies').select('vacancies -_id')
+	Vacancy.find({
+		$and: [
+			{
+				$or: [
+					{ role: { $regex: search, $options: 'i' } },
+					{ description: { $regex: search, $options: 'i' } },
+					{ sector: { $regex: search, $options: 'i' } },
+				],
+			},
+			{ closed: false },
+		],
+	}).populate('company', 'company.name').select('role description sector region company')
 		.then((vacancies) => { 
 			if (!vacancies) {
 				return res.status(404).json({
@@ -213,7 +198,7 @@ const searchVacancies = async (req, res) => {
 			return res.status(200).json({
 				success: true,
 				message: 'Vagas encotradas.',
-				vacancies: vacancies.reduce((acc, val) => acc.concat(val.vacancies), []),
+				vacancies: vacancies
 			});
 		})
 		.catch((err) => {
@@ -224,6 +209,67 @@ const searchVacancies = async (req, res) => {
 		});
 };
 
+const applyToVacancy = async (req, res) => {
+	try {
+		const { vacancy_id } = req.body;
+
+		const user_id = req.user._id
+
+		const vacancy = await Vacancy.findById(vacancy_id);
+
+		if (!vacancy) {
+			return res.status(404).json({
+				success: false,
+				message: 'Vaga não encontrada.',
+			});
+		}
+
+		if (vacancy.candidates.includes(user_id)) {
+			return res.status(400).json({
+				success: false,
+				message: 'Você já se candidatou a essa vaga.',
+			});
+		}
+
+		vacancy.candidates.push(user_id);
+		vacancy.save();
+
+		return res.json({
+			success: true,
+			message: 'Candidatura realizada com sucesso',
+		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: err,
+		});
+	}
+};
+
+const getAllCandidates = async (req, res) => {
+	try {
+		const vacancy = await Vacancy.findById(req.params.id).populate('candidates', 'name email');
+
+		if (!vacancy) {
+			return res.status(404).json({
+				success: false,
+				message: 'Vaga não encontrada.',
+			});
+		}
+
+		return res.json({
+			success: true,
+			message: 'Candidatos encontrados',
+			candidates: vacancy.candidates,
+		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: err,
+		});
+	}
+};
+
 module.exports = {
 	insertVacancy,
 	getAllVacancies,
@@ -232,4 +278,6 @@ module.exports = {
 	confirmVacancy,
 	closeVacancy,
 	searchVacancies,
+	applyToVacancy,
+	getAllCandidates,
 };

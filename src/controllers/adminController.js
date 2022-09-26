@@ -185,7 +185,7 @@ const changeUserBlockStatus = async (req, res) => {
 				users: updatedUsers
 			});
 		});
-	})
+	});
 };
 
 module.exports = {
