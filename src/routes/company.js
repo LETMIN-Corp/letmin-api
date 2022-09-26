@@ -11,18 +11,12 @@ const {
 	searchVacancies,
 	closeVacancy,
 } = require('../controllers/vacancyController');
-const { getCompanyData, updateCompanyData, updateHolderData } = require('../controllers/companyController');
+const { getCompanyData, searchUsers, updateCompanyData, updateHolderData } = require('../controllers/companyController');
 
 // Company Profile Route
 router.get('/company-data', getCompanyData);
 router.post('/update-company-company', validation(updateCompanyValidator), updateCompanyData);
 router.post('/update-company-holder', validation(updateHolderValidator), updateHolderData);
-
-const {
-	passportAuth,
-	checkRole,
-	serializeUser
-} = require('../utils/Auth');
 
 // Vacancy Crud Routes
 router.post('/register-vacancy', validation(vacancyValidator), insertVacancy);
@@ -32,5 +26,6 @@ router.get('/get-vacancy/:id', getVacancy);
 router.get('/search-vacancies/:search?', searchVacancies);
 router.patch('/confirm-vacancy/:id', confirmVacancy);
 router.delete('/close-vacancy/:id', closeVacancy);
+router.get('/user', searchUsers);
 
 module.exports = router;
