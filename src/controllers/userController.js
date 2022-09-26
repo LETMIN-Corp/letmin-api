@@ -81,7 +81,7 @@ const userLogin = async (req, res, next) => {
 				email,
 				password: hashedpassword,
 				name,
-				picture,
+				picture
 			});
   
 			newUser.save((err, user) => {
@@ -110,9 +110,9 @@ const userLogin = async (req, res, next) => {
 };
 
 const getUserData = async (req, res, next) => {
-    const { id } = req.params;
+    const { id } = req.user;
 
-    User.findById(id)
+	User.findById(id).select('-password')
     .then((user) => {
         if (!user) {
             return res.status(400).json({
