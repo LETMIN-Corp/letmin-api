@@ -134,9 +134,9 @@ const getUserData = async (req, res, next) => {
 }
 
 const updateUser = async (req, res, next) => {
-    const { id } = req.params;
+    const { id } = req.user;
 
-    User.findByIdAndUpdate(id, req.body, { new: true })
+    User.findByIdAndUpdate(req.user, req.body, { new: true })
     .then((user) => {
         if (!user) {
             return res.status(400).json({
@@ -145,8 +145,9 @@ const updateUser = async (req, res, next) => {
             });
         }
         return res.status(200).json({
+			message: "Alterado com sucesso!",
+            success: true,
             user,
-            success: true
         });
     })
     .catch((err) => {

@@ -16,7 +16,7 @@ router.get('/profile', async (req, res) => {
 router.get('/vacancy', searchVacancies);
 router.get('/get-vacancy/:id', getVacancy);
 router.get("/get-user", getUserData);
-router.get("/update-user", updateUser);
+router.post("/update-user", updateUser);
 router.post('/apply-vacancy', applyToVacancy);
 
 module.exports = router;
