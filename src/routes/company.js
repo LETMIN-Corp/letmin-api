@@ -12,7 +12,7 @@ const {
 	closeVacancy,
 	getAllCandidates,
 } = require('../controllers/vacancyController');
-const { getCompanyData, searchUsers, updateCompanyData, updateHolderData, addToTalentBank } = require('../controllers/companyController');
+const { getCompanyData, searchUsers, updateCompanyData, updateHolderData, addToTalentBank, removeFromTalentBank } = require('../controllers/companyController');
 
 // Company Profile Route
 router.get('/company-data', getCompanyData);
@@ -33,5 +33,6 @@ router.get('/get-all-candidates/:id', getAllCandidates);
 
 // Talent bank CRUD routes
 router.post('/add-to-talent-bank', addToTalentBank);
+router.post('/remove-from-talent-bank', removeFromTalentBank);
 
 module.exports = router;

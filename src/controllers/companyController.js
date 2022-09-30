@@ -258,7 +258,7 @@ const addToTalentBank = async (req, res) => {
 		if(company.talentBank.includes(id)) {
 			return res.status(400).json({
 				message: 'O prestador de serviços já está em seu banco de talentos',
-				success: true
+				success: false,
 			});
 		}
 
@@ -266,7 +266,7 @@ const addToTalentBank = async (req, res) => {
 		company.save().then(() => {
 			return res.status(201).json({
 				message: 'O prestador de serviços foi adicionado ao banco de talentos',
-				success: true
+				success: true,
 			});
 		})
 	} catch (err) {
@@ -277,6 +277,37 @@ const addToTalentBank = async (req, res) => {
 	}
 };
 
+const removeFromTalentBank = async (req, res) => {
+	try {
+		let companyId = req.user._id;
+		let id = req.body.target;
+		let company = await Company.findById(companyId);
+	
+		if(! company.talentBank.includes(id)) {
+			return res.status(400).json({
+				message: 'O prestador de serviços não está em seu banco de talentos',
+				success: false,
+			});
+		}
+
+		company.talentBank = company.talentBank.filter((userId) => {
+			return userId != id;
+		});
+
+		company.save().then(() => {
+			return res.status(201).json({
+				message: 'O prestador de serviços foi removido de seu banco de talentos',
+				success: true,
+			});
+		})
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: err,
+		});
+	}
+}
+
 module.exports = {
 	registerCompany,
 	loginCompany,
@@ -285,4 +316,5 @@ module.exports = {
 	updateCompanyData,
 	updateHolderData,
 	addToTalentBank,
+	removeFromTalentBank,
 };
