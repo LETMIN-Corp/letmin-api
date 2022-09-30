@@ -27,7 +27,7 @@ module.exports = (schema, checkBearer = false) => {
 		} catch (err) {
 			return res.status(400).json({
 				success: false,
-				message: err,
+				message: 'Error ' + err,
 			});
 		}
 	};

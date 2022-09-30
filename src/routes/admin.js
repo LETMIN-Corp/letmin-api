@@ -1,30 +1,18 @@
 const router = require('express').Router();
-const validation = require('../middlewares/validation');
-const adminValidator = require('../validate/admin');
 
 const { 
-	adminLogin,
-	adminRegister,
 	getAllCompanies,
 	changeCompanyBlockStatus,
 	getAllUsers,
 	changeUserBlockStatus,
 } = require('../controllers/adminController');
 
-// Bring in the User Registration function
-const {
-	passportAuth,
-	checkRole,
-	serializeUser
-} = require('../utils/Auth');
-const { ADMIN } = require('../utils/constants');
+// Companies Management Routes
+router.get('/get-all-companies', getAllCompanies);
+router.patch('/company-block', changeCompanyBlockStatus);
 
-
-
-router.get('/get-all-companies', passportAuth, checkRole(ADMIN), getAllCompanies);
-router.patch('/company-block', passportAuth, checkRole(ADMIN), changeCompanyBlockStatus);
-
-router.get('/get-all-users', passportAuth, checkRole(ADMIN), getAllUsers);
-router.patch('/user-block', passportAuth, checkRole(ADMIN), changeUserBlockStatus);
+// Users Management Routes
+router.get('/get-all-users', getAllUsers);
+router.patch('/user-block', changeUserBlockStatus);
 
 module.exports = router;

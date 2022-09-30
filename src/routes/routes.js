@@ -9,6 +9,7 @@ const { USER, ADMIN, COMPANY } = require('../utils/constants');
 const validation = require('../middlewares/validation');
 const { loginCompanySchema, companyValidator } = require('../validate/company');
 const adminValidator = require('../validate/admin');
+const { createComplaint } = require('../controllers/complaintController');
 
 router.get('/healthcheck', (req, res) => {
 	res.json({
@@ -28,7 +29,9 @@ router.post('/admin/login', validation(adminValidator), adminLogin);
 router.post('/company/register', validation(companyValidator), registerCompany);
 router.post('/company/login', validation(loginCompanySchema), loginCompany);
 
+router.post('/create-complaint', passportAuth, createComplaint);
 
+// Protected Routes for specific roles
 router.use('/user', passportAuth, checkRole(USER), require('./users'));
 router.use('/admin', passportAuth, checkRole(ADMIN), require('./admin'));
 router.use('/company', passportAuth, checkRole(COMPANY), require('./company'));
