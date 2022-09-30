@@ -218,7 +218,6 @@ const updateCompanyData = async (req, res) => {
 
 const updateHolderData = async (req, res) => {
 	try {
-
 		let token = req.headers.authorization;
 		let _id = ObjectId(decodeToken(token).user_id);
 
@@ -242,7 +241,34 @@ const updateHolderData = async (req, res) => {
 				company,
 			});
 		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: err,
+		});
+	}
+};
 
+const addToTalentBank = async (req, res) => {
+	try {
+		let companyId = req.user._id;
+		let id = req.body.target;
+		let company = await Company.findById(companyId);
+	
+		if(company.talentBank.includes(id)) {
+			return res.status(400).json({
+				message: 'O prestador de serviços já está em seu banco de talentos',
+				success: true
+			});
+		}
+
+		company.talentBank.push(id);
+		company.save().then(() => {
+			return res.status(201).json({
+				message: 'O prestador de serviços foi adicionado ao banco de talentos',
+				success: true
+			});
+		})
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
@@ -257,5 +283,6 @@ module.exports = {
 	getCompanyData,
 	searchUsers,
 	updateCompanyData,
-	updateHolderData
+	updateHolderData,
+	addToTalentBank,
 };
