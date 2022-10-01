@@ -308,6 +308,33 @@ const removeFromTalentBank = async (req, res) => {
 	}
 }
 
+const getTalentBank = async (req, res) => {
+	let token = req.headers.authorization;
+
+	let _id = ObjectId(decodeToken(token).user_id);
+
+	await Company.findById({ _id })
+		.then((company) => {
+			User.find().select('-password')
+				.then((users) => {
+					users = users.filter((user) => {
+						return company.talentBank.includes(user._id);
+					});
+
+					return res.status(200).json({
+						success: true,
+						users: users,
+					});
+				});
+		})
+		.catch((err) => {
+			return res.status(400).json({
+				success: false,
+				message: 'Error ' + err,
+			});
+		});
+}
+
 module.exports = {
 	registerCompany,
 	loginCompany,
@@ -317,4 +344,5 @@ module.exports = {
 	updateHolderData,
 	addToTalentBank,
 	removeFromTalentBank,
+	getTalentBank,
 };
