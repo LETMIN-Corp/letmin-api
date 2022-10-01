@@ -283,16 +283,30 @@ const getCandidate = async (req, res) => {
 		console.log(req.params.id);
 
 		// get candidate profile info, and the count of his applications (which is in the Vacancy model)
-		const candidate = await Vacancy.aggregate([
-			{ $match: { candidates: ObjectId(req.params.id) } },
-			{ $unwind: '$candidates' },
-			{ $match: { 'candidates': ObjectId(req.params.id) } },
-			{ $lookup: { from: 'users', localField: 'candidates', foreignField: '_id', as: 'candidate' } },
-			{ $unwind: '$candidate' },
-			{ $project: { candidate: 1, role: 1, _id: 0 } },
-			{ $group: { _id: '$candidate', applications: { $push: '$role' } } },
-			{ $project: { _id: 0, candidate: '$_id', applications: 1 } },
-		]);
+		const candidate = await User.aggregate([
+				{
+					$lookup: {
+						from: 'vacancies',
+						localField: '_id',
+						foreignField: 'candidates',
+						as: 'applications',
+					},
+				},
+				{
+					$project: {
+						_id: 1,
+						name: 1,
+						email: 1,
+						picture: 1,
+						formations: 1,
+						experiences: 1,
+						phone: 1,
+						createdAt: 1,
+						updatedAt: 1,
+						applications: { $size: '$applications' },
+					},
+				},
+			]);
 
 		if (!candidate || !candidate.length) {
 			return res.status(404).json({
