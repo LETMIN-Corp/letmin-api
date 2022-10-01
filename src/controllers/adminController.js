@@ -204,7 +204,7 @@ const getAllComplaints = async (req, res) => {
 }
 
 const changeComplaintStatus = async (req, res) => {
-	const { complaint_id } = req.body;
+	const complaint_id = req.params.id
 
 	if(!complaint_id) {
 		return res.status(400).json({
@@ -245,4 +245,5 @@ module.exports = {
 	getAllUsers,
 	changeUserBlockStatus,
 	getAllComplaints,
+	changeComplaintStatus,
 };

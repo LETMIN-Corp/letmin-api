@@ -23,7 +23,7 @@ const createComplaint = async (req, res) => {
         // Check if the target user exists (it can be a company or a user)
         const user = await User.findById(target);
         const company = await Company.findById(target);
-        console.log('target', target);
+
         if (!user && !company) {
             return res.status(400).json({
                 success: false,
@@ -33,6 +33,14 @@ const createComplaint = async (req, res) => {
 
         let targetRole = user ? 'user' : 'company';
 
+        // Check if fields are empty
+        if (!req.body.reason || !req.body.description) {
+            return res.status(400).json({
+                success: false,
+                message: 'Preencha todos os campos',
+            });
+        }
+        
         // Create the complaint
         const newComplaint = new Complaint({
             ...req.body,
