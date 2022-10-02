@@ -1,3 +1,4 @@
+const { required } = require('joi');
 const { Schema, model } = require('mongoose');
 
 const ComplaintSchema = new Schema({
@@ -12,24 +13,28 @@ const ComplaintSchema = new Schema({
     },
     envoy: {
         type: Schema.Types.ObjectId,
-        ref: 'User' || 'Company',
+        refPath: 'envoyType',
         required: true
     },
     target: {
         type: Schema.Types.ObjectId,
-        ref: 'User' || 'Company',
+        refPath: 'targetType',
         required: true
     },
-    typeof: {
+    envoyType: {
         type: String,
-        required: true,
-        enum: ['user', 'company']
+        enum: ['User', 'Company', 'Admin'],
+        required: true
     },
-    status: {
+    targetType: {
         type: String,
+        enum: ['User', 'Company'],
         required: true,
-        default: 'Pendente',
-        enum: ['Pendente', 'Resolvido'],
+    },
+    pending: {
+        type: Boolean,
+        default: true,
+        required: true
     },
 });
 

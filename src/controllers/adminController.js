@@ -189,12 +189,18 @@ const changeUserBlockStatus = async (req, res) => {
 
 const getAllComplaints = async (req, res) => {
     try {
-        const complaints = await Complaints.find();
-        return res.json({
-            success: true,
-            message: 'Reclamações encontradas com sucesso',
-            complaints,
-        });
+		// Get all complaints populating the target user/company and the envoy of the complaint
+		// If it's a company convert 'company.name' to 'name'
+        const complaints = await Complaints.find().populate([
+			{ path: 'target', select: 'name' },
+			{ path: 'envoy', select: 'name company.name' }
+		]).select('-target.password -envoy.password');
+			console.log(complaints);
+			return res.json({
+				success: true,
+				message: 'Reclamações encontradas com sucesso',
+				complaints,
+			});
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -204,7 +210,7 @@ const getAllComplaints = async (req, res) => {
 }
 
 const changeComplaintStatus = async (req, res) => {
-	const complaint_id = req.params.id
+	const { complaint_id } = req.body
 
 	if(!complaint_id) {
 		return res.status(400).json({
@@ -212,29 +218,69 @@ const changeComplaintStatus = async (req, res) => {
 			message: 'ID da reclamação não informado',
 		});
 	}
-
-	let _id = ObjectId(complaint_id);
-
-	Complaints.findById( _id , (err, complaint) => {
-		if (err || !complaint) {
-			return res.status(500).json({
-				success: false,
-				message: 'Não foi possivel encontrar a reclamação',
-			});
-		}
-		complaint.status = !complaint.status;
-		complaint.save().then(async (value) => {
-			let message = value.status ? 'Resolvida' : 'Pendente';
-
-			let updatedComplaints = await Complaints.find();
-
-			return res.status(200).json({
-				success: true,
-				message: `Reclamação marcada como ${message} com sucesso`,
-				complaints: updatedComplaints
+	try {
+		let _id = ObjectId(complaint_id);
+		
+		Complaints.findById( _id , (err, complaint) => {
+			if (err || !complaint) {
+				return res.status(500).json({
+					success: false,
+					message: 'Não foi possivel encontrar a reclamação',
+				});
+			}
+			complaint.pending = !complaint.pending;
+			complaint.save().then(async (value) => {
+				let message = value.pending ? 'Resolvida' : 'Pendente';
+	
+				let updatedComplaints = await Complaints.find();
+	
+				return res.status(200).json({
+					success: true,
+					message: `Reclamação marcada como ${message} com sucesso`,
+					complaints: updatedComplaints
+				});
 			});
 		});
-	});
+	} catch (err) {
+		console.log(err);
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar reclamações' + err,
+		});
+	}
+};
+
+const removeComplaint = async (req, res) => {
+	const { complaint_id } = req.body
+
+	if(!complaint_id) {
+		return res.status(400).json({
+			success: false,
+			message: 'ID da reclamação não informado',
+		});
+	}
+	try {
+		let _id = ObjectId(complaint_id);
+		
+		Complaints.findByIdAndDelete( _id , (err, complaint) => {
+			if (err || !complaint) {
+				return res.status(500).json({
+					success: false,
+					message: 'Não foi possivel encontrar a reclamação',
+				});
+			}
+			return res.status(200).json({
+				success: true,
+				message: `Reclamação removida com sucesso`,
+			});
+		});
+	} catch (err) {
+		console.log(err);
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar reclamações' + err,
+		});
+	}
 };
 
 module.exports = {
@@ -246,4 +292,5 @@ module.exports = {
 	changeUserBlockStatus,
 	getAllComplaints,
 	changeComplaintStatus,
+	removeComplaint,
 };

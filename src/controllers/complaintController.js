@@ -10,6 +10,7 @@ const createComplaint = async (req, res) => {
     try {
 
         let envoy = req.user._id;
+        let envoyRole = req.user.role;
         let target = req.body.target;
 
         // Check if the user is trying to create a complaint against himself
@@ -31,7 +32,7 @@ const createComplaint = async (req, res) => {
             });
         }
 
-        let targetRole = user ? 'user' : 'company';
+        let targetRole = user ? 'User' : 'Company';
 
         // Check if fields are empty
         if (!req.body.reason || !req.body.description) {
@@ -45,7 +46,10 @@ const createComplaint = async (req, res) => {
         const newComplaint = new Complaint({
             ...req.body,
             envoy,
-            typeof: targetRole,
+            pending: true,
+            // capitalize the first letter of the roles types
+            envoyType: envoyRole.charAt(0).toUpperCase() + envoyRole.slice(1),
+            targetType: targetRole,
         });
 
         await newComplaint.save();

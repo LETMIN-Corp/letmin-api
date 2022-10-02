@@ -308,6 +308,7 @@ const getCandidate = async (req, res) => {
 				},
 			]);
 
+		console.log(candidate);
 		if (!candidate || !candidate.length) {
 			return res.status(404).json({
 				success: false,
