@@ -244,7 +244,7 @@ const updateHolderData = async (req, res) => {
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
-			message: err,
+			message: 'Ocorreu um erro ao atualizar os dados do responsável.' + err,
 		});
 	}
 };
@@ -272,7 +272,7 @@ const addToTalentBank = async (req, res) => {
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
-			message: err,
+			message: 'Ocorreu um erro ao adicionar o prestador de serviços ao banco de talentos.' + err,
 		});
 	}
 };
@@ -295,7 +295,7 @@ const removeFromTalentBank = async (req, res) => {
 		});
 
 		company.save().then(() => {
-			return res.status(201).json({
+			return res.status(200).json({
 				message: 'O prestador de serviços foi removido de seu banco de talentos',
 				success: true,
 			});
@@ -303,7 +303,7 @@ const removeFromTalentBank = async (req, res) => {
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
-			message: err,
+			message: 'Ocorreu um erro ao remover o prestador de serviços: ' + err,
 		});
 	}
 }
