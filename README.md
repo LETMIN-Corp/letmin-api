@@ -4,29 +4,17 @@
 
 # Letmin API
 
-Para iniciar o desenvolvimento do projeto em sua máquina é necessário rodar os seguintes comandos:
+API rodando em Node com o framework Express e o Mongoose para interação com o MongoDB
+
+Para iniciar o desenvolvimento do projeto em sua máquina é necessário rodar os seguintes comandos para instalar as dependências e iniciar a API:
 
 ```
-    kool run setup
+    npm install
+    npm run dev
 ```
 
-- Esse comando instalará as dependências necessárias para o funcionamento da API.
+- Agora acesse `http://localhost:5000/api/healthcheck` para verificar se a API está funcionando
 
-```
-    kool run start
-```
-
-- Acesse `localhost:3000` para verificar se a API está funcionando
-
-Other useful commands:
-    
-```
-    docker ps | kool status
-    kool logs app -f
-    kool stop
-
-    kool run npm [command]
-```
 
 HTTP Response Codes
 
@@ -47,6 +35,7 @@ HTTP STATUS CODE 200 OK
 ```
     {
         "success": true,
+        "message": "Vagas encontradas com sucesso";
         "vacancies": [
             0: {
                 "_id": "63277366f2105c0201cd74cf",
