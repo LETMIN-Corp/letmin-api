@@ -17,7 +17,7 @@ const createComplaint = async (req, res) => {
         if (envoy == target) {
             return res.status(400).json({
                 success: false,
-                message: 'Você não pode criar uma reclamação contra você mesmo',
+                message: 'Você não pode criar uma denúncia contra você mesmo',
             });
         }
 
@@ -60,13 +60,13 @@ const createComplaint = async (req, res) => {
 
         return res.status(201).json({
             success: true,
-            message: 'Reclamação criada com sucesso',
+            message: 'Denúncia criada com sucesso',
             newComplaint,
         });
     } catch (err) {
         return res.status(400).json({
             success: false,
-            message: 'Erro ao criar reclamação: ' + err,
+            message: 'Erro ao criar denúncia: ' + err,
         });
     }
 }

@@ -211,7 +211,7 @@ const changeComplaintStatus = async (req, res) => {
 	if(!complaint_id) {
 		return res.status(400).json({
 			success: false,
-			message: 'ID da reclamação não informado',
+			message: 'ID da denúncia não informado',
 		});
 	}
 	try {
@@ -221,7 +221,7 @@ const changeComplaintStatus = async (req, res) => {
 			if (err || !complaint) {
 				return res.status(500).json({
 					success: false,
-					message: 'Não foi possivel encontrar a reclamação',
+					message: 'Não foi possivel encontrar a denúncia',
 				});
 			}
 			complaint.pending = !complaint.pending;
@@ -232,7 +232,7 @@ const changeComplaintStatus = async (req, res) => {
 	
 				return res.status(200).json({
 					success: true,
-					message: `Reclamação marcada como ${message} com sucesso`,
+					message: `Denúncia marcada como ${message} com sucesso`,
 					complaints: updatedComplaints
 				});
 			});
@@ -252,7 +252,7 @@ const removeComplaint = async (req, res) => {
 	if(!complaint_id) {
 		return res.status(400).json({
 			success: false,
-			message: 'ID da reclamação não informado',
+			message: 'ID da denúncia não informado',
 		});
 	}
 	try {
@@ -262,12 +262,12 @@ const removeComplaint = async (req, res) => {
 			if (err || !complaint) {
 				return res.status(500).json({
 					success: false,
-					message: 'Não foi possivel encontrar a reclamação',
+					message: 'Não foi possivel encontrar a denúncia',
 				});
 			}
 			return res.status(200).json({
 				success: true,
-				message: `Reclamação removida com sucesso`,
+				message: `Denúncia removida com sucesso`,
 			});
 		});
 	} catch (err) {
