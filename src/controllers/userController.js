@@ -136,10 +136,11 @@ const getUserData = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
     const { id } = req.user;
 
-    // User.findByIdAndUpdate(req.user, { 'name': req.body.name, 'description': req.body.description, }, { new: true })
-		
-    // User.findByIdAndUpdate(req.user, { 'experiences': req.body.experiences, }, { new: true })
-    User.findByIdAndUpdate(req.user, { 'formations': req.body.formations, }, { new: true }).then((user) => {
+    	User.findByIdAndUpdate(req.user, 
+			{ 
+				'name': req.body.name, 
+				'description': req.body.description, 
+			}, { new: true }).then((user) => {
         if (!user) {
             return res.status(400).json({
                 message: "Usuário não encontrado.",
@@ -160,53 +161,50 @@ const updateUser = async (req, res, next) => {
     });
 }
 
+const updateUserFormations = async (req, res, next) => {
+    try {
+		let userId = req.user;
+		let formations = req.body.formations;
+		let user = await User.findById(userId);
+
+		user.formations.push(formations);
+		user.save().then(() => {
+			return res.status(200).json({
+				success: true,
+			});
+		})
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Ocorreu um erro ao adicionar a formação ao seu banco!.' + err,
+		});
+	}
+}
+
 const updateUserExperiences = async (req, res, next) => {
-    const { id } = req.user;
+    try {
+		let userId = req.user;
+		let experiences = req.body.experiences;
+		let user = await User.findById(userId);
 
-	// await Company.findByIdAndUpdate(_id, {
-	// 	'holder.name': credentials.holder.name,
-	// 	'holder.cpf': credentials.holder.cpf,
-	// 	'holder.email': credentials.holder.email,
-	// 	'holder.phone': credentials.holder.phone,
-	// }).then((company) => {
-	// 	if (!company) {
-	// 		return res.status(404).json({
-	// 			success: false,
-	// 			message: 'Empresa não encontrada',
-	// 		});
-	// 	}
-
-	// 	return res.status(201).json({
-	// 		success: true,
-	// 		company,
-	// 	});
-	// });
-
-    User.findByIdAndUpdate(req.user, { 
-		'experiences.role': req.body.role,	
-	}).then((user) => {
-        if (!user) {
-            return res.status(400).json({
-                message: "Usuário não encontrado.",
-                success: false
-            });
-        }
-        return res.status(200).json({
-			message: "Alterado com sucesso!",
-            success: true,
-            user,
-        });
-    })
-    .catch((err) => {
-        return res.status(400).json({
-            message: 'Error ' + err,
-            success: false
-        });
-    });
+		user.experiences.push(experiences);
+		user.save().then(() => {
+			return res.status(200).json({
+				success: true,
+			});
+		})
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Ocorreu um erro ao adicionar a experiência ao seu banco!.' + err,
+		});
+	}
 }
 
 module.exports = {
     userLogin,
     getUserData,
     updateUser,
+	updateUserFormations,
+	updateUserExperiences,
 }

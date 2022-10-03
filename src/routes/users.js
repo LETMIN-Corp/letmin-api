@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const { updateUser, getUserData } = require('../controllers/userController');
+const { updateUser, getUserData, updateUserExperiences, updateUserFormations } = require('../controllers/userController');
 const { searchVacancies, getVacancy, applyToVacancy } = require('../controllers/vacancyController');
 
 // Bring in the User Registration function
@@ -17,6 +17,8 @@ router.get('/vacancy', searchVacancies);
 router.get('/get-vacancy/:id', getVacancy);
 router.get("/get-user", getUserData);
 router.post("/update-user", updateUser);
+router.post("/update-user-experiences", updateUserExperiences);
+router.post("/update-user-formations", updateUserFormations);
 router.post('/apply-vacancy', applyToVacancy);
 
 module.exports = router;
