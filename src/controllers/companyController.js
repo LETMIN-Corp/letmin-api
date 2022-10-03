@@ -214,7 +214,6 @@ const updateCompanyData = async (req, res) => {
 
 const updateHolderData = async (req, res) => {
 	try {
-
 		let token = req.headers.authorization;
 		let _id = ObjectId(decodeToken(token).user_id);
 
@@ -238,7 +237,6 @@ const updateHolderData = async (req, res) => {
 				company,
 			});
 		});
-
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
@@ -247,11 +245,100 @@ const updateHolderData = async (req, res) => {
 	}
 };
 
+const addToTalentBank = async (req, res) => {
+	try {
+		let companyId = req.user._id;
+		let id = req.body.target;
+		let company = await Company.findById(companyId);
+	
+		if(company.talentBank.includes(id)) {
+			return res.status(400).json({
+				message: 'O prestador de serviços já está em seu banco de talentos',
+				success: false,
+			});
+		}
+
+		company.talentBank.push(id);
+		company.save().then(() => {
+			return res.status(201).json({
+				message: 'O prestador de serviços foi adicionado ao banco de talentos',
+				success: true,
+			});
+		})
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Ocorreu um erro ao adicionar o prestador de serviços ao banco de talentos.' + err,
+		});
+	}
+};
+
+const removeFromTalentBank = async (req, res) => {
+	try {
+		let companyId = req.user._id;
+		let id = req.body.target;
+		let company = await Company.findById(companyId);
+	
+		if(! company.talentBank.includes(id)) {
+			return res.status(400).json({
+				message: 'O prestador de serviços não está em seu banco de talentos',
+				success: false,
+			});
+		}
+
+		company.talentBank = company.talentBank.filter((userId) => {
+			return userId != id;
+		});
+
+		company.save().then(() => {
+			return res.status(200).json({
+				message: 'O prestador de serviços foi removido de seu banco de talentos',
+				success: true,
+			});
+		})
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Ocorreu um erro ao remover o prestador de serviços: ' + err,
+		});
+	}
+}
+
+const getTalentBank = async (req, res) => {
+	let token = req.headers.authorization;
+
+	let _id = ObjectId(decodeToken(token).user_id);
+
+	await Company.findById({ _id })
+		.then((company) => {
+			User.find().select('-password')
+				.then((users) => {
+					users = users.filter((user) => {
+						return company.talentBank.includes(user._id);
+					});
+
+					return res.status(200).json({
+						success: true,
+						users: users,
+					});
+				});
+		})
+		.catch((err) => {
+			return res.status(400).json({
+				success: false,
+				message: 'Error ' + err,
+			});
+		});
+}
+
 module.exports = {
 	registerCompany,
 	loginCompany,
 	getCompanyData,
 	searchUsers,
 	updateCompanyData,
-	updateHolderData
+	updateHolderData,
+	addToTalentBank,
+	removeFromTalentBank,
+	getTalentBank,
 };

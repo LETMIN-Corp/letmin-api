@@ -6,22 +6,20 @@ const {
 	insertVacancy,
 	getVacanciesCompany,
 	getAllCompanyVacancies,
-	getVacancyData,
 	confirmVacancy,
 	searchVacancies,
 	closeVacancy,
 	getAllCandidates,
 	getCandidate,
 } = require('../controllers/vacancyController');
-const { getCompanyData, searchUsers, updateCompanyData, updateHolderData } = require('../controllers/companyController');
-const { createComplaint } = require('../controllers/complaintController');
+const { getCompanyData, searchUsers, updateCompanyData, updateHolderData, addToTalentBank, removeFromTalentBank, getTalentBank } = require('../controllers/companyController');
 
 // Company Profile Route
 router.get('/company-data', getCompanyData);
 router.post('/update-company-company', validation(updateCompanyValidator), updateCompanyData);
 router.post('/update-company-holder', validation(updateHolderValidator), updateHolderData);
 
-// Vacancy Crud Routes
+// Vacancy CRUD Routes
 router.post('/register-vacancy', validation(vacancyValidator), insertVacancy);
 router.get('/get-all-vacancies', getVacanciesCompany);
 router.get('/get-company-vacancies', getAllCompanyVacancies);
@@ -33,5 +31,10 @@ router.get('/user', searchUsers);
 
 router.get('/get-all-candidates/:id', getAllCandidates);
 router.get('/get-candidate/:id', getCandidate);
+
+// Talent bank CRUD routes
+router.post('/add-to-talent-bank', addToTalentBank);
+router.post('/remove-from-talent-bank', removeFromTalentBank);
+router.get('/get-talent-bank', getTalentBank);
 
 module.exports = router;
