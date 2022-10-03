@@ -50,10 +50,6 @@ const CompanySchema = new Schema({
 			type: String,
 			required: true
 		},
-		// price: {
-		//     type: Number,
-		//     required: true
-		// },
 	},
 	card: {
 		type: {
@@ -92,6 +88,10 @@ const CompanySchema = new Schema({
 			required: false
 		},
 	},
+	talentBank: [{
+		type: Schema.Types.ObjectId,
+		ref: 'User',
+	}],
 });
 
 module.exports = model('Company', CompanySchema, 'companies');
