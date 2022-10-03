@@ -45,11 +45,15 @@ const createComplaint = async (req, res) => {
         // Create the complaint
         const newComplaint = new Complaint({
             ...req.body,
-            envoy,
+            envoy: {
+                foreignKey: envoy,
+                role: envoyRole.charAt(0).toUpperCase() + envoyRole.slice(1)
+            },
+            target: {
+                foreignKey: target,
+                role: targetRole
+            },
             pending: true,
-            // capitalize the first letter of the roles types
-            envoyType: envoyRole.charAt(0).toUpperCase() + envoyRole.slice(1),
-            targetType: targetRole,
         });
 
         await newComplaint.save();

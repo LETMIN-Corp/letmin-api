@@ -12,30 +12,37 @@ const ComplaintSchema = new Schema({
         required: true
     },
     envoy: {
-        type: Schema.Types.ObjectId,
-        refPath: 'envoyType',
-        required: true
+        foreignKey: {
+            ref: 'User' || 'Company' || 'Admin',
+            type: Schema.Types.ObjectId,
+            required: true
+        },
+        role: {
+            type: String,
+            required: true,
+            enum: ['User', 'Company', 'Admin']
+        }
     },
     target: {
-        type: Schema.Types.ObjectId,
-        refPath: 'targetType',
-        required: true
-    },
-    envoyType: {
-        type: String,
-        enum: ['User', 'Company', 'Admin'],
-        required: true
-    },
-    targetType: {
-        type: String,
-        enum: ['User', 'Company'],
-        required: true,
+        foreignKey: {
+            ref: 'User' || 'Company',
+            type: Schema.Types.ObjectId,
+            required: true
+        },
+        role: {
+            type: String,
+            required: true,
+            enum: ['User', 'Company']
+        }
     },
     pending: {
         type: Boolean,
         default: true,
         required: true
     },
+},
+{
+    timestamps: true
 });
 
 module.exports = model('Complaint', ComplaintSchema, 'complaints')

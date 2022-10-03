@@ -191,16 +191,126 @@ const getAllComplaints = async (req, res) => {
     try {
 		// Get all complaints populating the target user/company and the envoy of the complaint
 		// If it's a company convert 'company.name' to 'name'
-        const complaints = await Complaints.find().populate([
-			{ path: 'target', select: 'name' },
-			{ path: 'envoy', select: 'name company.name' }
-		]).select('-target.password -envoy.password');
-			console.log(complaints);
-			return res.json({
-				success: true,
-				message: 'Reclamações encontradas com sucesso',
-				complaints,
-			});
+        const complaints = await Complaints.aggregate([
+			// Envoy
+			{
+				$lookup: {
+					from: 'users',
+					localField: 'envoy.foreignKey',
+					foreignField: '_id',
+					as: 'envoy.user'
+				}
+			},
+			{
+				$lookup: {
+					from: 'companies',
+					localField: 'envoy.foreignKey',
+					foreignField: '_id',
+					as: 'envoy.company'
+				}
+			},
+			{
+				$lookup: {
+					from: 'admins',
+					localField: 'envoy.foreignKey',
+					foreignField: '_id',
+					as: 'envoy.user'
+				}
+			},
+			// Target
+			{
+				$lookup: {
+					from: 'users',
+					localField: 'target.foreignKey',
+					foreignField: '_id',
+					as: 'target.user'
+				}
+			},
+			{
+				$lookup: {
+					from: 'companies',
+					localField: 'target.foreignKey',
+					foreignField: '_id',
+					as: 'target.company'
+				}
+			},
+			// Project
+			{
+				$project: {
+					_id: 1,
+					envoy: {
+						$cond: {
+							if: { $eq: [ "$envoy.user", [] ] },
+							then: {
+								$let: {
+									vars: {
+										company: { $arrayElemAt: [ "$envoy.company", 0 ] },
+									},
+									in: {
+										_id: "$$company._id",
+										name: "$$company.company.name",
+										email: "$$company.company.email",
+									}
+								}
+							},
+							else: {
+								$let: {
+									vars: {
+										user: { $arrayElemAt: [ "$envoy.user", 0 ] },
+									},
+									in: {
+										_id: "$$user._id",
+										name: "$$user.name",
+										email: "$$user.email",
+									}
+								}
+							}
+						}
+					},
+					target: {
+						$cond: {
+							if: { $eq: [ "$target.user", [] ] },
+							then: {
+								$let: {
+									vars: {
+										company: { $arrayElemAt: [ "$target.company", 0 ] },
+									},
+									in: {
+										_id: "$$company._id",
+										name: "$$company.company.name",
+										email: "$$company.company.email",
+										role: "$$company.company.role",
+									}
+								}
+							},
+							else: {
+								$let: {
+									vars: {
+										user: { $arrayElemAt: [ "$target.user", 0 ] },
+									},
+									in: {
+										_id: "$$user._id",
+										name: "$$user.name",
+										email: "$$user.email",
+									}
+								}
+							}
+						}
+					},
+					reason: 1,
+					description: 1,
+					pending: 1,
+					createdAt: 1,
+					updatedAt: 1
+				}
+			}
+		]);
+
+		return res.json({
+			success: true,
+			message: 'Reclamações encontradas com sucesso',
+			complaints,
+		});
     } catch (err) {
         return res.status(400).json({
             success: false,
