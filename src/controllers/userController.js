@@ -136,11 +136,12 @@ const getUserData = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
     const { id } = req.user;
 
-    	User.findByIdAndUpdate(req.user, 
-			{ 
-				'name': req.body.name, 
-				'description': req.body.description, 
-			}, { new: true }).then((user) => {
+    	// User.findByIdAndUpdate(req.user, 
+		// 	{ 
+		// 		'name': req.body.name, 
+		// 		'description': req.body.description, 
+		// 	}, { new: true })
+		User.findByIdAndUpdate(req.user, req.body, { new: true }).then((user) => {
         if (!user) {
             return res.status(400).json({
                 message: "Usuário não encontrado.",
