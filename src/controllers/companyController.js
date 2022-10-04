@@ -264,7 +264,7 @@ const addToTalentBank = async (req, res) => {
 				message: 'O prestador de serviços foi adicionado ao banco de talentos',
 				success: true,
 			});
-		})
+		});
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
@@ -295,14 +295,14 @@ const removeFromTalentBank = async (req, res) => {
 				message: 'O prestador de serviços foi removido de seu banco de talentos',
 				success: true,
 			});
-		})
+		});
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
 			message: 'Ocorreu um erro ao remover o prestador de serviços: ' + err,
 		});
 	}
-}
+};
 
 const getTalentBank = async (req, res) => {
 	let token = req.headers.authorization;
@@ -329,7 +329,7 @@ const getTalentBank = async (req, res) => {
 				message: 'Error ' + err,
 			});
 		});
-}
+};
 
 module.exports = {
 	registerCompany,

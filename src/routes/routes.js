@@ -12,7 +12,7 @@ const adminValidator = require('../validate/admin');
 const { createComplaint } = require('../controllers/complaintController');
 
 router.get('/healthcheck', (req, res) => {
-	res.json({
+	res.status(200).json({
 		success: true,
 		message: 'Olá Mundo',
 	});

@@ -188,8 +188,8 @@ const changeUserBlockStatus = async (req, res) => {
 };
 
 const getAllComplaints = async (req, res) => {
-    try {
-        const complaints = await Complaints
+	try {
+		const complaints = await Complaints
 			.aggregate(require('./repositories/ComplaintRepository').getAllComplaintsWithUsers);
 
 		return res.json({
@@ -197,16 +197,16 @@ const getAllComplaints = async (req, res) => {
 			message: 'Reclamações encontradas com sucesso',
 			complaints,
 		});
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            message: 'Erro ao buscar reclamações' + err,
-        });
-    }
-}
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar reclamações' + err,
+		});
+	}
+};
 
 const changeComplaintStatus = async (req, res) => {
-	const { complaint_id } = req.body
+	const { complaint_id } = req.body;
 
 	if(!complaint_id) {
 		return res.status(400).json({
@@ -247,7 +247,7 @@ const changeComplaintStatus = async (req, res) => {
 };
 
 const removeComplaint = async (req, res) => {
-	const { complaint_id } = req.body
+	const { complaint_id } = req.body;
 
 	if(!complaint_id) {
 		return res.status(400).json({
