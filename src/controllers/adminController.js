@@ -267,7 +267,7 @@ const removeComplaint = async (req, res) => {
 			}
 			return res.status(200).json({
 				success: true,
-				message: `Denúncia removida com sucesso`,
+				message: 'Denúncia removida com sucesso',
 			});
 		});
 	} catch (err) {
@@ -277,6 +277,28 @@ const removeComplaint = async (req, res) => {
 			message: 'Erro ao buscar reclamações' + err,
 		});
 	}
+};
+
+const getUser = async (req, res) => {
+	const { user_id } = req.body;
+
+	if(!user_id) {
+		return res.status(400).json({
+			success: false,
+			message: 'ID do usuário não informado',
+		});
+	}
+
+	let _id = ObjectId(user_id);
+
+	User.findById( _id ).select('-password')
+		.then((user) => {
+			return res.status(200).json({
+				success: true,
+				message: 'Usuário encontrado com sucesso',
+				user: user
+			});
+		});
 };
 
 module.exports = {
@@ -289,4 +311,5 @@ module.exports = {
 	getAllComplaints,
 	changeComplaintStatus,
 	removeComplaint,
+	getUser,
 };

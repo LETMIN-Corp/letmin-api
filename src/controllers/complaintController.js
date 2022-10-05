@@ -13,13 +13,13 @@ const createComplaint = async (req, res) => {
 		let envoyRole = req.user.role;
 		let target = req.body.target;
 
-        // Check if the user is trying to create a complaint against himself
-        if (envoy == target) {
-            return res.status(400).json({
-                success: false,
-                message: 'Você não pode criar uma denúncia contra você mesmo',
-            });
-        }
+		// Check if the user is trying to create a complaint against himself
+		if (envoy == target) {
+			return res.status(400).json({
+				success: false,
+				message: 'Você não pode criar uma denúncia contra você mesmo',
+			});
+		}
 
 		// Check if the target user exists (it can be a company or a user)
 		const user = await User.findById(target);
@@ -58,18 +58,18 @@ const createComplaint = async (req, res) => {
 
 		await newComplaint.save();
 
-        return res.status(201).json({
-            success: true,
-            message: 'Denúncia criada com sucesso',
-            newComplaint,
-        });
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            message: 'Erro ao criar denúncia: ' + err,
-        });
-    }
-}
+		return res.status(201).json({
+			success: true,
+			message: 'Denúncia criada com sucesso',
+			newComplaint,
+		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao criar denúncia: ' + err,
+		});
+	}
+};
 
 module.exports = {
 	createComplaint,
