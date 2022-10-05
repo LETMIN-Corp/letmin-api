@@ -151,35 +151,35 @@ const createForgotPasswordToken = async (req, res) => {
 	const linkemail = require('../utils/emailTemplates/forgotPassword')(company, url);
 
 	await sendEmail(linkemail)
-	.then(async (err, info) => {
-		if(err) {
-			res.status(500).json({
-				success: false,
-				message: 'Erro ao enviar email',
-				error: err,
-			});
-		}
-
-		Company.findByIdAndUpdate(company._id, {
-			'forgotPassword.selector': selector,
-			'forgotPassword.token': hashedToken,
-			'forgotPassword.issuedAt': Date.now(),
-			'forgotPassword.ip': ipRequest,
-		}, { new: true })
-			.then((company) => {
-				return res.status(200).json({
-					success: true,
-					message: 'Email enviado com sucesso.',
+		.then(async (err, info) => {
+			if(err) {
+				res.status(500).json({
+					success: false,
+					message: 'Erro ao enviar email',
+					error: err,
 				});
-			})
+			}
+
+			Company.findByIdAndUpdate(company._id, {
+				'forgotPassword.selector': selector,
+				'forgotPassword.token': hashedToken,
+				'forgotPassword.issuedAt': Date.now(),
+				'forgotPassword.ip': ipRequest,
+			}, { new: true })
+				.then((company) => {
+					return res.status(200).json({
+						success: true,
+						message: 'Email enviado com sucesso.',
+					});
+				});
 			
-	})
-	.catch((err) => {
-		return res.status(400).json({
-			success: false,
-			message: 'Error ' + err,
+		})
+		.catch((err) => {
+			return res.status(400).json({
+				success: false,
+				message: 'Error ' + err,
+			});
 		});
-	});
 };
 
 /**

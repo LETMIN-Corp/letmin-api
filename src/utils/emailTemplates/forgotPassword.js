@@ -1,11 +1,11 @@
 
 // return options of the email
 const email = (company, url) => {
-    console.log(company)
-    const options = {
-        email: company.company.email,
-        subject: 'Bem vindo a Letmin!',
-        html: `<html>
+	console.log(company);
+	const options = {
+		email: company.company.email,
+		subject: 'Bem vindo a Letmin!',
+		html: `<html>
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width">
@@ -66,8 +66,8 @@ const email = (company, url) => {
         
         </body>
         </html>`,
-    };
-    return options;
+	};
+	return options;
 };
 
 

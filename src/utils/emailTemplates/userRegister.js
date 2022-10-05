@@ -1,9 +1,9 @@
 // return options of the email
 const email = (user) => {
-    const options = {
-        email: user.email,
-        subject: 'Bem vindo a Letmin!',
-        html: `<html>
+	const options = {
+		email: user.email,
+		subject: 'Bem vindo a Letmin!',
+		html: `<html>
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width">
@@ -57,8 +57,8 @@ const email = (user) => {
         
         </body>
         `,
-    };
-    return options;
+	};
+	return options;
 };
 
 
