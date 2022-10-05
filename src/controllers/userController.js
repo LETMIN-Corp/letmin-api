@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const ROLES = require('../utils/constants');
+const { USER } = require('../utils/constants');
 const bcrypt = require('bcryptjs');
 
 const { SECRET } = require('../config');
@@ -7,15 +7,13 @@ const { SECRET } = require('../config');
 const {
 	generateToken,
 	verifyGoogleToken,
-	verifyToken,
-	decodeToken
 } = require('../utils/jwt');
 
 /**
  * User Login/Registration via Google
  * @route POST /api/auth/google
  */
-const userLogin = async (req, res, next) => {
+const userLogin = async (req, res) => {
 	if (!req.body.credential) {
 		return res.status(400).json({
 			success: false,
@@ -63,7 +61,7 @@ const userLogin = async (req, res, next) => {
 					});
 				}
 
-				const token = generateToken(user, ROLES.USER);
+				const token = generateToken(user, USER);
   
 				let result = {
 					username: user.username,
@@ -74,7 +72,7 @@ const userLogin = async (req, res, next) => {
 				};
 				return res.header('Authorization', token).status(200).json({
 					success: true,
-					message: 'Parabens! Você está logado.',
+					message: 'Parabéns! Você está logado.',
 					...result,
 				});
 			}
@@ -89,7 +87,7 @@ const userLogin = async (req, res, next) => {
 			});
   
 			newUser.save((err, user) => {
-				const token = generateToken(user, ROLES.USER);
+				const token = generateToken(user, USER);
   
 				const sendMail = require('../utils/mailer');
 				const email = require('../utils/emailTemplates/userRegister')(user);
@@ -102,14 +100,13 @@ const userLogin = async (req, res, next) => {
 
 				let result = {
 					username: user.username,  
-					role: 'user',
-					picture: user.picture,
+					role: USER,
 					email: user.email,
 					token: token,
 				};
 				return res.header('Authorization', result.token).status(200).json({
 					...result,
-					message: 'Parabens! Você está logado.',
+					message: 'Parabéns! Você está logado.',
 					success: true
 				});
 			});
@@ -122,56 +119,64 @@ const userLogin = async (req, res, next) => {
 		});
 };
 
-const getUserData = async (req, res, next) => {
-    const { id } = req.user;
+/**
+ * Get user by id (On JWT)
+ * @route GET /user/get-user
+ */
+const getUserData = async (req, res) => {
+	const { id } = req.user;
 
 	User.findById(id).select('-password')
-    .then((user) => {
-        if (!user) {
-            return res.status(400).json({
-                message: "Usuário não encontrado.",
-                success: false
-            });
-        }
-        return res.status(200).json({
-            user,
-            success: true
-        });
-    })
-    .catch((err) => {
-        return res.status(400).json({
-            message: 'Error ' + err,
-            success: false
-        });
-    });
-}
+		.then((user) => {
+			if (!user) {
+				return res.status(400).json({
+					message: 'Usuário não encontrado.',
+					success: false
+				});
+			}
+			return res.status(200).json({
+				user,
+				success: true
+			});
+		})
+		.catch((err) => {
+			return res.status(400).json({
+				message: 'Error ' + err,
+				success: false
+			});
+		});
+};
 
-const updateUser = async (req, res, next) => {
-    const { id } = req.params;
+/**
+ * Update user data
+ * @route *** /user/update-user
+*/
+const updateUser = async (req, res) => {
+	const { id } = req.params;
 
-    User.findByIdAndUpdate(id, req.body, { new: true })
-    .then((user) => {
-        if (!user) {
-            return res.status(400).json({
-                message: "Usuário não encontrado.",
-                success: false
-            });
-        }
-        return res.status(200).json({
-            user,
-            success: true
-        });
-    })
-    .catch((err) => {
-        return res.status(400).json({
-            message: 'Error ' + err,
-            success: false
-        });
-    });
-}
+	User.findByIdAndUpdate(id, req.body, { new: true })
+		.then((user) => {
+			if (!user) {
+				return res.status(400).json({
+					message: 'Usuário não encontrado.',
+					success: false
+				});
+			}
+			return res.status(200).json({
+				user,
+				success: true
+			});
+		})
+		.catch((err) => {
+			return res.status(400).json({
+				message: 'Error ' + err,
+				success: false
+			});
+		});
+};
 
 module.exports = {
-    userLogin,
-    getUserData,
-    updateUser,
-}
+	userLogin,
+	getUserData,
+	updateUser,
+};

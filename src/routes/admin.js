@@ -1,29 +1,33 @@
 const router = require('express').Router();
-const validation = require('../middlewares/validation');
-const adminValidator = require('../validate/admin');
 
 const { 
-	adminLogin,
-	adminRegister,
 	getAllCompanies,
 	changeCompanyBlockStatus,
 	getAllUsers,
 	changeUserBlockStatus,
+	getAllComplaints,
+	changeComplaintStatus,
+	removeComplaint,
+	getUser,
 } = require('../controllers/adminController');
 
-// Bring in the User Registration function
-const {
-	passportAuth,
-	checkRole,
-	serializeUser
-} = require('../utils/Auth');
-const { ADMIN } = require('../utils/constants');
+// Companies Management Routes
+router.get('/get-all-companies', getAllCompanies);
+router.patch('/company-block', changeCompanyBlockStatus);
 
+// Users Management Routes
+router.get('/get-all-users', getAllUsers);
+router.patch('/user-block', changeUserBlockStatus);
 
-router.get('/get-all-companies', passportAuth, checkRole(ADMIN), getAllCompanies);
-router.patch('/company-block', passportAuth, checkRole(ADMIN), changeCompanyBlockStatus);
+router.get('/get-all-companies', getAllCompanies);
+router.patch('/company-block', changeCompanyBlockStatus);
 
-router.get('/get-all-users', passportAuth, checkRole(ADMIN), getAllUsers);
-router.patch('/user-block', passportAuth, checkRole(ADMIN), changeUserBlockStatus);
+router.get('/get-all-users', getAllUsers);
+router.patch('/user-block', changeUserBlockStatus);
+router.get('/get-all-complaints', getAllComplaints);
+router.patch('/resolve-complaint', changeComplaintStatus);
+router.delete('/remove-complaint', removeComplaint);
+
+router.post('/get-user', getUser);
 
 module.exports = router;
