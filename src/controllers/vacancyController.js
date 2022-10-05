@@ -1,7 +1,5 @@
 const Vacancy = require('../models/Vacancy');
 const Company = require('../models/Company');
-const ObjectId = require('mongoose').Types.ObjectId;
-
 const User = require('../models/User');
 
 // Vacancy CRUD
@@ -14,7 +12,7 @@ const insertVacancy = async (req, res) => {
 			company: _id,
 		});
 
-		await vacancy.save(async (err, vacancy) => {
+		vacancy.save(async (err, vacancy) => {
 			if (err) {
 				return res.status(400).json({
 					success: false,
