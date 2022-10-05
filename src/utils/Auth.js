@@ -37,12 +37,11 @@ const checkRole = roles => (req, res, next) => {
 
 const serializeUser = user => {
 	return {
+		_id: user._id,
 		role: user.role,
-		username: user.username,
+		name: user.name,
 		email: user.email,
 		picture: user.picture,
-		name: user.name,
-		_id: user._id,
 		updatedAt: user.updatedAt,
 		createdAt: user.createdAt
 	};

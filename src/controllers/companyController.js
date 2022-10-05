@@ -6,15 +6,17 @@ const ROLES = require('../utils/constants');
 
 const {
 	generateToken,
-	verifyToken,
 	decodeToken
 } = require('../utils/jwt');
-const { serializeUser } = require('passport');
 
+/**
+ * Login company
+ * @route POST /company/login
+ */
 const loginCompany = async (req, res) => {
 	const credentials = req.body;
   
-	Company.findOne({ 'company.email' : credentials.email })
+	Company.findOne({ 'company.email' : credentials.email }).select('-company.holder.password')
 		.then(async (company) => {
 			if (!company) {
 				return res.status(404).json({
@@ -40,22 +42,10 @@ const loginCompany = async (req, res) => {
 			}
 			let token = generateToken(company, ROLES.COMPANY);
 
-			let result = {
-				company: {
-					name: company.company.name,
-					email: company.company.email,
-				},
-				holder: {
-					name: company.holder.name,
-					email: company.holder.email,
-					phone: company.holder.phone,
-				},
-				token: token,
-			};
 			return res.header('Authorization', token).status(200).json({
 				success: true,
-				message: 'Parabens! Você está logado.',
-				...result,
+				message: 'Parabéns! Você está logado.',
+				token: token,
 			});
 		})
 		.catch((err) => {
@@ -66,6 +56,10 @@ const loginCompany = async (req, res) => {
 		});
 };
 
+/**
+ * Register company
+ * @route POST /company/register
+ */
 const registerCompany = async (req, res) => {
 	let credentials = req.body;
   
@@ -92,22 +86,11 @@ const registerCompany = async (req, res) => {
 		.then(company => {
   
 			let token = generateToken(company, ROLES.COMPANY);
-			let result = {
-				company: {
-					name: company.company.name,
-					email: company.company.email,
-				},
-				holder: {
-					name: company.holder.name,
-					email: company.holder.email,
-					phone: company.holder.phone,
-				},
-				token: token,
-			};
+
 			return res.header('Authorization', token).status(201).json({
-				...result,
-				message: 'Parabens! Você está cadastrado e logado.',
-				success: true
+				success: true,
+				message: 'Parabéns! Você está cadastrado e logado.',
+				token: token,
 			});
 		}).catch(err => {
 			return res.status(500).json({
@@ -118,6 +101,10 @@ const registerCompany = async (req, res) => {
 		});
 };
 
+/**
+ * Get company data
+ * @route GET /company/company-data
+ */
 const getCompanyData = async (req, res) => {
 	let token = req.headers.authorization;
 
@@ -139,12 +126,21 @@ const getCompanyData = async (req, res) => {
 		});
 };
 
+/**
+ * Search users by name
+ * @route GET /company/user
+ */
 const searchUsers = async (req, res) => {
 	let search = req.params.search || '';
 
 	User.find({
-		$or: [
-			{ 'user.name': { $regex: search, $options: 'i' } },
+		$and: [
+			{ blocked: false },
+			{
+				$or: [
+					{ 'user.name': { $regex: search, $options: 'i' } },
+				]
+			}
 		]
 	}).then((users) => {
 		if (!users) {
@@ -268,7 +264,7 @@ const addToTalentBank = async (req, res) => {
 				message: 'O prestador de serviços foi adicionado ao banco de talentos',
 				success: true,
 			});
-		})
+		});
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
@@ -299,14 +295,14 @@ const removeFromTalentBank = async (req, res) => {
 				message: 'O prestador de serviços foi removido de seu banco de talentos',
 				success: true,
 			});
-		})
+		});
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
 			message: 'Ocorreu um erro ao remover o prestador de serviços: ' + err,
 		});
 	}
-}
+};
 
 const getTalentBank = async (req, res) => {
 	let token = req.headers.authorization;
@@ -333,7 +329,7 @@ const getTalentBank = async (req, res) => {
 				message: 'Error ' + err,
 			});
 		});
-}
+};
 
 module.exports = {
 	registerCompany,
