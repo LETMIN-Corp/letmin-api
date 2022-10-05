@@ -1,22 +1,21 @@
 const Admin = require('../models/Admin');
 const Company = require('../models/Company');
 const bcrypt = require('bcryptjs');
-const ROLES = require('../utils/constants');
+const { ADMIN } = require('../utils/constants');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 const {
 	generateToken,
-	verifyToken,
-	decodeToken
 } = require('../utils/jwt');
 const User = require('../models/User');
+const Complaints = require('../models/Complaint');
 
 /**
  * @DESC To register the admin
  */
 const adminRegister = async (req, res) => {
 	const adminDets = req.body;
-  
+
 	// Check if email is already taken
 	let admin = await Admin.findOne({ email: adminDets.email });
 	if (admin) {
@@ -25,7 +24,7 @@ const adminRegister = async (req, res) => {
 			message: 'Email já cadastrado',
 		});
 	}
-  
+
 	// Get the hashed password
 	const password = await bcrypt.hash(adminDets.password, 12);
 	// create a new user
@@ -38,7 +37,7 @@ const adminRegister = async (req, res) => {
 		.then((value) => {
 			return res.status(201).json({
 				success: true,
-				message: `Parabens ${value.name}! Você está cadastrado. Por favor logue.`,
+				message: `Parabéns ${value.name}! Você está cadastrado. Por favor logue.`,
 			});
 		})
 		.catch((err) => {
@@ -76,7 +75,7 @@ const adminLogin = async (req, res) => {
 	}
 
 	// Sign in the token and issue it to the user
-	let token = generateToken(user, ROLES.ADMIN);
+	let token = generateToken(user, ADMIN);
 	let result = {
 		name: user.name,
 		email: user.email,
@@ -84,7 +83,7 @@ const adminLogin = async (req, res) => {
 	};
 	return res.header('Authorization', token).status(200).json({
 		success: true,
-		message: 'Parabens! Você está logado.',
+		message: 'Parabéns! Você está logado.',
 		...result,
 	});
 };
@@ -102,7 +101,7 @@ const getAllCompanies = async (req, res) => {
 		.catch((err) => {
 			return res.status(500).json({
 				success: false,
-				message: 'Não foi possivel listar as empresas',
+				message: 'Não foi possivel listar as empresas' + err,
 			});
 		});
 
@@ -188,6 +187,120 @@ const changeUserBlockStatus = async (req, res) => {
 	});
 };
 
+const getAllComplaints = async (req, res) => {
+	try {
+		const complaints = await Complaints
+			.aggregate(require('./repositories/ComplaintRepository').getAllComplaintsWithUsers);
+
+		return res.json({
+			success: true,
+			message: 'Reclamações encontradas com sucesso',
+			complaints,
+		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar reclamações' + err,
+		});
+	}
+};
+
+const changeComplaintStatus = async (req, res) => {
+	const { complaint_id } = req.body;
+
+	if(!complaint_id) {
+		return res.status(400).json({
+			success: false,
+			message: 'ID da denúncia não informado',
+		});
+	}
+	try {
+		let _id = ObjectId(complaint_id);
+		
+		Complaints.findById( _id , (err, complaint) => {
+			if (err || !complaint) {
+				return res.status(500).json({
+					success: false,
+					message: 'Não foi possivel encontrar a denúncia',
+				});
+			}
+			complaint.pending = !complaint.pending;
+			complaint.save().then(async (value) => {
+				let message = value.pending ? 'Resolvida' : 'Pendente';
+	
+				let updatedComplaints = await Complaints.find();
+	
+				return res.status(200).json({
+					success: true,
+					message: `Denúncia marcada como ${message} com sucesso`,
+					complaints: updatedComplaints
+				});
+			});
+		});
+	} catch (err) {
+		console.log(err);
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar reclamações' + err,
+		});
+	}
+};
+
+const removeComplaint = async (req, res) => {
+	const { complaint_id } = req.body;
+
+	if(!complaint_id) {
+		return res.status(400).json({
+			success: false,
+			message: 'ID da denúncia não informado',
+		});
+	}
+	try {
+		let _id = ObjectId(complaint_id);
+		
+		Complaints.findByIdAndDelete( _id , (err, complaint) => {
+			if (err || !complaint) {
+				return res.status(500).json({
+					success: false,
+					message: 'Não foi possivel encontrar a denúncia',
+				});
+			}
+			return res.status(200).json({
+				success: true,
+				message: 'Denúncia removida com sucesso',
+			});
+		});
+	} catch (err) {
+		console.log(err);
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar reclamações' + err,
+		});
+	}
+};
+
+const getUser = async (req, res) => {
+	const { user_id } = req.body;
+
+	if(!user_id) {
+		return res.status(400).json({
+			success: false,
+			message: 'ID do usuário não informado',
+		});
+	}
+
+	let _id = ObjectId(user_id);
+
+	User.findById( _id ).select('-password')
+		.then((user) => {
+			return res.status(200).json({
+				success: true,
+				message: 'Usuário encontrado com sucesso',
+				user: user
+			});
+		});
+};
+
 module.exports = {
 	adminRegister,
 	adminLogin,
@@ -195,4 +308,8 @@ module.exports = {
 	changeCompanyBlockStatus,
 	getAllUsers,
 	changeUserBlockStatus,
+	getAllComplaints,
+	changeComplaintStatus,
+	removeComplaint,
+	getUser,
 };

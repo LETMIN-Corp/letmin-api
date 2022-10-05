@@ -13,11 +13,9 @@ const vacancyValidator = Joi.object({
 		'string.empty': 'Descrição não pode ser vazia',
 		'any.required': 'Descrição é obrigatória'
 	}),
-	// number
 	salary: Joi.string().required().messages({
 		'string.empty': 'Salário não pode ser vazio',
 		'any.required': 'Salário é obrigatório',
-		//'number.base': `Salário deve ser um número`
 	}),
 	currency: Joi.string().required().valid('Real', 'Dolar', 'Euro').messages({
 		'string.empty': 'Moeda não pode ser vazia',
