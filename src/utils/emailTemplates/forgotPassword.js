@@ -3,7 +3,7 @@
 const email = (company, url) => {
 	const options = {
 		email: company.company.email,
-		subject: 'Bem vindo a Letmin!',
+		subject: 'Letmin - Recuperação de Senha!',
 		html: `<html>
         <head>
             <meta charset="utf-8">
