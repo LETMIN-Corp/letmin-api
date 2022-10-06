@@ -10,8 +10,8 @@ const {
 } = require('../utils/jwt');
 
 /**
- * Login user
- * @route POST /user/login
+ * User Login/Registration via Google
+ * @route POST /api/auth/google
  */
 const userLogin = async (req, res) => {
 	if (!req.body.credential) {
@@ -89,6 +89,15 @@ const userLogin = async (req, res) => {
 			newUser.save((err, user) => {
 				const token = generateToken(user, USER);
   
+				const sendMail = require('../utils/mailer');
+				const email = require('../utils/emailTemplates/userRegister')(user);
+
+				sendMail(email).then(() => {
+					console.log('Email enviado com sucesso');
+				}).catch((err) => {
+					console.log('Erro ao enviar email', err);
+				});
+
 				let result = {
 					username: user.username,  
 					role: USER,

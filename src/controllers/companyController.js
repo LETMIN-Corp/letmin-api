@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 const ObjectId = require('mongoose').Types.ObjectId;
 const User = require('../models/User');
 const ROLES = require('../utils/constants');
+const { CLIENT_URL } = require('../config');
+const sendEmail = require('../utils/mailer');
 
 const {
 	generateToken,
@@ -127,6 +129,124 @@ const getCompanyData = async (req, res) => {
 };
 
 /**
+ * Check the selector and token for password recovery
+ * @route GET /company/check-selector-token
+ * @param {string} selector
+ * @param {string} token
+ **/
+const checkRecoveryToken = async (req, res, next) => {
+	const { selector, token } = req.body;
+
+	try {
+		const company = await Company.findOne({ 'forgotPassword.selector': selector } );
+
+		if (!company || !token) {
+			return res.status(400).json({
+				success: false,
+				message: 'Token inválido.',
+			});
+		}
+
+		// find forgotPassword object in company with the same selector
+		const selectedFP = company.forgotPassword.find((fp) => fp.selector === selector);
+		const tokenIsValid = await bcrypt.compare(token, selectedFP.token || '');
+
+		if (
+			!selectedFP || 
+			!tokenIsValid || 
+			selectedFP.createdAt < Date.now() - 3600000 ||
+			selectedFP.used
+		) {
+			return res.status(400).json({
+				success: false,
+				message: 'Token inválido ou expirado.',
+			});
+		}
+
+		req.company = company;
+		next();
+
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Error ' + err,
+		});
+	}
+};
+
+/**
+ * Create forgot password token on company
+ * @route POST /company/forgot-password
+ * @body email
+ * @returns token, selector
+ **/
+const createForgotPasswordToken = async (req, res) => {
+	const { email } = req.body;
+
+	const company = await Company.findOne({ 'company.email': email });
+
+	if (!company) {
+		return res.status(400).json({
+			success: false,
+			message: 'Email não cadastrado.',
+		});
+	}
+
+	try {
+		const ipRequest = req.socket.remoteAddress;
+		const selector = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+		const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+		const hashedToken = await bcrypt.hash(token, 12);
+
+		const url = `${CLIENT_URL[0]}/company/new-password?selector=${selector}&token=${token}`;
+
+		const linkemail = require('../utils/emailTemplates/forgotPassword')(company, url);
+
+		await sendEmail(linkemail)
+			.then(async (info, err) => {
+				if (err) {
+					return res.status(400).json({
+						success: false,
+						message: 'Error ' + err,
+					});
+				}
+
+				let passwordReset = {
+					selector: selector,
+					token: hashedToken,
+					ipRequest: ipRequest,
+					createdAt: Date.now(),
+					used: false
+				}
+
+				// Add passwordReset object to company.forgotPassword array
+				Company.findByIdAndUpdate(company._id, {
+					$push: {
+						forgotPassword: passwordReset,
+					},
+				})
+					.then(() => {
+						return res.status(200).json({
+							success: true,
+							message: 'Email enviado com sucesso.',
+						});
+					})
+					.catch((err) => {
+						return res.status(400).json({
+							success: false,
+							message: 'Error ' + err,
+						});
+					});
+			});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Error ' + err,
+		});
+	}
+};
+
+/**
  * Search users by name
  * @route GET /company/user
  */
@@ -160,6 +280,32 @@ const searchUsers = async (req, res) => {
 			success: false,
 			message: 'Error ' + err,
 		});
+	});
+};
+
+/**
+ * Reset Password of company after passing through CheckRecoveryToken middleware
+ * @route POST /company/reset-password
+ * @body { password, confirmPassword }
+ **/
+const resetPassword = async (req, res) => {
+	const { password } = req.body;
+	const company = req.company;
+
+	company.holder.password = await bcrypt.hash(password, 12);
+	// and set the used field from passwordReset with the selector and token as false
+
+	company.forgotPassword.forEach((fp) => {
+		if (fp.selector === req.body.selector) {
+			fp.used = true;
+		}
+	});
+
+	await company.save();
+
+	res.status(200).json({
+		success: true,
+		message: 'Senha alterada com sucesso.',
 	});
 };
 
@@ -341,4 +487,7 @@ module.exports = {
 	addToTalentBank,
 	removeFromTalentBank,
 	getTalentBank,
+	createForgotPasswordToken,
+	checkRecoveryToken,
+	resetPassword,
 };
