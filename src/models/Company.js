@@ -98,13 +98,18 @@ const CompanySchema = new Schema({
 				type: String,
 				required: false
 			},
-			issuedAt: {
+			createdAt: {
 				type: Date,
 				required: false
 			},
 			ip: {
 				type: String,
 				required: false
+			},
+			used: {
+				type: Boolean,
+				required: true,
+				default: false
 			},
 		}
 	],
