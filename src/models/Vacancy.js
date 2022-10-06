@@ -35,6 +35,11 @@ const VacancySchema = new Schema({
 		required: true,
 		enum: ['Integral', 'Meio Período', 'Home Office']
 	},
+	type: {
+		type: String,
+		required: true,
+		enum: ['Estágio', 'Permanente', 'Temporário']
+	},
 	region: {
 		type: String,
 		required: true,
