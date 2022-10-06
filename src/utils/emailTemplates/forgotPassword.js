@@ -1,7 +1,6 @@
 
 // return options of the email
 const email = (company, url) => {
-	console.log(company);
 	const options = {
 		email: company.company.email,
 		subject: 'Bem vindo a Letmin!',

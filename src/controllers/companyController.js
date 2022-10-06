@@ -141,45 +141,49 @@ const createForgotPasswordToken = async (req, res) => {
 		});
 	}
 
-	const ipRequest = req.socket.remoteAddress;
-	const selector = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-	const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-	const hashedToken = await bcrypt.hash(token, 12);
+	try {
+		const ipRequest = req.socket.remoteAddress;
+		const selector = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+		const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+		const hashedToken = await bcrypt.hash(token, 12);
 
-	const url = `${CLIENT_URL}/new-password?selector=${selector}&validator=${token}`;
+		const url = `${CLIENT_URL[0]}/new-password?selector=${selector}&validator=${token}`;
 
-	const linkemail = require('../utils/emailTemplates/forgotPassword')(company, url);
+		const linkemail = require('../utils/emailTemplates/forgotPassword')(company, url);
 
-	await sendEmail(linkemail)
-		.then(async (err, info) => {
-			if(err) {
-				res.status(500).json({
-					success: false,
-					message: 'Erro ao enviar email',
-					error: err,
-				});
-			}
-
-			Company.findByIdAndUpdate(company._id, {
-				'forgotPassword.selector': selector,
-				'forgotPassword.token': hashedToken,
-				'forgotPassword.issuedAt': Date.now(),
-				'forgotPassword.ip': ipRequest,
-			}, { new: true })
-				.then((company) => {
-					return res.status(200).json({
-						success: true,
-						message: 'Email enviado com sucesso.',
+		await sendEmail(linkemail)
+			.then(async (err, info) => {
+				if(err) {
+					res.status(500).json({
+						success: false,
+						message: 'Erro ao enviar email',
+						error: err,
 					});
-				});
-			
-		})
-		.catch((err) => {
-			return res.status(400).json({
-				success: false,
-				message: 'Error ' + err,
-			});
+				}
+
+				Company.findByIdAndUpdate(company._id, {
+					$set: {
+						'passwordReset.selector': selector,
+						'passwordReset.token': hashedToken,
+						'passwordReset.ipRequest': ipRequest,
+						'passwordReset.expires': Date.now() + 3600000,
+					},
+				}, { new: true })
+					.then((company) => {
+						return res.status(200).json({
+							success: true,
+							message: 'Email enviado com sucesso.',
+							passwordReset: company.passwordReset,
+						});
+					});
+				
+			})
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Error ' + err,
 		});
+	}
 };
 
 /**
@@ -242,12 +246,30 @@ const resetPassword = async (req, res) => {
 	const { selector, token } = req.params;
 
 	const company = await Company.findOne({ 'forgotPassword.token': selector });
-	const tokenIsValid = await bcrypt.compare(token, company.forgotPassword.token);
+
+	if (!company) {
+		return res.status(400).json({
+			success: false,
+			message: 'Token inválido1.',
+		});
+	}
+
+	// find forgotPassword object in company with the same selector
+	const selectedToken = company.forgotPassword.find((fp) => fp.token === selector);
+
+	if (!selectedToken) {
+		return res.status(400).json({
+			success: false,
+			message: 'Token inválido2.',
+		});
+	}
+
+	const tokenIsValid = await bcrypt.compare(token, selectedToken);
 
 	if (!company || !tokenIsValid) {
 		return res.status(400).json({
 			success: false,
-			message: 'Token inválido.',
+			message: 'Token inválido3.',
 		});
 	}
 
