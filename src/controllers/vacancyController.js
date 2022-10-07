@@ -1,6 +1,7 @@
 const Vacancy = require('../models/Vacancy');
 const Company = require('../models/Company');
 const User = require('../models/User');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 // Vacancy CRUD
 const insertVacancy = async (req, res) => {
@@ -280,6 +281,7 @@ const getCandidate = async (req, res) => {
 	try {
 		// get candidate profile info, and the count of his applications (which is in the Vacancy model)
 		const candidate = await User.aggregate([
+			{ $match: { _id: ObjectId(req.params.id) } },
 			{
 				$lookup: {
 					from: 'vacancies',
