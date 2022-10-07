@@ -35,26 +35,37 @@ const email = (user) => {
                     text-align: center;
                     padding: 10px;
                 }
+                button, a {
+                    background-color: #9C37EB;
+                    color: #fff;
+                    border: none;
+                    padding: 10px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    font-weigth: 500;
+                }
             </style>
         </head>
         <body>
-        
             <div class="email-content">
                 <div class="top-bar">
                     <h1>Letmin</h1>
                 </div>
-                <h2>Olá ${user.name},</h2>
-                <p>Seja bem vindo a Letmin.</p>
-                <p>Esperamos que você aproveite ao máximo o nosso sistema de matching de empregos.</p>
-        
-                <p>Qualquer dúvida, entre em contato conosco.</p>
-                <p>Atenciosamente,</p>
-                <p>Equipe Letmin</p>
+                <div style="padding: 0 12px;">
+                    <h2>Olá ${ user.name },</h2>
+                    <p>Seja bem vindo a Letmin.</p>
+                    <p>Esperamos que você aproveite ao máximo o nosso sistema de matching de empregos.</p>
+                    <p>Qualquer dúvida, entre em contato conosco.</p>
+                    <p>Atenciosamente,</p>
+                    <p>
+                        <b>Equipe Letmin</b>
+                    </p>
+                </div>
                 <div class="footer">
                     <p>Letmin - 2022</p>
                 </div>
             </div>
-        
         </body>
         `,
 	};
