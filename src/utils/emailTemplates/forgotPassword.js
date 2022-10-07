@@ -36,33 +36,41 @@ const email = (company, url) => {
                     text-align: center;
                     padding: 10px;
                 }
-                button {
+                button, a {
                     background-color: #9C37EB;
                     color: #fff;
                     border: none;
                     padding: 10px;
                     border-radius: 5px;
                     cursor: pointer;
+                    text-decoration: none;
+                    font-weigth: 500;
                 }
             </style>
         </head>
         <body>
-        
             <div class="email-content">
                 <div class="top-bar">
                     <h1>Letmin - Recuperação de Senha</h1>
                 </div>
-                <h2>Olá administrador da ${company.company.name},</h2>
-                <p>Se você solicitou a recuperação de senha, clique no link abaixo que estará valido pela próxima 1 hora para escolher sua nova senha.</p>
-                <button><a href="${url}">Recuperar Senha</a></button>
-                <p>Se você não solicitou a recuperação de senha, apenas ignore este email.</p>
-                <p>Atenciosamente,</p>
-                <p>Equipe Letmin</p>
+                <div style="padding: 0 12px;">
+                    <h2>Olá administrador da ${ company.company.name },</h2>
+                    <p>Se você solicitou a recuperação de senha, clique no link abaixo que estará valido pela próxima 1 hora para escolher sua nova senha.</p>
+                    <div>
+                        <b>
+                            <a style="color: white;" href="${ url }">Recuperar Senha</a>
+                        </b>
+                    </div>
+                    <p>Se você não solicitou a recuperação de senha, apenas ignore este email.</p>
+                    <p>Atenciosamente,</p>
+                    <p>
+                        <b>Equipe Letmin</b>
+                    </p>
+                </div>
                 <div class="footer">
                     <p>Letmin - 2022</p>
                 </div>
             </div>
-        
         </body>
         </html>`,
 	};
