@@ -19,6 +19,11 @@ router.patch('/company-block', changeCompanyBlockStatus);
 router.get('/get-all-users', getAllUsers);
 router.patch('/user-block', changeUserBlockStatus);
 
+router.get('/get-all-companies', getAllCompanies);
+router.patch('/company-block', changeCompanyBlockStatus);
+
+router.get('/get-all-users', getAllUsers);
+router.patch('/user-block', changeUserBlockStatus);
 router.get('/get-all-complaints', getAllComplaints);
 router.patch('/resolve-complaint', changeComplaintStatus);
 router.delete('/remove-complaint', removeComplaint);

@@ -88,6 +88,31 @@ const CompanySchema = new Schema({
 			required: false
 		},
 	},
+	forgotPassword: [
+		{
+			selector: {
+				type: String,
+				required: true
+			},
+			token: {
+				type: String,
+				required: false
+			},
+			createdAt: {
+				type: Date,
+				required: false
+			},
+			ip: {
+				type: String,
+				required: false
+			},
+			used: {
+				type: Boolean,
+				required: true,
+				default: false
+			},
+		}
+	],
 	talentBank: [{
 		type: Schema.Types.ObjectId,
 		ref: 'User',

@@ -278,8 +278,6 @@ const getAllCandidates = async (req, res) => {
  */
 const getCandidate = async (req, res) => {
 	try {
-		console.log(req.params.id);
-
 		// get candidate profile info, and the count of his applications (which is in the Vacancy model)
 		const candidate = await User.aggregate([
 			{
@@ -306,7 +304,6 @@ const getCandidate = async (req, res) => {
 			},
 		]);
 
-		console.log(candidate);
 		if (!candidate || !candidate.length) {
 			return res.status(404).json({
 				success: false,

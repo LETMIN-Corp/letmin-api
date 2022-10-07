@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 const { adminRegister, adminLogin } = require('../controllers/adminController');
-const { registerCompany, loginCompany } = require('../controllers/companyController');
+const { registerCompany, loginCompany, createForgotPasswordToken, resetPassword, checkRecoveryToken } = require('../controllers/companyController');
 const { userLogin } = require('../controllers/userController');
 const { passportAuth, checkRole } = require('../utils/Auth');
 
@@ -17,6 +17,10 @@ router.get('/healthcheck', (req, res) => {
 		message: 'Olá Mundo',
 	});
 });
+
+router.post('/send-recovery-email', createForgotPasswordToken);
+router.post('/check-recovery-token', checkRecoveryToken, (req, res) => { return res.status(200).json({ success: true, message: 'Token válido' }) });
+router.post('/new-password', checkRecoveryToken, resetPassword);
 
 // Users Authentication Route
 router.post('/user/login', userLogin);
