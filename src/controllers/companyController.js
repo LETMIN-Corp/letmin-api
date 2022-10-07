@@ -217,7 +217,7 @@ const createForgotPasswordToken = async (req, res) => {
 					ipRequest: ipRequest,
 					createdAt: Date.now(),
 					used: false
-				}
+				};
 
 				// Add passwordReset object to company.forgotPassword array
 				Company.findByIdAndUpdate(company._id, {
