@@ -93,8 +93,10 @@ const getVacancy = async (req, res) => {
 
 // Change vacancy status to the opposite
 const confirmVacancy = async (req, res) => {
+	const companyId = req.user._id;
+
 	try {
-		Vacancy.findById(req.params.id)
+		Vacancy.findOne({ company: companyId, _id: req.params.id })
 			.then((vacancy) => {
 				if (!vacancy) {
 					return res.status(404).json({
@@ -120,8 +122,10 @@ const confirmVacancy = async (req, res) => {
 };
 
 const closeVacancy = async (req, res) => {
+	const companyId = req.user._id;
+
 	try {
-		await Vacancy.findByIdAndDelete(req.params.id)
+		await Vacancy.findOne({ company: companyId, _id: req.params.id })
 			.then((vacancy) => {
 				if (!vacancy) {
 					return res.status(404).json({
