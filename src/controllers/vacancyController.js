@@ -243,6 +243,40 @@ const applyToVacancy = async (req, res) => {
 	}
 };
 
+const cancelApplyVacancy = async (req, res) => {
+	try {
+		const { vacancy_id } = req.body;
+
+		const user_id = req.user._id;
+
+		const vacancy = await Vacancy.findById(vacancy_id);
+
+		if (!vacancy) {
+			return res.status(404).json({
+				success: false,
+				message: 'Vaga não encontrada.',
+			});
+		}
+
+		if (vacancy.candidates.includes(user_id)) 
+		{
+			let index = vacancy.candidates.indexOf(user_id);
+			vacancy.candidates.splice(index, 1)
+			vacancy.save();
+
+			return res.json({
+				success: true,
+				message: 'Descandidatura realizada com sucesso',
+			});
+		}
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao se candidatar a vaga.' + err,
+		});
+	}
+};
+
 const getAllCandidates = async (req, res) => {
 	try {
 		const vacancy = await Vacancy.findById(req.params.id)
@@ -367,6 +401,7 @@ module.exports = {
 	closeVacancy,
 	searchVacancies,
 	applyToVacancy,
+	cancelApplyVacancy,
 	getAllCandidates,
 	getCandidate,
 	getAppliedVacancies,
