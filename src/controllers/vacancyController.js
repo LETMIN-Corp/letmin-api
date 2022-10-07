@@ -206,6 +206,37 @@ const searchVacancies = async (req, res) => {
 		});
 };
 
+const getCandidateVacancies = async (req, res) => {
+	// let search = req.params.search? req.params.search.trim() : '';
+	const user_id = req.user._id;
+
+	Vacancy.find({
+		$and: [
+			{ candidates: user_id },
+		],
+	}).populate('company', 'company.name').select('role description sector region company').sort({ createdAt: -1 })
+		.then((vacancies) => { 
+			if (!vacancies) {
+				return res.status(404).json({
+					success: false,
+					message: 'Vaga não encontrada.',
+				});
+			}
+
+			return res.status(200).json({
+				success: true,
+				message: 'Vagas encotradas.',
+				vacancies: vacancies
+			});
+		})
+		.catch((err) => {
+			return res.status(400).json({
+				success: false,
+				message: 'Erro ao buscar vagas.' + err,
+			});
+		});
+};
+
 const applyToVacancy = async (req, res) => {
 	try {
 		const { vacancy_id } = req.body;
@@ -400,6 +431,7 @@ module.exports = {
 	confirmVacancy,
 	closeVacancy,
 	searchVacancies,
+	getCandidateVacancies,
 	applyToVacancy,
 	cancelApplyVacancy,
 	getAllCandidates,
