@@ -72,7 +72,7 @@ const getVacancy = async (req, res) => {
 						message: 'Vaga não encontrada.',
 					});
 				}
-				
+
 				vacancy.views += 1;
 				vacancy.save();
 
