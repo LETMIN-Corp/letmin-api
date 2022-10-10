@@ -36,7 +36,59 @@ const userUpdateValidator = Joi.object({
 	}),
 }).options({ abortEarly: false }).unknown();
 
+const updateUserFormations = Joi.array().items({
+	name: Joi.string().required().messages({
+		'string.empty': 'Email não pode ser vazio',
+		'any.required': 'Email é obrigatório',
+	}),
+	institution: Joi.string().required().messages({
+		'string.empty': 'Email não pode ser vazio',
+		'any.required': 'Email é obrigatório',
+	}),
+	start: Joi.string().required().messages({
+		'string.empty': 'Email não pode ser vazio',
+		'any.required': 'Email é obrigatório',
+	}),
+	finish: Joi.string().required().messages({
+		'string.empty': 'Email não pode ser vazio',
+		'any.required': 'Email é obrigatório',
+	}),
+	description: Joi.string().required().messages({
+		'string.empty': 'Email não pode ser vazio',
+		'any.required': 'Email é obrigatório',
+	})
+})
+
+
+//.options({ abortEarly: false }).unknown();
+
+const updateUserExperiences = Joi.array().items({
+	role: Joi.string().required().messages({
+		'string.empty': 'Email não pode ser vazio',
+		'any.required': 'Email é obrigatório',
+	}),
+	company: Joi.string().required().messages({
+		'string.empty': 'Email não pode ser vazio',
+		'any.required': 'Email é obrigatório',
+	}),
+	start: Joi.string().required().messages({
+		'string.empty': 'Email não pode ser vazio',
+		'any.required': 'Email é obrigatório',
+	}),
+	finish: Joi.string().required().messages({
+		'string.empty': 'Email não pode ser vazio',
+		'any.required': 'Email é obrigatório',
+	}),
+	description: Joi.string().required().messages({
+		'string.empty': 'Email não pode ser vazio',
+		'any.required': 'Email é obrigatório',
+	})
+})
+//.options({ abortEarly: false }).unknown();
+
 module.exports = {
 	userValidator,
-	userUpdateValidator
+	userUpdateValidator,
+	updateUserFormations,
+	updateUserExperiences,
 };
