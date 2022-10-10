@@ -10,7 +10,7 @@ const VacancySchema = new Schema({
 		index: true,
 		type: String,
 		required: true,
-		enum: ['Recursos Humanos', 'Tecnologia', 'Administrativo', 'Financeiro', 'Operacional']
+		enum: ['Recursos Humanos', 'Tecnologia', 'Administrativo', 'Financeiro', 'Operacional', 'Comércio', 'Serviços', 'Saúde', 'Industrial', 'Construção'],
 	},
 	description: {
 		index: true,

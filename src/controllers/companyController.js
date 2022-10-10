@@ -10,6 +10,7 @@ const {
 	generateToken,
 	decodeToken
 } = require('../utils/jwt');
+const Vacancy = require('../models/Vacancy');
 
 /**
  * Login company
@@ -217,7 +218,7 @@ const createForgotPasswordToken = async (req, res) => {
 					ipRequest: ipRequest,
 					createdAt: Date.now(),
 					used: false
-				}
+				};
 
 				// Add passwordReset object to company.forgotPassword array
 				Company.findByIdAndUpdate(company._id, {
@@ -477,6 +478,31 @@ const getTalentBank = async (req, res) => {
 		});
 };
 
+const getVacancy = async (req, res) => {
+	try {
+		Vacancy.findById(req.params.id).populate('company', 'company.name')
+			.then((vacancy) => {
+				if (!vacancy) {
+					return res.status(404).json({
+						success: false,
+						message: 'Vaga não encontrada.',
+					});
+				}
+
+				return res.json({
+					success: true,
+					message: 'Vaga encontrada com sucesso',
+					vacancy,
+				});
+			});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar vaga' + err,
+		});
+	}
+};
+
 module.exports = {
 	registerCompany,
 	loginCompany,
@@ -490,4 +516,5 @@ module.exports = {
 	createForgotPasswordToken,
 	checkRecoveryToken,
 	resetPassword,
+	getVacancy,
 };

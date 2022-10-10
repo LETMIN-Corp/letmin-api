@@ -1,6 +1,7 @@
 const Vacancy = require('../models/Vacancy');
 const Company = require('../models/Company');
 const User = require('../models/User');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 // Vacancy CRUD
 const insertVacancy = async (req, res) => {
@@ -72,7 +73,7 @@ const getVacancy = async (req, res) => {
 						message: 'Vaga não encontrada.',
 					});
 				}
-				
+
 				vacancy.views += 1;
 				vacancy.save();
 
@@ -92,8 +93,10 @@ const getVacancy = async (req, res) => {
 
 // Change vacancy status to the opposite
 const confirmVacancy = async (req, res) => {
+	const companyId = req.user._id;
+
 	try {
-		Vacancy.findById(req.params.id)
+		Vacancy.findOne({ company: companyId, _id: req.params.id })
 			.then((vacancy) => {
 				if (!vacancy) {
 					return res.status(404).json({
@@ -119,8 +122,10 @@ const confirmVacancy = async (req, res) => {
 };
 
 const closeVacancy = async (req, res) => {
+	const companyId = req.user._id;
+
 	try {
-		await Vacancy.findByIdAndDelete(req.params.id)
+		await Vacancy.findOne({ company: companyId, _id: req.params.id })
 			.then((vacancy) => {
 				if (!vacancy) {
 					return res.status(404).json({
@@ -206,6 +211,37 @@ const searchVacancies = async (req, res) => {
 		});
 };
 
+const getCandidateVacancies = async (req, res) => {
+	// let search = req.params.search? req.params.search.trim() : '';
+	const user_id = req.user._id;
+
+	Vacancy.find({
+		$and: [
+			{ candidates: user_id },
+		],
+	}).populate('company', 'company.name').select('role description sector region company').sort({ createdAt: -1 })
+		.then((vacancies) => { 
+			if (!vacancies) {
+				return res.status(404).json({
+					success: false,
+					message: 'Vaga não encontrada.',
+				});
+			}
+
+			return res.status(200).json({
+				success: true,
+				message: 'Vagas encotradas.',
+				vacancies: vacancies
+			});
+		})
+		.catch((err) => {
+			return res.status(400).json({
+				success: false,
+				message: 'Erro ao buscar vagas.' + err,
+			});
+		});
+};
+
 const applyToVacancy = async (req, res) => {
 	try {
 		const { vacancy_id } = req.body;
@@ -235,6 +271,40 @@ const applyToVacancy = async (req, res) => {
 			success: true,
 			message: 'Candidatura realizada com sucesso',
 		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao se candidatar a vaga.' + err,
+		});
+	}
+};
+
+const cancelApplyVacancy = async (req, res) => {
+	try {
+		const { vacancy_id } = req.body;
+
+		const user_id = req.user._id;
+
+		const vacancy = await Vacancy.findById(vacancy_id);
+
+		if (!vacancy) {
+			return res.status(404).json({
+				success: false,
+				message: 'Vaga não encontrada.',
+			});
+		}
+
+		if (vacancy.candidates.includes(user_id)) 
+		{
+			let index = vacancy.candidates.indexOf(user_id);
+			vacancy.candidates.splice(index, 1)
+			vacancy.save();
+
+			return res.json({
+				success: true,
+				message: 'Descandidatura realizada com sucesso',
+			});
+		}
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
@@ -280,6 +350,7 @@ const getCandidate = async (req, res) => {
 	try {
 		// get candidate profile info, and the count of his applications (which is in the Vacancy model)
 		const candidate = await User.aggregate([
+			{ $match: { _id: ObjectId(req.params.id) } },
 			{
 				$lookup: {
 					from: 'vacancies',
@@ -366,7 +437,9 @@ module.exports = {
 	confirmVacancy,
 	closeVacancy,
 	searchVacancies,
+	getCandidateVacancies,
 	applyToVacancy,
+	cancelApplyVacancy,
 	getAllCandidates,
 	getCandidate,
 	getAppliedVacancies,
