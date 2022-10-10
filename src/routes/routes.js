@@ -19,7 +19,7 @@ router.get('/healthcheck', (req, res) => {
 });
 
 router.post('/send-recovery-email', createForgotPasswordToken);
-router.post('/check-recovery-token', checkRecoveryToken, (req, res) => { return res.status(200).json({ success: true, message: 'Token válido' }) });
+router.post('/check-recovery-token', checkRecoveryToken, (req, res) => { return res.status(200).json({ success: true, message: 'Token válido' }); });
 router.post('/new-password', checkRecoveryToken, resetPassword);
 
 // Users Authentication Route
