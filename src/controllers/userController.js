@@ -149,33 +149,78 @@ const getUserData = async (req, res) => {
 
 /**
  * Update user data
- * @route *** /user/update-user
+ * @route POST /user/update-user
 */
-const updateUser = async (req, res) => {
-	const { id } = req.params;
+const updateUser = async (req, res, next) => {
+    const { _id } = req.user;
 
-	User.findByIdAndUpdate(id, req.body, { new: true })
-		.then((user) => {
-			if (!user) {
-				return res.status(400).json({
-					message: 'Usuário não encontrado.',
-					success: false
-				});
-			}
+	User.findByIdAndUpdate(_id, req.body, { new: true }).then((user) => {
+        if (!user) {
+            return res.status(400).json({
+                message: "Usuário não encontrado.",
+                success: false
+            });
+        }
+        return res.status(200).json({
+			message: "Alterado com sucesso!",
+            success: true,
+            user,
+        });
+    })
+    .catch((err) => {
+        return res.status(400).json({
+            message: 'Error ' + err,
+            success: false
+        });
+    });
+}
+
+const updateUserFormations = async (req, res, next) => {
+    try {
+		let userId = req.user;
+		let formations = req.body.formations;
+		let user = await User.findById(userId);
+
+		user.formations.push(formations);
+		user.save().then(() => {
 			return res.status(200).json({
-				user,
-				success: true
+				success: true,
 			});
 		})
-		.catch((err) => {
-			return res.status(400).json({
-				message: 'Error ' + err,
-				success: false
-			});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Ocorreu um erro ao adicionar a formação ao seu banco!.' + err,
 		});
-};
+	}
+}
+
+const updateUserExperiences = async (req, res, next) => {
+    try {
+		let userId = req.user;
+		let experiences = req.body.experiences;
+		let user = await User.findById(userId);
+
+		user.experiences.push(experiences);
+		user.save().then(() => {
+			return res.status(200).json({
+				success: true,
+			});
+		})
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Ocorreu um erro ao adicionar a experiência ao seu banco!.' + err,
+		});
+	}
+}
 
 module.exports = {
+    userLogin,
+    getUserData,
+    updateUser,
+	updateUserFormations,
+	updateUserExperiences,
 	userLogin,
 	getUserData,
 	updateUser,
