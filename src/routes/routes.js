@@ -33,7 +33,8 @@ router.post('/admin/login', validation(adminValidator), adminLogin);
 router.post('/company/register', validation(companyValidator), registerCompany);
 router.post('/company/login', validation(loginCompanySchema), loginCompany);
 
-router.post('/create-complaint', passportAuth, createComplaint);
+const complaintValidator = require('../validate/complaint');
+router.post('/create-complaint', passportAuth, validation(complaintValidator), createComplaint);
 
 // Protected Routes for specific roles
 router.use('/user', passportAuth, checkRole(USER), require('./users'));

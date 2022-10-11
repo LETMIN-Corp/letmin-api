@@ -187,9 +187,10 @@ const changeUserBlockStatus = async (req, res) => {
 };
 
 const getAllComplaints = async (req, res) => {
+	const { getAllComplaintsWithUsers } = require('./repositories/ComplaintRepository');
+
 	try {
-		const complaints = await Complaints
-			.aggregate(require('./repositories/ComplaintRepository').getAllComplaintsWithUsers);
+		const complaints = await getAllComplaintsWithUsers();
 
 		return res.json({
 			success: true,

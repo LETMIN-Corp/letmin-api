@@ -7,7 +7,8 @@ const vacancyValidator = Joi.object({
 	}),
 	sector: Joi.string().required().valid('Recursos Humanos', 'Tecnologia', 'Administrativo', 'Financeiro', 'Operacional').messages({
 		'string.empty': 'Setor não pode ser vazio',
-		'any.required': 'Setor é obrigatório'
+		'any.required': 'Setor é obrigatório',
+		'any.only': 'Setor inválido'
 	}),
 	description: Joi.string().required().messages({
 		'string.empty': 'Descrição não pode ser vazia',
