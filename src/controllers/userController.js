@@ -175,52 +175,10 @@ const updateUser = async (req, res, next) => {
     });
 }
 
-const updateUserFormations = async (req, res, next) => {
-    try {
-		let userId = req.user;
-		let formations = req.body.formations;
-		let user = await User.findById(userId);
-
-		user.formations.push(formations);
-		user.save().then(() => {
-			return res.status(200).json({
-				success: true,
-			});
-		})
-	} catch (err) {
-		return res.status(400).json({
-			success: false,
-			message: 'Ocorreu um erro ao adicionar a formação ao seu banco!.' + err,
-		});
-	}
-}
-
-const updateUserExperiences = async (req, res, next) => {
-    try {
-		let userId = req.user;
-		let experiences = req.body.experiences;
-		let user = await User.findById(userId);
-
-		user.experiences.push(experiences);
-		user.save().then(() => {
-			return res.status(200).json({
-				success: true,
-			});
-		})
-	} catch (err) {
-		return res.status(400).json({
-			success: false,
-			message: 'Ocorreu um erro ao adicionar a experiência ao seu banco!.' + err,
-		});
-	}
-}
-
 module.exports = {
     userLogin,
     getUserData,
     updateUser,
-	updateUserFormations,
-	updateUserExperiences,
 	userLogin,
 	getUserData,
 	updateUser,

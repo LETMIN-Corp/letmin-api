@@ -1,6 +1,7 @@
 const router = require('express').Router();
+const validation = require('../middlewares/validation');
 
-const { updateUser, getUserData, updateUserExperiences, updateUserFormations } = require('../controllers/userController');
+const { updateUser, getUserData } = require('../controllers/userController');
 const { 
 	searchVacancies, 
 	getCandidateVacancies,
@@ -9,6 +10,8 @@ const {
 	getAppliedVacancies,
 	cancelApplyVacancy
 } = require('../controllers/vacancyController');
+
+const { updateUserFormations, updateUserExperiences } = require('../validate/user');
 
 // Profile Route
 router.get('/get-user', getUserData);
@@ -20,8 +23,8 @@ router.get('/vacancy-candidate', getCandidateVacancies);
 router.get('/get-vacancy/:id', getVacancy);
 router.get("/get-user", getUserData);
 router.post("/update-user", updateUser);
-router.post("/update-user-experiences", updateUserExperiences);
-router.post("/update-user-formations", updateUserFormations);
+router.post("/check-user-experiences", validation(updateUserExperiences), (req, res) => { return res.status(200).json({ success: true, message: 'Objeto válido' }); });
+router.post("/check-user-formations", validation(updateUserFormations), (req, res) => { return res.status(200).json({ success: true, message: 'Objeto válido' }); });
 
 router.post('/apply-vacancy', applyToVacancy);
 router.post('/cancel-apply-vacancy', cancelApplyVacancy);

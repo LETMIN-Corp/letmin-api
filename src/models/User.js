@@ -11,6 +11,10 @@ const UserSchema = new Schema({
 		type: String,
 		required: true
 	},
+	role: {
+		type: String,
+		required: false,
+	},
 	username: {
 		type: String,
 		required: true
