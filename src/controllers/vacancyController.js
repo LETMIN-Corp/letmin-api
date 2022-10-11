@@ -363,6 +363,8 @@ const getCandidate = async (req, res) => {
 				$project: {
 					_id: 1,
 					name: 1,
+					role: 1,
+					description: 1,
 					email: 1,
 					picture: 1,
 					formations: 1,
