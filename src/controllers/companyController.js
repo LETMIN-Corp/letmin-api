@@ -310,6 +310,10 @@ const resetPassword = async (req, res) => {
 	});
 };
 
+/**
+ * Update Company Data
+ * @route Patch /api/company/update-company
+ */
 const updateCompanyData = async (req, res) => {
 	try {
 		let token = req.headers.authorization;

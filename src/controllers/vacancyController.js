@@ -213,39 +213,40 @@ const searchVacancies = async (req, res) => {
 	let search = req.params.search? req.params.search.trim() : '';
 
 	const { searchVacancies } = require('./repositories/VacancyRepository');
-	Vacancy.find({
-		$and: [
-			{ closed: false },
-			{
-				$or: [
-					{ role: { $regex: search, $options: 'i' } },
-					{ description: { $regex: search, $options: 'i' } },
-					{ sector: { $regex: search, $options: 'i' } },
-					{ 'company.name': { $regex: search, $options: 'i' } },
-				],
-			},
-		],
-	}).populate('company', 'company.name').select('role description sector region company candidates').sort({ createdAt: -1 })
-		.then((vacancies) => { 
-			if (!vacancies) {
-				return res.status(404).json({
-					success: false,
-					message: 'Vaga não encontrada.',
-				});
-			}
+	// Vacancy.find({
+	// 	$and: [
+	// 		{ closed: false },
+	// 		{
+	// 			$or: [
+	// 				{ role: { $regex: search, $options: 'i' } },
+	// 				{ description: { $regex: search, $options: 'i' } },
+	// 				{ sector: { $regex: search, $options: 'i' } },
+	// 				{ 'company.name': { $regex: search, $options: 'i' } },
+	// 			],
+	// 		},
+	// 	],
+	// }).populate('company', 'company.name').select('role description sector region company candidates').sort({ createdAt: -1 })
+	try {
+		const vacancies = await searchVacancies(search);
 
-			return res.status(200).json({
-				success: true,
-				message: 'Vagas encotradas.',
-				vacancies: vacancies
-			});
-		})
-		.catch((err) => {
-			return res.status(400).json({
+		if (!vacancies) {
+			return res.status(404).json({
 				success: false,
-				message: 'Erro ao buscar vagas.' + err,
+				message: 'Vaga não encontrada.',
 			});
+		}
+
+		return res.status(200).json({
+			success: true,
+			message: 'Vagas encotradas.',
+			vacancies: vacancies
 		});
+	} catch(err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar vagas.' + err,
+		});
+	};
 };
 
 const getCandidateVacancies = async (req, res) => {
@@ -412,7 +413,6 @@ const getCandidate = async (req, res) => {
 // Get all vacancies the user applied to sorting by date and counting the number of candidates
 const getAppliedVacancies = async (req, res) => {
 	const { getAppliedVacancies } = require('./repositories/VacancyRepository');
-
 	try {
 		const vacancies = await getAppliedVacancies(req.user._id);
 
@@ -426,7 +426,7 @@ const getAppliedVacancies = async (req, res) => {
 		return res.json({
 			success: true,
 			message: 'Vagas encontradas',
-			data: vacancies
+			vacancies: vacancies
 		});
 	} catch (err) {
 		return res.status(400).json({

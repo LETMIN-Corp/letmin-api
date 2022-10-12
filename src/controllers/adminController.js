@@ -3,6 +3,7 @@ const Company = require('../models/Company');
 const bcrypt = require('bcryptjs');
 const { ADMIN } = require('../utils/constants');
 const ObjectId = require('mongoose').Types.ObjectId;
+const { success, error } = require('consola');
 
 const {
 	generateToken,
@@ -238,7 +239,7 @@ const changeComplaintStatus = async (req, res) => {
 			});
 		});
 	} catch (err) {
-		console.log(err);
+		error(err);
 		return res.status(400).json({
 			success: false,
 			message: 'Erro ao buscar reclamações' + err,
@@ -271,7 +272,7 @@ const removeComplaint = async (req, res) => {
 			});
 		});
 	} catch (err) {
-		console.log(err);
+		error(err);
 		return res.status(400).json({
 			success: false,
 			message: 'Erro ao buscar reclamações' + err,

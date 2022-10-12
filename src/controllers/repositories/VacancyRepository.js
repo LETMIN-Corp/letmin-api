@@ -33,12 +33,28 @@ async function getCandidateInfo(_id) {
 
 async function getAppliedVacancies (_id) {
     return await Vacancy.aggregate([
-        { $match: { candidates: ObjectId(_id) } },
+        { $match: { candidates: _id }}, 
         { $sort: { createdAt: -1 } },
-        { $project: { role: 1, description: 1, sector: 1, region: 1, company: 1, candidates: { $size: '$candidates' } } },
-        { $lookup: { from: 'companies', localField: 'company', foreignField: '_id', as: 'company' } },
-        { $unwind: '$company' },
-        { $project: { role: 1, description: 1, sector: 1, region: 1, company: '$company.name', candidates: 1 } }
+        { $lookup: { from: 'companies', localField: 'company', foreignField: '_id', as: 'companyInfo'} },
+        { $unwind: { path: '$companyInfo' } },
+        {
+            $project: {
+                role: 1, 
+                description: 1, 
+                sector: 1, 
+                views: 1, 
+                salary: 1, 
+                currency: 1, 
+                region: 1, 
+                candidates: {
+                    $size: '$candidates'
+                }, 
+                company: {
+                    _id: '$companyInfo._id', 
+                    name: '$companyInfo.company.name'
+                }
+            }
+        }
     ]);
 }
 
@@ -56,10 +72,29 @@ async function searchVacancies(search) {
             },
         },
         { $sort: { createdAt: -1 } },
-        { $project: { role: 1, description: 1, sector: 1, region: 1, company: 1, candidates: { $size: '$candidates' } } },
-        { $lookup: { from: 'companies', localField: 'company', foreignField: '_id', as: 'company' } },
-        { $unwind: '$company' },
-        { $project: { role: 1, description: 1, sector: 1, region: 1, company: '$company.name', candidates: 1 } },
+        { $lookup: { from: 'companies', localField: 'company', foreignField: '_id', as: 'companyInfo'} },
+        { $unwind: { path: '$companyInfo' } },
+        {
+            $project: {
+                role: 1, 
+                description: 1, 
+                sector: 1, 
+                views: 1, 
+                salary: 1, 
+                currency: 1, 
+                region: 1, 
+                candidates: {
+                    $size: '$candidates'
+                },
+                user_applied: {
+                    $in: [new ObjectId('63460be3b642d29bb6d224df'), '$candidates']
+                },
+                company: {
+                    _id: '$companyInfo._id', 
+                    name: '$companyInfo.company.name'
+                }
+            }
+        }
     ]);
 }
 
