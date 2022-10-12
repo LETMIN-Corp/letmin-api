@@ -33,9 +33,10 @@ const vacancyValidator = Joi.object({
 		'any.required': 'Região é obrigatória',
 		'any.only': 'Região inválida'
 	}),
-	type: Joi.string().required().messages({
+	type: Joi.string().required().valid('Estágio', 'Permanente', 'Temporário').messages({
 		'string.empty': 'Tipo de contratação não pode ser vazio',
-		'any.required': 'Tipo de contratação é obrigatório'
+		'any.required': 'Tipo de contratação é obrigatório',
+		'any.only': 'Tipo de contratação inválida'
 	}),
 }).options({ abortEarly: false }).unknown();
 
