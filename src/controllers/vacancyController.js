@@ -213,19 +213,7 @@ const searchVacancies = async (req, res) => {
 	let search = req.params.search? req.params.search.trim() : '';
 
 	const { searchVacancies } = require('./repositories/VacancyRepository');
-	// Vacancy.find({
-	// 	$and: [
-	// 		{ closed: false },
-	// 		{
-	// 			$or: [
-	// 				{ role: { $regex: search, $options: 'i' } },
-	// 				{ description: { $regex: search, $options: 'i' } },
-	// 				{ sector: { $regex: search, $options: 'i' } },
-	// 				{ 'company.name': { $regex: search, $options: 'i' } },
-	// 			],
-	// 		},
-	// 	],
-	// }).populate('company', 'company.name').select('role description sector region company candidates').sort({ createdAt: -1 })
+
 	try {
 		const vacancies = await searchVacancies(search);
 
