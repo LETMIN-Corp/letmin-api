@@ -58,6 +58,10 @@ const VacancySchema = new Schema({
 		type: Boolean,
 		default: false
 	},
-});
+},
+	{
+		timestamps: true
+	}
+);
 
 module.exports = model('Vacancy', VacancySchema, 'vacancies');

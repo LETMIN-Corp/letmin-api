@@ -310,6 +310,10 @@ const resetPassword = async (req, res) => {
 	});
 };
 
+/**
+ * Update Company Data
+ * @route Patch /api/company/update-company
+ */
 const updateCompanyData = async (req, res) => {
 	try {
 		let token = req.headers.authorization;
@@ -480,7 +484,7 @@ const getTalentBank = async (req, res) => {
 
 const getVacancy = async (req, res) => {
 	try {
-		Vacancy.findById(req.params.id).populate('company', 'company.name')
+		Vacancy.findById(req.params.id).populate('company', 'company.name').populate('candidates')
 			.then((vacancy) => {
 				if (!vacancy) {
 					return res.status(404).json({

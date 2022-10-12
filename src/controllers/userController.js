@@ -1,7 +1,7 @@
 const User = require('../models/User');
-const { USER } = require('../utils/constants');
 const bcrypt = require('bcryptjs');
-
+const { success, error } = require('consola');
+const { USER } = require('../utils/constants');
 const { SECRET } = require('../config');
 
 const {
@@ -93,9 +93,15 @@ const userLogin = async (req, res) => {
 				const email = require('../utils/emailTemplates/userRegister')(user);
 
 				sendMail(email).then(() => {
-					console.log('Email enviado com sucesso');
+					success({
+						message: `Email enviado para ${user.email}`,
+						badge: true
+					});
 				}).catch((err) => {
-					console.log('Erro ao enviar email', err);
+					error({
+						message: `Erro ao enviar email para ${user.email}: ${err}`,
+						badge: true
+					});
 				});
 
 				let result = {

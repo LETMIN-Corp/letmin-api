@@ -5,9 +5,10 @@ const vacancyValidator = Joi.object({
 		'string.empty': 'Cargo não pode ser vazio',
 		'any.required': 'Cargo é obrigatório'
 	}),
-	sector: Joi.string().required().valid('Recursos Humanos', 'Tecnologia', 'Administrativo', 'Financeiro', 'Operacional').messages({
+	sector: Joi.string().required().valid('Recursos Humanos', 'Tecnologia', 'Administrativo', 'Financeiro', 'Operacional', 'Comércio', 'Serviços', 'Saúde', 'Industrial', 'Construção').messages({
 		'string.empty': 'Setor não pode ser vazio',
-		'any.required': 'Setor é obrigatório'
+		'any.required': 'Setor é obrigatório',
+		'any.only': 'Setor inválido'
 	}),
 	description: Joi.string().required().messages({
 		'string.empty': 'Descrição não pode ser vazia',
@@ -31,6 +32,11 @@ const vacancyValidator = Joi.object({
 		'string.empty': 'Região não pode ser vazia',
 		'any.required': 'Região é obrigatória',
 		'any.only': 'Região inválida'
+	}),
+	type: Joi.string().required().valid('Estágio', 'Permanente', 'Temporário').messages({
+		'string.empty': 'Tipo de contratação não pode ser vazio',
+		'any.required': 'Tipo de contratação é obrigatório',
+		'any.only': 'Tipo de contratação inválida'
 	}),
 }).options({ abortEarly: false }).unknown();
 

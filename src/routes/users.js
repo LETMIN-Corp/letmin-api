@@ -28,6 +28,6 @@ router.post("/check-user-formations", validation(updateUserFormations), (req, re
 
 router.post('/apply-vacancy', applyToVacancy);
 router.post('/cancel-apply-vacancy', cancelApplyVacancy);
-router.post('/get-all-applications', getAppliedVacancies);
+router.get('/get-candidate-applications', getAppliedVacancies);
 
 module.exports = router;
