@@ -57,10 +57,7 @@ const updateUserFormations = Joi.object({
 		'string.empty': 'Descrição não pode ser vazio',
 		'any.required': 'Descrição é obrigatório',
 	})
-})
-
-
-//.options({ abortEarly: false }).unknown();
+}).options({ abortEarly: false }).unknown();
 
 const updateUserExperiences = Joi.object({
 	role: Joi.string().required().messages({
@@ -83,8 +80,7 @@ const updateUserExperiences = Joi.object({
 		'string.empty': 'Descrição não pode ser vazio',
 		'any.required': 'Descrição é obrigatório',
 	})
-})
-//.options({ abortEarly: false }).unknown();
+}).options({ abortEarly: false }).unknown();
 
 module.exports = {
 	userValidator,
