@@ -97,9 +97,9 @@ const checkUserSkills = Joi.object({
 		'string.empty': 'Nome não pode ser vazio',
 		'any.required': 'Nome é obrigatório',
 	}),
-	description: Joi.string().required().messages({
-		'string.empty': 'Descrição não pode ser vazio',
-		'any.required': 'Descrição é obrigatório',
+	level: Joi.string().required().messages({
+		'string.empty': 'Nivel de habilidade é obrigatório',
+		'any.required': 'Nivel de habilidade é obrigatório',
 	})
 }).options({ abortEarly: false }).unknown();
 
