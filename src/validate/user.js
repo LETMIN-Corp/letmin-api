@@ -1,7 +1,7 @@
 const Joi = require('joi');
 
 const userValidator = Joi.object({
-	username: Joi.string().required().messages({
+	name: Joi.string().required().messages({
 		'string.empty': 'Nome não pode ser vazio',
 		'any.required': 'Nome é obrigatório'
 	}),
@@ -21,14 +21,24 @@ const userValidator = Joi.object({
 }).options({ abortEarly: false }).unknown();
 
 const userUpdateValidator = Joi.object({
-	username: Joi.string().required().messages({
+	name: Joi.string().min(6).max(64).required().messages({
 		'string.empty': 'Nome não pode ser vazio',
-		'any.required': 'Nome é obrigatório'
+		'any.required': 'Nome é obrigatório',
+		'string.min': 'Nome deve ter no mínimo 6 caracteres',
+		'string.max': 'Nome deve ter no máximo 64 caracteres'
 	}),
 	email: Joi.string().email().required().messages({
 		'string.empty': 'Email não pode ser vazio',
 		'any.required': 'Email é obrigatório',
 		'string.email': 'Email inválido'
+	}),
+	role: Joi.string().messages({
+		'string.empty': 'Role não pode ser vazia',
+		'typeError': 'Role deve ser uma string'
+	}),
+	description: Joi.string().messages({
+		'string.empty': 'Descrição não pode ser vazia',
+		'typeError': 'Descrição deve ser uma string'
 	}),
 	picture: Joi.string().messages({
 		'string.empty': 'Foto não pode ser vazia',
@@ -36,7 +46,7 @@ const userUpdateValidator = Joi.object({
 	}),
 }).options({ abortEarly: false }).unknown();
 
-const updateUserFormations = Joi.object({
+const checkUserFormations = Joi.object({
 	name: Joi.string().required().messages({
 		'string.empty': 'Formação não pode ser vazio',
 		'any.required': 'Formação é obrigatório',
@@ -59,7 +69,7 @@ const updateUserFormations = Joi.object({
 	})
 }).options({ abortEarly: false }).unknown();
 
-const updateUserExperiences = Joi.object({
+const checkUserExperiences = Joi.object({
 	role: Joi.string().required().messages({
 		'string.empty': 'Nome não pode ser vazio',
 		'any.required': 'Nome é obrigatório',
@@ -85,6 +95,6 @@ const updateUserExperiences = Joi.object({
 module.exports = {
 	userValidator,
 	userUpdateValidator,
-	updateUserFormations,
-	updateUserExperiences,
+	checkUserFormations,
+	checkUserExperiences,
 };
