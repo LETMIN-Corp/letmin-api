@@ -92,9 +92,21 @@ const checkUserExperiences = Joi.object({
 	})
 }).options({ abortEarly: false }).unknown();
 
+const checkUserSkills = Joi.object({
+	name: Joi.string().required().messages({
+		'string.empty': 'Nome não pode ser vazio',
+		'any.required': 'Nome é obrigatório',
+	}),
+	description: Joi.string().required().messages({
+		'string.empty': 'Descrição não pode ser vazio',
+		'any.required': 'Descrição é obrigatório',
+	})
+}).options({ abortEarly: false }).unknown();
+
 module.exports = {
 	userValidator,
 	userUpdateValidator,
 	checkUserFormations,
 	checkUserExperiences,
+	checkUserSkills,
 };

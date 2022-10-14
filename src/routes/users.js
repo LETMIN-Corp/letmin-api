@@ -11,13 +11,9 @@ const {
 	cancelApplyVacancy
 } = require('../controllers/vacancyController');
 
-const { checkUserFormations, checkUserExperiences, userUpdateValidator } = require('../validate/user');
+const { checkUserFormations, checkUserExperiences, userUpdateValidator, checkUserSkills } = require('../validate/user');
 
 const confirmCheck = require('../middlewares/confirmCheck');
-
-// Profile Route
-router.get('/get-user', getUserData);
-router.get('/update-user', updateUser);
 
 // Vacancy Routes
 router.get('/vacancy', searchVacancies);
@@ -29,6 +25,7 @@ router.post('/cancel-apply-vacancy', cancelApplyVacancy);
 // User CRUD Routes
 router.get('/get-user', getUserData);
 router.post('/update-user', validation(userUpdateValidator), updateUser);
+router.post('/check-user-skills', validation(checkUserSkills), confirmCheck('Objeto válido'));
 router.post('/check-user-experiences', validation(checkUserExperiences), confirmCheck('Objeto válido'));
 router.post('/check-user-formations', validation(checkUserFormations), confirmCheck('Objeto válido'));
 
