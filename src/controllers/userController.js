@@ -157,34 +157,31 @@ const getUserData = async (req, res) => {
  * Update user data
  * @route POST /user/update-user
 */
-const updateUser = async (req, res, next) => {
-    const { _id } = req.user;
+const updateUser = async (req, res) => {
+	const { _id } = req.user;
 
 	User.findByIdAndUpdate(_id, req.body, { new: true }).then((user) => {
-        if (!user) {
-            return res.status(400).json({
-                message: "Usuário não encontrado.",
-                success: false
-            });
-        }
-        return res.status(200).json({
-			message: "Alterado com sucesso!",
-            success: true,
-            user,
-        });
-    })
-    .catch((err) => {
-        return res.status(400).json({
-            message: 'Error ' + err,
-            success: false
-        });
-    });
-}
+		if (!user) {
+			return res.status(400).json({
+				message: 'Usuário não encontrado.',
+				success: false
+			});
+		}
+		return res.status(200).json({
+			message: 'Alterado com sucesso!',
+			success: true,
+			user,
+		});
+	})
+		.catch((err) => {
+			return res.status(400).json({
+				message: 'Error ' + err,
+				success: false
+			});
+		});
+};
 
 module.exports = {
-    userLogin,
-    getUserData,
-    updateUser,
 	userLogin,
 	getUserData,
 	updateUser,

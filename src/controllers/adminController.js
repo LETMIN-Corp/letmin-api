@@ -36,6 +36,7 @@ const adminRegister = async (req, res) => {
 	});
 	await newAdmin.save()
 		.then((value) => {
+			success('Admin criado com sucesso');
 			return res.status(201).json({
 				success: true,
 				message: `Parabéns ${value.name}! Você está cadastrado. Por favor logue.`,

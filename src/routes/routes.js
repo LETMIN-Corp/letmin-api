@@ -11,15 +11,12 @@ const { loginCompanySchema, companyValidator } = require('../validate/company');
 const adminValidator = require('../validate/admin');
 const { createComplaint } = require('../controllers/complaintController');
 
-router.get('/healthcheck', (req, res) => {
-	res.status(200).json({
-		success: true,
-		message: 'Olá Mundo',
-	});
-});
+const confirmCheck = require('../middlewares/confirmCheck');
+
+router.get('/healthcheck', confirmCheck('Olá Mundo'));
 
 router.post('/send-recovery-email', createForgotPasswordToken);
-router.post('/check-recovery-token', checkRecoveryToken, (req, res) => { return res.status(200).json({ success: true, message: 'Token válido' }); });
+router.post('/check-recovery-token', checkRecoveryToken, confirmCheck('Token válido'));
 router.post('/new-password', checkRecoveryToken, resetPassword);
 
 // Users Authentication Route

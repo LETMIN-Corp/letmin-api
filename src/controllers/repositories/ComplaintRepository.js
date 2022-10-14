@@ -119,7 +119,7 @@ async function getAllComplaintsWithUsers() {
 			}
 		}
 	]);
-};
+}
 
 module.exports = {
 	getAllComplaintsWithUsers
