@@ -32,11 +32,11 @@ const userUpdateValidator = Joi.object({
 		'any.required': 'Email é obrigatório',
 		'string.email': 'Email inválido'
 	}),
-	role: Joi.string().messages({
-		'string.empty': 'Role não pode ser vazia',
-		'typeError': 'Role deve ser uma string'
+	role: Joi.string().allow('').messages({
+		'string.empty': 'Cargo não pode ser vazia',
+		'typeError': 'Cargo deve ser uma string'
 	}),
-	description: Joi.string().messages({
+	description: Joi.string().allow('').messages({
 		'string.empty': 'Descrição não pode ser vazia',
 		'typeError': 'Descrição deve ser uma string'
 	}),

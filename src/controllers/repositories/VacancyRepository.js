@@ -25,6 +25,8 @@ async function getCandidateInfo(_id) {
                 phone: 1,
                 createdAt: 1,
                 updatedAt: 1,
+                role: 1,
+                description: 1,
                 applications: { $size: '$applications' },
             },
         },
