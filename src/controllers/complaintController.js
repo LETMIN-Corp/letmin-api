@@ -8,7 +8,6 @@ const User = require('../models/User');
  */
 const createComplaint = async (req, res) => {
 	try {
-
 		let envoy = req.user._id;
 		let envoyRole = req.user.role;
 		let target = req.body.target;

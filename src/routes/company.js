@@ -11,6 +11,7 @@ const {
 	closeVacancy,
 	getAllCandidates,
 	getCandidate,
+	updateVacancy,
 } = require('../controllers/vacancyController');
 const { getCompanyData, searchUsers, updateCompanyData, updateHolderData, addToTalentBank, removeFromTalentBank, getTalentBank, getVacancy } = require('../controllers/companyController');
 
@@ -23,11 +24,11 @@ router.post('/update-company-holder', validation(updateHolderValidator), updateH
 router.post('/register-vacancy', validation(vacancyValidator), insertVacancy);
 router.get('/get-all-vacancies', getVacanciesCompany);
 router.get('/get-company-vacancies', getAllCompanyVacancies);
-//router.get('/get-vacancy/:id', getVacancyData);
 router.get('/get-vacancy/:id', getVacancy);
 router.get('/search-vacancies/:search?', searchVacancies);
 router.patch('/confirm-vacancy/:id', confirmVacancy);
-router.delete('/close-vacancy/:id', closeVacancy);
+router.delete('/close-vacancy/:id', closeVacancy); //remove
+router.patch('/update-vacancy', validation(vacancyValidator), updateVacancy);
 router.get('/user', searchUsers);
 
 router.get('/get-all-candidates/:id', getAllCandidates);

@@ -3,6 +3,7 @@ const Company = require('../models/Company');
 const bcrypt = require('bcryptjs');
 const { ADMIN } = require('../utils/constants');
 const ObjectId = require('mongoose').Types.ObjectId;
+const { success, error } = require('consola');
 
 const {
 	generateToken,
@@ -35,6 +36,7 @@ const adminRegister = async (req, res) => {
 	});
 	await newAdmin.save()
 		.then((value) => {
+			success('Admin criado com sucesso');
 			return res.status(201).json({
 				success: true,
 				message: `Parabéns ${value.name}! Você está cadastrado. Por favor logue.`,
@@ -187,9 +189,10 @@ const changeUserBlockStatus = async (req, res) => {
 };
 
 const getAllComplaints = async (req, res) => {
+	const { getAllComplaintsWithUsers } = require('./repositories/ComplaintRepository');
+
 	try {
-		const complaints = await Complaints
-			.aggregate(require('./repositories/ComplaintRepository').getAllComplaintsWithUsers);
+		const complaints = await getAllComplaintsWithUsers();
 
 		return res.json({
 			success: true,
@@ -237,7 +240,7 @@ const changeComplaintStatus = async (req, res) => {
 			});
 		});
 	} catch (err) {
-		console.log(err);
+		error(err);
 		return res.status(400).json({
 			success: false,
 			message: 'Erro ao buscar reclamações' + err,
@@ -270,7 +273,7 @@ const removeComplaint = async (req, res) => {
 			});
 		});
 	} catch (err) {
-		console.log(err);
+		error(err);
 		return res.status(400).json({
 			success: false,
 			message: 'Erro ao buscar reclamações' + err,

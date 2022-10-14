@@ -1,11 +1,10 @@
-const { required } = require('joi');
 const { Schema, model } = require('mongoose');
 
 const ComplaintSchema = new Schema({
 	reason: {
 		type: String,
 		required: true,
-		enum: ['Conteúdo Inapropriado', 'Spam', 'Outro']
+		enum: ['Conteúdo inapropriado', 'Spam', 'Outros']
 	},
 	description: {
 		type: String,

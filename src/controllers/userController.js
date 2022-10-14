@@ -1,7 +1,7 @@
 const User = require('../models/User');
-const { USER } = require('../utils/constants');
 const bcrypt = require('bcryptjs');
-
+const { success, error } = require('consola');
+const { USER } = require('../utils/constants');
 const { SECRET } = require('../config');
 
 const {
@@ -93,9 +93,15 @@ const userLogin = async (req, res) => {
 				const email = require('../utils/emailTemplates/userRegister')(user);
 
 				sendMail(email).then(() => {
-					console.log('Email enviado com sucesso');
+					success({
+						message: `Email enviado para ${user.email}`,
+						badge: true
+					});
 				}).catch((err) => {
-					console.log('Erro ao enviar email', err);
+					error({
+						message: `Erro ao enviar email para ${user.email}: ${err}`,
+						badge: true
+					});
 				});
 
 				let result = {
@@ -151,34 +157,31 @@ const getUserData = async (req, res) => {
  * Update user data
  * @route POST /user/update-user
 */
-const updateUser = async (req, res, next) => {
-    const { _id } = req.user;
+const updateUser = async (req, res) => {
+	const { _id } = req.user;
 
 	User.findByIdAndUpdate(_id, req.body, { new: true }).then((user) => {
-        if (!user) {
-            return res.status(400).json({
-                message: "Usuário não encontrado.",
-                success: false
-            });
-        }
-        return res.status(200).json({
-			message: "Alterado com sucesso!",
-            success: true,
-            user,
-        });
-    })
-    .catch((err) => {
-        return res.status(400).json({
-            message: 'Error ' + err,
-            success: false
-        });
-    });
-}
+		if (!user) {
+			return res.status(400).json({
+				message: 'Usuário não encontrado.',
+				success: false
+			});
+		}
+		return res.status(200).json({
+			message: 'Alterado com sucesso!',
+			success: true,
+			user,
+		});
+	})
+		.catch((err) => {
+			return res.status(400).json({
+				message: 'Error ' + err,
+				success: false
+			});
+		});
+};
 
 module.exports = {
-    userLogin,
-    getUserData,
-    updateUser,
 	userLogin,
 	getUserData,
 	updateUser,

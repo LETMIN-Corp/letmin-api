@@ -12,7 +12,7 @@ const { adminRegisterValidator, adminLoginValidator } = require('../validate/adm
 const { createComplaint } = require('../controllers/complaintController');
 const confirmCheck = require('../middlewares/confirmCheck');
 
-router.get('/healthcheck', confirmCheck('Olá mundo'));
+router.get('/healthcheck', confirmCheck('Olá Mundo'));
 
 // Recover password routes
 router.post('/send-recovery-email', createForgotPasswordToken);
@@ -30,7 +30,8 @@ router.post('/admin/login', validation(adminLoginValidator), adminLogin);
 router.post('/company/register', validation(registerCompanyValidator), registerCompany);
 router.post('/company/login', validation(loginCompanySchema), loginCompany);
 
-router.post('/create-complaint', passportAuth, createComplaint);
+const complaintValidator = require('../validate/complaint');
+router.post('/create-complaint', passportAuth, validation(complaintValidator), createComplaint);
 
 // Protected Routes for specific roles
 router.use('/user', passportAuth, checkRole(USER), require('./users'));
