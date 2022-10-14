@@ -1,7 +1,7 @@
 const Vacancy = require('../models/Vacancy');
 const Company = require('../models/Company');
-const User = require('../models/User');
-const ObjectId = require('mongoose').Types.ObjectId;
+// const User = require('../models/User');
+// const ObjectId = require('mongoose').Types.ObjectId;
 
 // Vacancy CRUD
 const insertVacancy = async (req, res) => {
@@ -234,7 +234,7 @@ const searchVacancies = async (req, res) => {
 			success: false,
 			message: 'Erro ao buscar vagas.' + err,
 		});
-	};
+	}
 };
 
 const getCandidateVacancies = async (req, res) => {
@@ -323,7 +323,7 @@ const cancelApplyVacancy = async (req, res) => {
 		if (vacancy.candidates.includes(user_id)) 
 		{
 			let index = vacancy.candidates.indexOf(user_id);
-			vacancy.candidates.splice(index, 1)
+			vacancy.candidates.splice(index, 1);
 			vacancy.save();
 
 			return res.json({

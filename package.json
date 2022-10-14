@@ -6,7 +6,7 @@
   "scripts": {
     "prod": "set NODE_ENV=production && npm start",
     "test": "set NODE_ENV=test && mocha ./test/app.js --exit --port 8000",
-    "lint": "eslint ./ --fix",
+    "lint": "eslint ./src --fix",
     "dev": "set TZ='America/Sao Paulo' && npx nodemon src/app.js -L",
     "start": "set TZ='America/Sao Paulo' node src/app.js",
     "publish": "npm run lint && npm run test && npm run prod"

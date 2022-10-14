@@ -182,9 +182,6 @@ const updateUser = async (req, res) => {
 }
 
 module.exports = {
-    userLogin,
-    getUserData,
-    updateUser,
 	userLogin,
 	getUserData,
 	updateUser,
