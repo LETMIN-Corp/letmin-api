@@ -55,11 +55,11 @@ const checkUserFormations = Joi.object({
 		'string.empty': 'Instituição não pode ser vazio',
 		'any.required': 'Instituição é obrigatório',
 	}),
-	start: Joi.string().required().messages({
+	start: Joi.number().required().min(1900).messages({
 		'string.empty': 'Ano de Início não pode ser vazio',
 		'any.required': 'Ano de Início é obrigatório',
 	}),
-	finish: Joi.string().required().messages({
+	finish: Joi.number().required().min(1900).messages({
 		'string.empty': 'Ano de Término não pode ser vazio',
 		'any.required': 'Ano de Término é obrigatório',
 	}),
