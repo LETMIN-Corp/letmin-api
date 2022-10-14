@@ -132,7 +132,7 @@ const userLogin = async (req, res) => {
 const getUserData = async (req, res) => {
 	const { id } = req.user;
 
-	User.findById(id).select('-password')
+	User.findById(id).select('-password -blocked -__v')
 		.then((user) => {
 			if (!user) {
 				return res.status(400).json({
@@ -158,28 +158,28 @@ const getUserData = async (req, res) => {
  * @route POST /user/update-user
 */
 const updateUser = async (req, res) => {
-	const { _id } = req.user;
+    const { _id } = req.user;
 
 	User.findByIdAndUpdate(_id, req.body, { new: true }).then((user) => {
-		if (!user) {
-			return res.status(400).json({
-				message: 'Usuário não encontrado.',
-				success: false
-			});
-		}
-		return res.status(200).json({
-			message: 'Alterado com sucesso!',
-			success: true,
-			user,
-		});
-	})
-		.catch((err) => {
-			return res.status(400).json({
-				message: 'Error ' + err,
-				success: false
-			});
-		});
-};
+        if (!user) {
+            return res.status(400).json({
+                message: "Usuário não encontrado.",
+                success: false
+            });
+        }
+        return res.status(200).json({
+			message: "Os dados do usuário foram atualizados com sucesso!",
+            success: true,
+            user,
+        });
+    })
+    .catch((err) => {
+        return res.status(400).json({
+            message: 'Error ' + err,
+            success: false
+        });
+    });
+}
 
 module.exports = {
 	userLogin,
