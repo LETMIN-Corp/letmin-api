@@ -132,7 +132,7 @@ const userLogin = async (req, res) => {
 const getUserData = async (req, res) => {
 	const { id } = req.user;
 
-	User.findById(id).select('-password')
+	User.findById(id).select('-password -blocked -__v')
 		.then((user) => {
 			if (!user) {
 				return res.status(400).json({
@@ -168,7 +168,7 @@ const updateUser = async (req, res) => {
 			});
 		}
 		return res.status(200).json({
-			message: 'Alterado com sucesso!',
+			message: 'Os dados do usuário foram atualizados com sucesso!',
 			success: true,
 			user,
 		});
