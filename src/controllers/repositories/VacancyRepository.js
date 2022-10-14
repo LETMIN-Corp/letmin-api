@@ -4,33 +4,33 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 // get candidate profile info, and the count of his applications (which is in the Vacancy model)
 async function getCandidateInfo(_id) {
-    return await User.aggregate([
-        { $match: { _id: ObjectId(_id) } },
-        {
-            $lookup: {
-                from: 'vacancies',
-                localField: '_id',
-                foreignField: 'candidates',
-                as: 'applications',
-            },
-        },
-        {
-            $project: {
-                _id: 1,
-                name: 1,
-                email: 1,
-                picture: 1,
-                formations: 1,
-                experiences: 1,
-                phone: 1,
-                createdAt: 1,
-                updatedAt: 1,
-                role: 1,
-                description: 1,
-                applications: { $size: '$applications' },
-            },
-        },
-    ]);
+	return await User.aggregate([
+		{ $match: { _id: ObjectId(_id) } },
+		{
+			$lookup: {
+				from: 'vacancies',
+				localField: '_id',
+				foreignField: 'candidates',
+				as: 'applications',
+			},
+		},
+		{
+			$project: {
+				_id: 1,
+				name: 1,
+				email: 1,
+				picture: 1,
+				formations: 1,
+				experiences: 1,
+				phone: 1,
+				createdAt: 1,
+				updatedAt: 1,
+				role: 1,
+				description: 1,
+				applications: { $size: '$applications' },
+			},
+		},
+	]);
 }
 
 async function getAppliedVacancies (_id) {
