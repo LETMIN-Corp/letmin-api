@@ -3,7 +3,7 @@ const router = require('express').Router();
 const { adminRegister, adminLogin } = require('../controllers/adminController');
 const { registerCompany, loginCompany, createForgotPasswordToken, resetPassword, checkRecoveryToken } = require('../controllers/companyController');
 const { userLogin } = require('../controllers/userController');
-const { passportAuth, checkRole } = require('../utils/Auth');
+const { passportAuth, checkRole, changeProfilePicture } = require('../utils/Auth');
 
 const { USER, ADMIN, COMPANY } = require('../utils/constants');
 const validation = require('../middlewares/validation');
@@ -38,36 +38,7 @@ router.use('/user', passportAuth, checkRole(USER), require('./users'));
 router.use('/admin', passportAuth, checkRole(ADMIN), require('./admin'));
 router.use('/company', passportAuth, checkRole(COMPANY), require('./company'));
 
-const multer = require('multer');
-const multerConfig = require('../config/multer');
-
-const { API_URL } = require('../config');
-
-var upload = multer(multerConfig).single('file')
-
-router.post('/upload', passportAuth, checkRole([USER, COMPANY]), 
-			(req, res) => {
-				upload(req, res, function (err) {
-					if (err instanceof multer.MulterError || err) {
-						return res.status(400).json({
-							success: false,
-							message: 'Erro no upload do arquivo: ' + err
-						})
-					}
-					if (!req.file) {
-						return res.status(400).json({
-							success: false,
-							message: 'Nenhum arquivo enviado'
-						})
-					}
-					return res.status(200).json({
-						success: true,
-						uri: req.file.key,
-						message: 'Arquivo enviado com sucesso',
-						file: API_URL + '/api/uploads/' + req.file.filename
-					})
-				})
-			});
+router.post('/upload', passportAuth, checkRole([USER, COMPANY]), changeProfilePicture);
 
 const express = require('express');
 const path = require('path');

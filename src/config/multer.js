@@ -29,7 +29,6 @@ module.exports = {
     fileFilter: (req, file, cb) => {
         const allowedMimes = [
             'image/jpeg',
-            'image/pjpeg',
             'image/png',
             'image/gif',
         ];
@@ -37,7 +36,7 @@ module.exports = {
         if (allowedMimes.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new Error('Invalid file type.'));
+            cb(new Error('Formato de arquivo inválido.'));
         }
     }
 };
