@@ -45,6 +45,19 @@ const VacancySchema = new Schema({
 		required: true,
 		enum: ['Sul', 'Sudeste', 'Centro-Oeste', 'Norte', 'Nordeste']
 	},
+	wantedSkills: [{
+		name: {
+			type: String,
+		},
+		level: {
+			type: String,
+			enum: ['Iniciante', 'Intermediário', 'Avançado'],
+		},
+	}],
+	yearsOfExperience: {
+		type: Number,
+		required: true
+	},
 	candidates: [{
 		type: Schema.Types.ObjectId,
 		ref: 'User'
