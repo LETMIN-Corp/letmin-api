@@ -109,9 +109,7 @@ const registerCompany = async (req, res) => {
  * @route GET /company/company-data
  */
 const getCompanyData = async (req, res) => {
-	let token = req.headers.authorization;
-
-	let _id = ObjectId(decodeToken(token).user_id);
+	const { _id } = req.user;
 
 	await Company.findById({ _id }).select('-holder.password')
 		.then((company) => {
@@ -316,8 +314,7 @@ const resetPassword = async (req, res) => {
  */
 const updateCompanyData = async (req, res) => {
 	try {
-		let token = req.headers.authorization;
-		let _id = ObjectId(decodeToken(token).user_id);
+		const { _id } = req.user;
 
 		let credentials = req.body;
 
@@ -365,8 +362,7 @@ const updateCompanyData = async (req, res) => {
 
 const updateHolderData = async (req, res) => {
 	try {
-		let token = req.headers.authorization;
-		let _id = ObjectId(decodeToken(token).user_id);
+		const { _id } = req.user;
 
 		let credentials = req.body;
 
@@ -456,9 +452,7 @@ const removeFromTalentBank = async (req, res) => {
 };
 
 const getTalentBank = async (req, res) => {
-	let token = req.headers.authorization;
-
-	let _id = ObjectId(decodeToken(token).user_id);
+	let { _id } = req.user;
 
 	await Company.findById({ _id })
 		.then((company) => {
