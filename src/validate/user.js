@@ -55,13 +55,17 @@ const checkUserFormations = Joi.object({
 		'string.empty': 'Instituição não pode ser vazio',
 		'any.required': 'Instituição é obrigatório',
 	}),
-	start: Joi.number().required().min(1900).messages({
-		'string.empty': 'Ano de Início não pode ser vazio',
+	start: Joi.number().required().allow("").min(1900).max(new Date().getFullYear() + 1).messages({
+		'number.empty': 'Ano de Início não pode ser vazio',
 		'any.required': 'Ano de Início é obrigatório',
+		'number.min': 'O ano de Início deve ser maior que 1900',
+		'number.max': 'O ano de Início deve ser menor ou igual ao ano atual',
 	}),
-	finish: Joi.number().required().min(1900).messages({
-		'string.empty': 'Ano de Término não pode ser vazio',
+	finish: Joi.number().required().allow("").min(1900).max(new Date().getFullYear() + 1).messages({
+		'number.empty': 'Ano de Término não pode ser vazio',
 		'any.required': 'Ano de Término é obrigatório',
+		'number.min': 'O ano de Término deve ser maior que 1900',
+		'number.max': 'O ano de Término deve ser menor ou igual ao ano atual',
 	}),
 	description: Joi.string().required().messages({
 		'string.empty': 'Descrição não pode ser vazio',
@@ -78,13 +82,17 @@ const checkUserExperiences = Joi.object({
 		'string.empty': 'Empresa não pode ser vazio',
 		'any.required': 'Empresa é obrigatório',
 	}),
-	start: Joi.string().required().messages({
-		'string.empty': 'Ano de Início não pode ser vazio',
+	start: Joi.number().required().allow("").min(1900).max(new Date().getFullYear() + 1).messages({
+		'number.empty': 'Ano de Início não pode ser vazio',
 		'any.required': 'Ano de Início é obrigatório',
+		'number.min': 'O ano de Início deve ser maior que 1900',
+		'number.max': 'O ano de Início deve ser menor ou igual ao ano atual',
 	}),
-	finish: Joi.string().required().messages({
-		'string.empty': 'Ano de Término não pode ser vazio',
+	finish: Joi.number().required().allow("").min(1900).max(new Date().getFullYear() + 1).messages({
+		'number.empty': 'Ano de Término não pode ser vazio',
 		'any.required': 'Ano de Término é obrigatório',
+		'number.min': 'O ano de Término deve ser maior que 1900',
+		'number.max': 'O ano de Término deve ser menor ou igual ao ano atual',
 	}),
 	description: Joi.string().required().messages({
 		'string.empty': 'Descrição não pode ser vazio',
