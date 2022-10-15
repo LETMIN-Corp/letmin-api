@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const validation = require('../middlewares/validation');
 
-const { updateUser, getUserData } = require('../controllers/userController');
+const { updateUser, getUserData, deleteUserAccount } = require('../controllers/userController');
 const { 
 	searchVacancies, 
 	getCandidateVacancies,
@@ -28,6 +28,7 @@ router.post('/update-user', validation(userUpdateValidator), updateUser);
 router.post('/check-user-skills', validation(checkUserSkills), confirmCheck('Objeto válido'));
 router.post('/check-user-experiences', validation(checkUserExperiences), confirmCheck('Objeto válido'));
 router.post('/check-user-formations', validation(checkUserFormations), confirmCheck('Objeto válido'));
+router.delete('/delete-account', deleteUserAccount);
 
 router.get('/get-candidate-applications', getAppliedVacancies);
 

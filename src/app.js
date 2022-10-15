@@ -22,7 +22,7 @@ app.use(cors({
 // parse application/json and application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: false }));
 
 app.use(passport.initialize());
 require('./middlewares/passport')(passport);
