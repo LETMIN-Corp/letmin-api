@@ -10,9 +10,10 @@ const complaintValidator = Joi.object({
 		'string.empty': 'Descrição não pode ser vazia',
 		'any.required': 'Descrição é obrigatória'
 	}),
-	target: Joi.string().required().messages({
+	target: Joi.string().required().length(24).messages({
 		'string.empty': 'Alvo não pode ser vazio',
-		'any.required': 'Alvo é obrigatório'
+		'any.required': 'Alvo é obrigatório',
+		'string.length': 'Alvo inválido'
 	})
 }).options({ abortEarly: false }).unknown();
 

@@ -39,15 +39,18 @@ const vacancyValidator = Joi.object({
 		'any.only': 'Tipo de contratação inválida'
 	}),
 	wantedSkills: Joi.array().items({
-		name: Joi.string().allow("").min(2).max(32).messages({
+		name: Joi.string().allow("").min(2).max(45).messages({
 			'string.min': 'O nome da habilidade deve ser maior que 2 caractéres',
 		}),
 		level: Joi.string().allow("").valid('Iniciante', 'Intermediário', 'Avançado').messages({
 			'string.only': 'Tipo de nível inválido'
 		})
 	}),
-	yearsOfExperience: Joi.number().allow(0).max(40).messages({
-		'number.max': 'Anos de experiência inválidos',
+	yearsOfExperience: Joi.number().integer().min(0).max(40).messages({
+		'number.base': 'Anos de experiência deve ser um número',
+		'number.integer': 'Anos de experiência deve ser um número inteiro',
+		'number.min': 'Anos de experiência deve ser maior ou igual a 0',
+		'number.max': 'Anos de experiência não podem ser absurdos',
 		'typeError': 'O valor deve ser um inteiro'
 	})	
 }).options({ abortEarly: false }).unknown();

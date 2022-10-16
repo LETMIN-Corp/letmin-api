@@ -29,7 +29,7 @@ router.get('/search-vacancies/:search?', searchVacancies);
 router.patch('/confirm-vacancy/:id', confirmVacancy);
 router.delete('/close-vacancy/:id', closeVacancy); //remove
 router.patch('/update-vacancy', validation(vacancyValidator), updateVacancy);
-router.get('/user', searchUsers);
+router.get('/search-users', searchUsers);
 
 router.get('/get-all-candidates/:id', getAllCandidates);
 router.get('/get-candidate/:id', getCandidate);

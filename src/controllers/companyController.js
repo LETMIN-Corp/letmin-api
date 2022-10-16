@@ -1,4 +1,5 @@
 const Company = require('../models/Company');
+const Vacancy = require('../models/Vacancy');
 const bcrypt = require('bcryptjs');
 const ObjectId = require('mongoose').Types.ObjectId;
 const User = require('../models/User');
@@ -6,11 +7,8 @@ const ROLES = require('../utils/constants');
 const { CLIENT_URL } = require('../config');
 const sendEmail = require('../utils/mailer');
 
-const {
-	generateToken,
-	decodeToken
-} = require('../utils/jwt');
-const Vacancy = require('../models/Vacancy');
+const { generateToken } = require('../utils/jwt');
+const { companySearchUsers } = require('./repositories/UserRepository');
 
 /**
  * Login company
@@ -252,16 +250,9 @@ const createForgotPasswordToken = async (req, res) => {
 const searchUsers = async (req, res) => {
 	let search = req.params.search || '';
 
-	User.find({
-		$and: [
-			{ blocked: false },
-			{
-				$or: [
-					{ 'user.name': { $regex: search, $options: 'i' } },
-				]
-			}
-		]
-	}).then((users) => {
+	try{
+		const users = await companySearchUsers(search);
+
 		if (!users) {
 			return res.status(404).json({
 				success: false,
@@ -274,12 +265,13 @@ const searchUsers = async (req, res) => {
 			message: 'Usuários encontrados.',
 			users: users,
 		});
-	}).catch((err) => {
+
+	} catch (err) {
 		return res.status(400).json({
 			success: false,
 			message: 'Error ' + err,
 		});
-	});
+	}
 };
 
 /**
