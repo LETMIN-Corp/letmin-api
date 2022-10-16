@@ -77,4 +77,24 @@ const VacancySchema = new Schema({
 }
 );
 
+/**
+ * Find vacancy with the same id and that is from the company_id and toggle it to the opposite value
+ * @param {string} vacancy_id 
+ * @param {string} company_id 
+ * @returns {Promise<Vacancy>}
+ */
+VacancySchema.statics.findByIdAndToggleClosed = async function(vacancy_id, company_id) {
+	return this.findOne({ _id: vacancy_id, company: company_id })
+		.then(vacancy => {
+			if (!vacancy) {
+				return Promise.reject({
+					status: 404,
+					message: 'Vaga não encontrada'
+				});
+			}
+			vacancy.closed = !vacancy.closed;
+			return vacancy.save();
+		});
+};
+
 module.exports = model('Vacancy', VacancySchema, 'vacancies');

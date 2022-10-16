@@ -39,10 +39,10 @@ const vacancyValidator = Joi.object({
 		'any.only': 'Tipo de contratação inválida'
 	}),
 	wantedSkills: Joi.array().items({
-		name: Joi.string().allow("").min(2).max(45).messages({
+		name: Joi.string().min(2).max(45).messages({
 			'string.min': 'O nome da habilidade deve ser maior que 2 caractéres',
 		}),
-		level: Joi.string().allow("").valid('Iniciante', 'Intermediário', 'Avançado').messages({
+		level: Joi.string().valid('Iniciante', 'Intermediário', 'Avançado').messages({
 			'string.only': 'Tipo de nível inválido'
 		})
 	}),
