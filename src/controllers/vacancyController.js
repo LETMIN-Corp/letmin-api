@@ -242,7 +242,7 @@ const searchVacancies = async (req, res) => {
 
 		return res.status(200).json({
 			success: true,
-			message: 'Vagas encotradas.',
+			message: 'Vagas encontradas.',
 			vacancies: vacancies
 		});
 	} catch(err) {
@@ -276,7 +276,7 @@ const getCandidateVacancies = async (req, res) => {
 
 			return res.status(200).json({
 				success: true,
-				message: 'Vagas encotradas.',
+				message: 'Vagas encontradas.',
 				vacancies: vacancies
 			});
 		})
