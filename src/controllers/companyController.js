@@ -1,4 +1,5 @@
 const Company = require('../models/Company');
+const Vacancy = require('../models/Vacancy');
 const bcrypt = require('bcryptjs');
 const ObjectId = require('mongoose').Types.ObjectId;
 const User = require('../models/User');
@@ -6,11 +7,8 @@ const ROLES = require('../utils/constants');
 const { CLIENT_URL } = require('../config');
 const sendEmail = require('../utils/mailer');
 
-const {
-	generateToken,
-	decodeToken
-} = require('../utils/jwt');
-const Vacancy = require('../models/Vacancy');
+const { generateToken } = require('../utils/jwt');
+const { companySearchUsers } = require('./repositories/UserRepository');
 
 /**
  * Login company
@@ -109,9 +107,7 @@ const registerCompany = async (req, res) => {
  * @route GET /company/company-data
  */
 const getCompanyData = async (req, res) => {
-	let token = req.headers.authorization;
-
-	let _id = ObjectId(decodeToken(token).user_id);
+	const { _id } = req.user;
 
 	await Company.findById({ _id }).select('-holder.password')
 		.then((company) => {
@@ -254,16 +250,9 @@ const createForgotPasswordToken = async (req, res) => {
 const searchUsers = async (req, res) => {
 	let search = req.params.search || '';
 
-	User.find({
-		$and: [
-			{ blocked: false },
-			{
-				$or: [
-					{ 'user.name': { $regex: search, $options: 'i' } },
-				]
-			}
-		]
-	}).then((users) => {
+	try{
+		const users = await companySearchUsers(search);
+
 		if (!users) {
 			return res.status(404).json({
 				success: false,
@@ -276,12 +265,13 @@ const searchUsers = async (req, res) => {
 			message: 'Usuários encontrados.',
 			users: users,
 		});
-	}).catch((err) => {
+
+	} catch (err) {
 		return res.status(400).json({
 			success: false,
 			message: 'Error ' + err,
 		});
-	});
+	}
 };
 
 /**
@@ -316,8 +306,7 @@ const resetPassword = async (req, res) => {
  */
 const updateCompanyData = async (req, res) => {
 	try {
-		let token = req.headers.authorization;
-		let _id = ObjectId(decodeToken(token).user_id);
+		const { _id } = req.user;
 
 		let credentials = req.body;
 
@@ -365,8 +354,7 @@ const updateCompanyData = async (req, res) => {
 
 const updateHolderData = async (req, res) => {
 	try {
-		let token = req.headers.authorization;
-		let _id = ObjectId(decodeToken(token).user_id);
+		const { _id } = req.user;
 
 		let credentials = req.body;
 
@@ -456,9 +444,7 @@ const removeFromTalentBank = async (req, res) => {
 };
 
 const getTalentBank = async (req, res) => {
-	let token = req.headers.authorization;
-
-	let _id = ObjectId(decodeToken(token).user_id);
+	let { _id } = req.user;
 
 	await Company.findById({ _id })
 		.then((company) => {
@@ -484,7 +470,7 @@ const getTalentBank = async (req, res) => {
 
 const getVacancy = async (req, res) => {
 	try {
-		Vacancy.findById(req.params.id).populate('company', 'company.name').populate('candidates')
+		Vacancy.findById(req.params.id).populate('company', 'company.name').populate('candidates').select('-wantedSkills._id')
 			.then((vacancy) => {
 				if (!vacancy) {
 					return res.status(404).json({

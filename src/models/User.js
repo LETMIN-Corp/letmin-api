@@ -31,11 +31,15 @@ const UserSchema = new Schema({
 		type: String,
 		required: true
 	},
-	blocked: {
-		required: true,
-		type: Boolean,
-		default: false
-	},
+	skills: [{
+		name: {
+			type: String,
+		},
+		level: {
+			type: String,
+			enum: ['Iniciante', 'Intermediário', 'Avançado'],
+		},
+	}],
 	formations: [{
 		name : {
 			type: String,
@@ -70,6 +74,11 @@ const UserSchema = new Schema({
 			type: String,
 		},
 	}],
+	blocked: {
+		required: true,
+		type: Boolean,
+		default: false
+	},
 },
 { timestamps: true }
 );

@@ -2,18 +2,13 @@ const User = require('../../models/User');
 const Vacancy = require('../../models/Vacancy');
 const ObjectId = require('mongoose').Types.ObjectId;
 
-// get candidate profile info, and the count of his applications (which is in the Vacancy model)
+/**
+ * Get candidate profile info, and the count of his applications (which is in the Vacancy model)
+ */
 async function getCandidateInfo(_id) {
 	return await User.aggregate([
 		{ $match: { _id: ObjectId(_id) } },
-		{
-			$lookup: {
-				from: 'vacancies',
-				localField: '_id',
-				foreignField: 'candidates',
-				as: 'applications',
-			},
-		},
+		{ $lookup: { from: 'vacancies', localField: '_id', foreignField: 'candidates', as: 'applications'} },
 		{
 			$project: {
 				_id: 1,
@@ -34,6 +29,9 @@ async function getCandidateInfo(_id) {
 	]);
 }
 
+/**
+ * Get all vacancies that the candidate has applied to
+ */
 async function getAppliedVacancies (_id) {
 	return await Vacancy.aggregate([
 		{ $match: { candidates: _id }}, 
@@ -61,7 +59,11 @@ async function getAppliedVacancies (_id) {
 	]);
 }
 
-async function searchVacancies(search) {
+/*
+ * Get all vacancies not closed to show to candidate
+ * @param {string} search - search string
+ **/
+async function searchVacancies(user_id, search) {
 	return await Vacancy.aggregate([
 		{ $match: { closed: false } },
 		{
@@ -90,7 +92,7 @@ async function searchVacancies(search) {
 					$size: '$candidates'
 				},
 				user_applied: {
-					$in: [new ObjectId('63460be3b642d29bb6d224df'), '$candidates']
+					$in: [new ObjectId(user_id), '$candidates']
 				},
 				company: {
 					_id: '$companyInfo._id', 
@@ -101,8 +103,36 @@ async function searchVacancies(search) {
 	]);
 }
 
+/**
+ * Get all candidates that applied to the vacancy (not blocked) to show to company with basic info about the role and the users
+ * @param {string} _id - vacancy id
+ * @return {object} - with the vacancy info and the candidates inside an array
+ */
+async function getVacancyCandidates(_id) {
+	return await Vacancy.aggregate([
+		{ $match: { _id: ObjectId(_id) } },
+		{ $lookup: { from: 'users', localField: 'candidates', foreignField: '_id', as: 'candidates'} },
+		{ $match: { 'candidates.blocked': false } },
+		//{ $unwind: { path: '$candidates' } },
+		// return a single object with the vacancy info and the candidates inside an array
+		{
+			$project: {
+				role: 1,
+				description: 1,
+				sector: 1,
+				views: 1,
+				salary: 1,
+				currency: 1,
+				region: 1,
+				candidates: 1
+			},
+		}
+	]);
+}
+
 module.exports = {
 	getCandidateInfo,
 	getAppliedVacancies,
 	searchVacancies,
+	getVacancyCandidates,
 };

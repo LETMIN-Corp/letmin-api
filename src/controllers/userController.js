@@ -8,6 +8,7 @@ const {
 	generateToken,
 	verifyGoogleToken,
 } = require('../utils/jwt');
+const Vacancy = require('../models/Vacancy');
 const Company = require('../models/Company');
 
 /**
@@ -237,10 +238,56 @@ const updateUser = async (req, res) => {
 		});
 };
 
+/**
+ * Delete User account - Only user
+ * @route DELETE /user/delete-account
+*/
+const deleteUserAccount = async (req, res) => {
+	const { _id } = req.user;
+
+	try {
+		await User.findByIdAndDelete(_id).then((user) => {
+			if (!user) {
+				return res.status(400).json({
+					success: false,
+					message: 'Usuário não encontrado.',
+				});
+			}
+		});
+
+		// remove user _id from Vacancy candidates array
+		await Vacancy.updateMany(
+			{ candidates: { $in: [_id] } },
+			{ $pull: { candidates: _id } },
+			{ multi: true }
+		);
+
+		// Remove user _id from Company talentBank array	
+		await Company.updateMany(
+			{ talentBank: { $in: [_id] } },
+			{ $pull: { talentBank: _id } },
+			{ multi: true }
+		);
+
+		return res.status(200).json({
+			success: true,
+			message: 'Usuário deletado com sucesso!',
+		});
+
+	} catch (err) {
+		console.log(err);
+		return res.status(400).json({
+			success: false,
+			message: 'Error ' + err,
+		});
+	}
+};
+
 module.exports = {
 	userLogin,
 	getUserData,
 	updateUser,
+	deleteUserAccount,
 	searchCompany,
-	getCompany
+	getCompany,
 };
