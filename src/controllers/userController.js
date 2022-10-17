@@ -157,7 +157,7 @@ const getUserData = async (req, res) => {
 const searchCompany = async (req, res) => {
 	let search = req.params.search? req.params.search.trim() : '';
 
-	Company.find({		
+	Company.find({	
 			$or: [
 				{ 'company.name': { $regex: search, $options: 'i' } },
 				{ 'company.address': { $regex: search, $options: 'i' } },
@@ -188,7 +188,11 @@ const searchCompany = async (req, res) => {
 
 const getCompany = async (req, res) => {
 
-	await Company.findById(req.params.id).populate('company holder vacancies', 'role sector region description currency salary')
+	await Company.findById(req.params.id).populate('vacancies', 'role sector region description currency salary closed', { 
+		$and: [
+			{ closed: false },
+		],
+	}).select('company holder vacancies')
 		.then((company) => {
 			return res.status(200).json({
 				success: true,
