@@ -159,10 +159,10 @@ const searchCompany = async (req, res) => {
 	let search = req.params.search? req.params.search.trim() : '';
 
 	Company.find({	
-			$or: [
-				{ 'company.name': { $regex: search, $options: 'i' } },
-				{ 'company.address': { $regex: search, $options: 'i' } },
-			],
+		$or: [
+			{ 'company.name': { $regex: search, $options: 'i' } },
+			{ 'company.address': { $regex: search, $options: 'i' } },
+		],
 		
 	}).select('_id company.name company.address').sort({ createdAt: -1 })
 		.then((companies) => { 

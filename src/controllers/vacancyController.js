@@ -118,7 +118,7 @@ const confirmVacancy = async (req, res) => {
 	const companyId = req.user._id;
 
 	try {
-		const result = await Vacancy.findByIdAndToggleClosed(req.params.id, companyId)
+		const result = await Vacancy.findByIdAndToggleClosed(req.params.id, companyId);
 
 		if (!result) {
 			return res.status(404).json({
