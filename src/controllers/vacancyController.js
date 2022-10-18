@@ -1,9 +1,12 @@
 const Vacancy = require('../models/Vacancy');
 const Company = require('../models/Company');
-// const User = require('../models/User');
-// const ObjectId = require('mongoose').Types.ObjectId;
 
-// Vacancy CRUD
+/**
+ * Insert a new vacancy in the database
+ * @route POST api/company/register-vacancy
+ * @body {Vacancy} vacancy
+ * @returns 
+ */
 const insertVacancy = async (req, res) => {
 	let _id = req.user._id;
 
@@ -67,6 +70,8 @@ const getAllCompanyVacancies = async (req, res) => {
 
 /**
  * Get one vacancy from id populating the company name and all candidates
+ * @route GET api/company/get-vacancy/:id
+ * @route GET api/user/get-vacancy/:id
  */
 const getVacancy = async (req, res) => {
 	try {
@@ -97,28 +102,35 @@ const getVacancy = async (req, res) => {
 	}
 };
 
-// Change vacancy status to the opposite
+/**
+ * Change vacancy status to the opposite
+ * @route PATCH api/company/confirm-vacancy/:id
+ * @param {id} vacancy id
+ * @returns 
+ */
 const confirmVacancy = async (req, res) => {
+	if (!req.params.id) {
+		return res.status(400).json({
+			success: false,
+			message: 'Id não informado',
+		});
+	}
 	const companyId = req.user._id;
 
 	try {
-		Vacancy.findOne({ company: companyId, _id: req.params.id })
-			.then((vacancy) => {
-				if (!vacancy) {
-					return res.status(404).json({
-						success: false,
-						message: 'Vaga não encontrada.',
-					});
-				}
-			
-				vacancy.closed = !vacancy.closed;
-				vacancy.save();
+		const result = await Vacancy.findByIdAndToggleClosed(req.params.id, companyId)
 
-				return res.json({
-					success: true,
-					message: 'Vaga atualizada com sucesso',
-				});
+		if (!result) {
+			return res.status(404).json({
+				success: false,
+				message: 'Vaga não encontrada.',
 			});
+		}
+
+		return res.json({
+			success: true,
+			message: 'Vaga atualizada com sucesso',
+		});
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
@@ -153,7 +165,11 @@ const closeVacancy = async (req, res) => {
 	}
 };
 
-// Update vacancy
+/**
+ * Update vacancy
+ * @route PATCH api/company/update-vacancy
+ * @body VacancyModel
+ */
 const updateVacancy = async (req, res) => {
 	const companyId = req.user._id;
 	const vacancyId = req.body._id;
@@ -207,7 +223,7 @@ const getVacanciesCompany = async (req, res) => {
 /**
  * Search vacancies by role, description, sector, region and company name not including closed ones
  * and sort by date and include candidates if the user is one of them
- * @route   GET api/users/search-vacancies/:search
+ * @route GET api/users/search-vacancies/:search
  */
 const searchVacancies = async (req, res) => {
 	let search = req.params.search? req.params.search.trim() : '';
@@ -215,7 +231,7 @@ const searchVacancies = async (req, res) => {
 	const { searchVacancies } = require('./repositories/VacancyRepository');
 
 	try {
-		const vacancies = await searchVacancies(search);
+		const vacancies = await searchVacancies(req.user._id, search);
 
 		if (!vacancies) {
 			return res.status(404).json({
@@ -226,7 +242,7 @@ const searchVacancies = async (req, res) => {
 
 		return res.status(200).json({
 			success: true,
-			message: 'Vagas encotradas.',
+			message: 'Vagas encontradas.',
 			vacancies: vacancies
 		});
 	} catch(err) {
@@ -237,8 +253,12 @@ const searchVacancies = async (req, res) => {
 	}
 };
 
+/**
+ * Get all vacancies where the user is a candidate
+ * @param {*} req 
+ * @param {*} res 
+ */
 const getCandidateVacancies = async (req, res) => {
-	// let search = req.params.search? req.params.search.trim() : '';
 	const user_id = req.user._id;
 
 	Vacancy.find({
@@ -256,7 +276,7 @@ const getCandidateVacancies = async (req, res) => {
 
 			return res.status(200).json({
 				success: true,
-				message: 'Vagas encotradas.',
+				message: 'Vagas encontradas.',
 				vacancies: vacancies
 			});
 		})
@@ -339,13 +359,20 @@ const cancelApplyVacancy = async (req, res) => {
 	}
 };
 
+/**
+ * Get all candidates from one vacancy
+ * @route /get-vacancy-candidates/:id
+ * 
+ * @param {string} id vacancy id
+ **/
 const getAllCandidates = async (req, res) => {
-	try {
-		const vacancy = await Vacancy.findById(req.params.id)
-			.select('candidates role')
-			.populate('candidates', 'name email');
 
-		if (!vacancy) {
+	const { getVacancyCandidates } = require('./repositories/VacancyRepository');
+
+	try {
+		let candidates = await getVacancyCandidates(req.params.id);
+
+		if (!candidates || candidates.length == 0) {
 			return res.status(404).json({
 				success: false,
 				message: 'Vaga não encontrada.',
@@ -355,10 +382,7 @@ const getAllCandidates = async (req, res) => {
 		return res.json({
 			success: true,
 			message: 'Candidatos encontrados',
-			data: {
-				candidates: vacancy.candidates,
-				role: vacancy.role
-			}
+			data: candidates[0]
 		});
 	} catch (err) {
 		return res.status(400).json({

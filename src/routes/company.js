@@ -14,6 +14,8 @@ const {
 	updateVacancy,
 } = require('../controllers/vacancyController');
 const { getCompanyData, searchUsers, updateCompanyData, updateHolderData, addToTalentBank, removeFromTalentBank, getTalentBank, getVacancy } = require('../controllers/companyController');
+const { checkUserSkills } = require('../validate/user');
+const confirmCheck = require('../middlewares/confirmCheck');
 
 // Company Profile Route
 router.get('/company-data', getCompanyData);
@@ -29,9 +31,10 @@ router.get('/search-vacancies/:search?', searchVacancies);
 router.patch('/confirm-vacancy/:id', confirmVacancy);
 router.delete('/close-vacancy/:id', closeVacancy); //remove
 router.patch('/update-vacancy', validation(vacancyValidator), updateVacancy);
-router.get('/user', searchUsers);
 
-router.get('/get-all-candidates/:id', getAllCandidates);
+router.get('/search-users', searchUsers);
+router.post('/check-vacancy-skills', validation(checkUserSkills), confirmCheck('Objeto válido'));
+router.get('/get-vacancy-candidates/:id', getAllCandidates);
 router.get('/get-candidate/:id', getCandidate);
 
 // Talent bank CRUD routes
