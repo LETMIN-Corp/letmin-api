@@ -64,42 +64,39 @@ const loginCompany = async (req, res) => {
 const registerCompany = async (req, res) => {
 	let credentials = req.body;
   
-	let company = await Company.findOne({
-		'company.cnpj' : credentials.company.cnpj,
-		'company.email' : credentials.company.email 
-	}).select('+company.cnpj +company.email');
+	try {
+		let company = await Company.findOne({
+			'company.cnpj' : credentials.company.cnpj,
+			'company.email' : credentials.company.email 
+		}).select('+company.cnpj +company.email');
 
-	if (company) {
+		if (company) {
+			return res.status(400).json({
+				success: false,
+				message: 'CNPJ ou email já foi cadastrado.',
+			});
+		}
+	
+		credentials.holder.password = await bcrypt.hash(credentials.holder.password, 12);
+
+		company = new Company(credentials);
+	
+		await company.save()
+
+		let token = generateToken(company, ROLES.COMPANY);
+
+		return res.header('Authorization', token).status(201).json({
+			success: true,
+			message: 'Parabéns! Você está cadastrado e logado.',
+			token: token,
+		});
+
+	} catch (err) {
 		return res.status(400).json({
 			success: false,
-			message: 'CNPJ ou email já foi cadastrado.',
+			message: 'Error ' + err,
 		});
 	}
-  
-	credentials.holder.password = await bcrypt.hash(credentials.holder.password, 12);
-  
-	company = new Company({
-		...credentials,
-		role: ROLES.COMPANY,
-	});
-  
-	company.save()
-		.then(company => {
-  
-			let token = generateToken(company, ROLES.COMPANY);
-
-			return res.header('Authorization', token).status(201).json({
-				success: true,
-				message: 'Parabéns! Você está cadastrado e logado.',
-				token: token,
-			});
-		}).catch(err => {
-			return res.status(500).json({
-				success: false,
-				message: 'Não foi possivel cadastrar a empresa.',
-				error: err,
-			});
-		});
 };
 
 /**
@@ -329,7 +326,8 @@ const updateCompanyData = async (req, res) => {
 			'company.cnpj': credentials.company.cnpj,
 			'company.email': credentials.company.email,
 			'company.phone': credentials.company.phone,
-			'company.address': credentials.company.address
+			'company.address': credentials.company.address,
+			'company.description': credentials.company.description,
 		}).then((company) => {
 			if (!company) {
 				return res.status(404).json({
@@ -338,8 +336,9 @@ const updateCompanyData = async (req, res) => {
 				});
 			}
 
-			return res.status(201).json({
+			return res.status(200).json({
 				success: true,
+				message: 'Empresa atualizada com sucesso.',
 				company,
 			});
 		});
@@ -371,8 +370,9 @@ const updateHolderData = async (req, res) => {
 				});
 			}
 
-			return res.status(201).json({
+			return res.status(200).json({
 				success: true,
+				message: 'Dados do responsável atualizados com sucesso.',
 				company,
 			});
 		});
