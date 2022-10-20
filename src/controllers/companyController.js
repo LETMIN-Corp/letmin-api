@@ -1,7 +1,5 @@
 const Company = require('../models/Company');
-const Vacancy = require('../models/Vacancy');
 const bcrypt = require('bcryptjs');
-const ObjectId = require('mongoose').Types.ObjectId;
 const User = require('../models/User');
 const ROLES = require('../utils/constants');
 const { CLIENT_URL } = require('../config');
@@ -81,7 +79,7 @@ const registerCompany = async (req, res) => {
 
 		company = new Company(credentials);
 	
-		await company.save()
+		await company.save();
 
 		let token = generateToken(company, ROLES.COMPANY);
 
@@ -468,23 +466,26 @@ const getTalentBank = async (req, res) => {
 		});
 };
 
-const getVacancy = async (req, res) => {
-	try {
-		Vacancy.findById(req.params.id).populate('company', 'company.name').populate('candidates').select('-wantedSkills._id')
-			.then((vacancy) => {
-				if (!vacancy) {
-					return res.status(404).json({
-						success: false,
-						message: 'Vaga não encontrada.',
-					});
-				}
+const companyGetVacancy = async (req, res) => {
+	
+	const { companyGetVacancy } = require('./repositories/VacancyRepository');
 
-				return res.json({
-					success: true,
-					message: 'Vaga encontrada com sucesso',
-					vacancy,
-				});
+	try {
+		const vacancy = await companyGetVacancy(req.params.id);
+
+		if (!vacancy) {
+			return res.status(404).json({
+				success: false,
+				message: 'Vaga não encontrada.',
 			});
+		}
+
+		return res.json({
+			success: true,
+			message: 'Vaga encontrada com sucesso',
+			vacancy: vacancy,
+		});
+
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
@@ -506,5 +507,5 @@ module.exports = {
 	createForgotPasswordToken,
 	checkRecoveryToken,
 	resetPassword,
-	getVacancy,
+	companyGetVacancy,
 };

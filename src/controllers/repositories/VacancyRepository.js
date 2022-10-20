@@ -130,9 +130,93 @@ async function getVacancyCandidates(_id) {
 	]);
 }
 
+/**
+ * Get Vacancy Info to show to company and candidate
+ * @param {string} _id 
+ * @returns 
+ */
+async function userGetVacancy(_id, user_id) {
+	const vacancy = await Vacancy.aggregate([
+		{ $match: {
+			_id: ObjectId(_id),
+			closed: false
+		} },
+		{ $lookup: { from: 'companies', localField: 'company', foreignField: '_id', as: 'companyInfo'} },
+		{ $unwind: { path: '$companyInfo' } },
+		{
+			$project: {
+				role: 1,
+				description: 1,
+				sector: 1,
+				views: 1,
+				salary: 1,
+				currency: 1,
+				region: 1,
+				workload: 1,
+				wantedSkills: 1,
+				yearsOfExperience: 1,
+				type: 1,
+				candidates: {
+					$size: '$candidates'
+				},
+				company: {
+					_id: '$companyInfo._id',
+					name: '$companyInfo.company.name'
+				},
+				user_applied: {
+					$in: [new ObjectId(user_id), '$candidates']
+				}
+			}
+		}
+	]);
+
+	// if vacancy exists, increment views
+	if (vacancy.length > 0) {
+		await Vacancy.updateOne({ _id: ObjectId(_id) }, { $inc: { views: 1 } });
+	}
+
+	return vacancy[0];
+}
+
+const companyGetVacancy = async (_id) => {
+	const vacancy = await Vacancy.aggregate([
+		{ $match: { _id: ObjectId(_id) } },
+		{ $lookup: { from: 'companies', localField: 'company', foreignField: '_id', as: 'companyInfo'} },
+		{ $unwind: { path: '$companyInfo' } },
+		{
+			$project: {
+				role: 1,
+				description: 1,
+				sector: 1,
+				views: 1,
+				salary: 1,
+				currency: 1,
+				region: 1,
+				workload: 1,
+				wantedSkills: 1,
+				yearsOfExperience: 1,
+				type: 1,
+				candidates: 1,
+				number_candidates: {
+					$size: '$candidates'
+				},
+				company: {
+					_id: '$companyInfo._id',
+					name: '$companyInfo.company.name'
+				},
+				
+			}
+		}
+	]);
+
+	return vacancy[0];
+};
+
 module.exports = {
 	getCandidateInfo,
 	getAppliedVacancies,
 	searchVacancies,
 	getVacancyCandidates,
+	userGetVacancy,
+	companyGetVacancy,
 };

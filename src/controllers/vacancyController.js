@@ -73,27 +73,25 @@ const getAllCompanyVacancies = async (req, res) => {
  * @route GET api/company/get-vacancy/:id
  * @route GET api/user/get-vacancy/:id
  */
-const getVacancy = async (req, res) => {
+const userGetVacancy = async (req, res) => {
+
+	const { userGetVacancy } = require('./repositories/VacancyRepository');
+
 	try {
-		// get vacancy and only one company
-		Vacancy.findById(req.params.id).populate('company candidates', 'company.name')
-			.then((vacancy) => {
-				if (!vacancy) {
-					return res.status(404).json({
-						success: false,
-						message: 'Vaga não encontrada.',
-					});
-				}
-
-				vacancy.views += 1;
-				vacancy.save();
-
-				return res.json({
-					success: true,
-					message: 'Vaga encontrada com sucesso',
-					vacancy,
-				});
+		const vacancy = await userGetVacancy(req.params.id, req.user._id);
+		
+		if (!vacancy) {
+			return res.status(404).json({
+				success: false,
+				message: 'Vaga não encontrada.',
 			});
+		}
+
+		return res.json({
+			success: true,
+			message: 'Vaga encontrada com sucesso',
+			vacancy: vacancy,
+		});
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
@@ -173,7 +171,7 @@ const closeVacancy = async (req, res) => {
 const updateVacancy = async (req, res) => {
 	const companyId = req.user._id;
 	const vacancyId = req.body._id;
-
+	console.log(req.body);
 	try {
 		Vacancy.findOneAndUpdate({ company: companyId, _id: vacancyId }, req.body, { new: true })
 			.then((vacancy) => {
@@ -452,7 +450,7 @@ module.exports = {
 	insertVacancy,
 	getVacanciesCompany,
 	getAllCompanyVacancies,
-	getVacancy,
+	userGetVacancy,
 	confirmVacancy,
 	closeVacancy,
 	updateVacancy,

@@ -13,7 +13,8 @@ const VacancySchema = new Schema({
 		enum: ['Recursos Humanos', 'Tecnologia', 'Administrativo', 'Financeiro', 'Operacional', 'Comércio', 'Serviços', 'Saúde', 'Industrial', 'Construção'],
 	},
 	description: {
-		index: true,
+		index: true, 
+		text: true,
 		type: String,
 		required: true
 	},
@@ -56,7 +57,7 @@ const VacancySchema = new Schema({
 	}],
 	yearsOfExperience: {
 		type: Number,
-		required: true
+		default: 0
 	},
 	candidates: [{
 		type: Schema.Types.ObjectId,
