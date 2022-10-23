@@ -4,25 +4,24 @@ const Vacancy = require('../models/Vacancy');
 
 const matchCandidates = async (req, res) => {
 	const { vacancy_id } = req.body;
-	console.log(vacancy_id);
-	try {
-		// find the vacancy
+
+    try {
 		const vacancy = await Vacancy.findById(vacancy_id);
 
+        if (!vacancy) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vaga não encontrada.',
+            });
+        }
 		// find candidates that match the vacancy requirements
 		// based on skills, years of experience, user role and their description
-		const candidates = await User.find({
-			skills: { $in: vacancy.wantedSkills.name },
-			role: vacancy.role,
-			$or: [
-				{ yearsOfExperience: { $gte: vacancy.yearsOfExperience } },
-				{ description: { $regex: vacancy.description, $options: 'i' } },
-				{ role: { $regex: vacancy.role, $options: 'i' } },
-				//{ skills: { $regex: vacancy.skills, $options: 'i' } },
-			],
-			//'skills.name': { $regex: vacancy.wantedSkills.name, $options: 'i' },
+        console.log(vacancy);
 
-			yearsOfExperience: { $gte: vacancy.yearsOfExperience },
+		descriptionSpliced = vacancy.description.trim().split(' ');
+
+		const candidates = await User.find({
+			$text: { $search: vacancy.description },
 		});
 
 		// find the company

@@ -83,6 +83,8 @@ const UserSchema = new Schema({
 { timestamps: true }
 );
 
+UserSchema.index({role: 'text', name: 'text', username: 'text', description: 'text', formations: 'text', experiences: 'text', skills: 'text'});
+
 UserSchema.pre('save', async function (next) {
 	var user = this;
 

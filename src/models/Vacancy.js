@@ -78,6 +78,8 @@ const VacancySchema = new Schema({
 }
 );
 
+VacancySchema.index({ role: 'text', description: 'text' });
+
 /**
  * Find vacancy with the same id and that is from the company_id and toggle it to the opposite value
  * @param {string} vacancy_id 
