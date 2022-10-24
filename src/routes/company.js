@@ -23,7 +23,12 @@ const {
 	addToTalentBank, 
 	removeFromTalentBank, 
 	getTalentBank, 
-	companyGetVacancy 
+	companyGetVacancy,
+	companyGetEmployee,
+	getAllCompanyEmployees,
+	updateCompanyEmployee,
+	addCompanyEmployee,
+	deleteCompanyEmployee,
 } = require('../controllers/companyController');
 
 const confirmCheck = require('../middlewares/confirmCheck');
@@ -55,5 +60,12 @@ router.post('/remove-from-talent-bank', removeFromTalentBank);
 router.get('/get-talent-bank', getTalentBank);
 
 router.post('/match-candidates', matchCandidates);
+
+// Employer CRUD Routes
+router.get('/get-company-employees', getAllCompanyEmployees);
+router.get('/get-company-employee/:id', companyGetEmployee);
+router.patch('/update-company-employee/', updateCompanyEmployee);
+router.get('/add-company-employee/:id', addCompanyEmployee);
+router.delete('/delete-company-employee/:id', deleteCompanyEmployee);
 
 module.exports = router;

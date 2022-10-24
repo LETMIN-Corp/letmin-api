@@ -7,6 +7,7 @@ const sendEmail = require('../utils/mailer');
 
 const { generateToken } = require('../utils/jwt');
 const { companySearchUsers } = require('./repositories/UserRepository');
+const { default: mongoose } = require('mongoose');
 
 /**
  * Login company
@@ -494,6 +495,216 @@ const companyGetVacancy = async (req, res) => {
 	}
 };
 
+const companyGetEmployee = async (req, res) => {
+
+	const { employee_id } = req.params;
+
+	try {
+
+		Company.aggregate([
+			{
+				$match: {
+					_id: mongoose.Types.ObjectId(req.user._id),
+				},
+			},
+			{
+				$unwind: '$employees',
+			},
+			{
+				$match: {
+					'employees._id': mongoose.Types.ObjectId(employee_id),
+				},
+			},
+			{
+				$project: {
+					_id: 0,
+					employee: '$employees',
+				},
+			},
+		]).then((employee) => {
+			if (!employee) {
+				return res.status(404).json({
+					success: false,
+					message: 'Funcionário não encontrado.',
+				});
+			}
+
+			return res.json({
+				success: true,
+				message: 'Funcionário encontrado com sucesso',
+				employee: employee[0].employee,
+			});
+		});
+
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar funcionário' + err,
+		});
+	}
+}
+
+const getAllCompanyEmployees = async (req, res) => {
+	try {
+		const employess = await Company.aggregate([
+			{
+				$match: {
+					_id: mongoose.Types.ObjectId(req.user._id),
+				},
+			},
+			{
+				$lookup: {
+					from: 'users',
+					localField: 'employees._id',
+					foreignField: '_id',
+					as: 'employees',
+				},
+			},
+			{
+				$unwind: '$employees',
+			},
+			{
+				$project: {
+					_id: '$employees._id',
+					name: '$employees.name',
+					email: '$employees.email',
+					picture: '$employees.picture',
+					employed_at: '$employees.employed_at',
+				},
+			},
+		]);
+
+		return res.json({
+			success: true,
+			message: 'Funcionários encontrados com sucesso',
+			employees: employess,
+		});
+
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar funcionários' + err,
+		});
+	}
+}
+
+const updateCompanyEmployee = async (req, res) => {
+	const { employee } = req.body;
+
+	try {
+		const employees = await Company.findOneAndUpdate(
+			{
+				_id: req.user._id,
+				'employees._id': employee._id,
+			},
+			{
+				$set: {
+					'employees.$.name': req.body.name,
+					'employees.$.email': req.body.email,
+					'employees.$.phone': req.body.phone,
+					'employees.$.role': req.body.role,
+				},
+			},
+			{
+				new: true,
+			}
+		);
+		
+		if (!employee) {
+			return res.status(404).json({
+				success: false,
+				message: 'Funcionário não encontrado.',
+			});
+		}
+
+		return res.json({
+			success: true,
+			message: 'Funcionário atualizado com sucesso',
+			employee: employee,
+		});
+
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao atualizar funcionário' + err,
+		});
+	}
+}
+
+const addCompanyEmployee = async (req, res) => {
+	const { id } = req.params;
+
+	try {
+		Company.findOneAndUpdate(
+			{
+				_id: req.user._id,
+			},
+			{
+				$push: {
+					employees: {
+						_id: id	,
+						name: req.body.name,
+					}
+				},
+			},
+			{
+				new: true,
+			}
+		).then((employee) => {
+			if (!employee) {
+				return res.status(404).json({
+					success: false,
+					message: 'Funcionário não encontrado.',
+				});
+			}
+			
+			return res.json({
+				success: true,
+				message: 'Funcionário adicionado com sucesso',
+				employee: employee,
+			});
+		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao adicionar funcionário' + err,
+		});
+	}
+}
+
+const deleteCompanyEmployee = async (req, res) => {
+	const { employee_id } = req.params;
+
+	try {
+		const employee = await Company.findOneAndUpdate(
+			{
+				_id: req.user._id,
+			},
+			{
+				$pull: {
+					employees: {
+						_id: employee_id,
+					},
+				},
+			},
+			{
+				new: true,
+			}
+		);
+		
+		return res.json({
+			success: true,
+			message: 'Funcionário deletado com sucesso',
+			employee: employee,
+		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao deletar funcionário' + err,
+		});
+	}
+}
+
 module.exports = {
 	registerCompany,
 	loginCompany,
@@ -504,6 +715,11 @@ module.exports = {
 	addToTalentBank,
 	removeFromTalentBank,
 	getTalentBank,
+	companyGetEmployee,
+	getAllCompanyEmployees,
+	updateCompanyEmployee,
+	addCompanyEmployee,
+	deleteCompanyEmployee,
 	createForgotPasswordToken,
 	checkRecoveryToken,
 	resetPassword,

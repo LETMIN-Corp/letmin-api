@@ -84,6 +84,16 @@ const CompanySchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref: 'Vacancy',
 	}],
+	employees: [{
+		_id: {
+			type: Schema.Types.ObjectId,
+			ref: 'User',
+		},
+		employed_at: {
+			type: Date,
+			default: Date.now,
+		},
+	}],
 	status: {
 		blocked: {
 			type: Boolean,
