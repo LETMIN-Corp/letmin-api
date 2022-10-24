@@ -14,20 +14,12 @@ const matchCandidates = async (req, res) => {
                 message: 'Vaga não encontrada.',
             });
         }
-		// find candidates that match the vacancy requirements
-		// based on skills, years of experience, user role and their description
-        console.log(vacancy);
 
-		descriptionSpliced = vacancy.description.trim().split(' ');
+		const { matchUsersWithVacancy } = require('./repositories/matchRepository');
 
-		const candidates = await User.find({
-			$text: { $search: vacancy.description },
-		});
+		const candidates = await matchUsersWithVacancy(vacancy);
 
-		// find the company
-		const company = await Company.findById(vacancy.company);
-
-		if (!candidates || !candidates.length) {
+		if (!candidates.length) {
 			return res.status(404).json({
 				success: false,
 				message: 'Nenhum candidato encontrado.',
@@ -38,7 +30,6 @@ const matchCandidates = async (req, res) => {
 			success: true,
 			message: 'Candidatos encontrados.',
 			candidates: candidates,
-			//company: company,
 		});
 
 	} catch (err) {
