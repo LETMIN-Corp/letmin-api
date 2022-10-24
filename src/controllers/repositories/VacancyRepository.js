@@ -193,7 +193,16 @@ const companyGetVacancy = async (_id) => {
 				currency: 1,
 				region: 1,
 				workload: 1,
-				wantedSkills: 1,
+				wantedSkills: {
+					$map: {
+						input: '$wantedSkills',
+						as: 'skill',
+						in: {
+							name: '$$skill.name',
+							level: '$$skill.level'
+						}
+					}
+				},
 				yearsOfExperience: 1,
 				type: 1,
 				candidates: 1,
