@@ -2,7 +2,7 @@ const User = require('../../models/User');
 
 /**
  * Get candidates most suitable for a vacancy
- * @param {String} _id
+ * @param {Vacancy} vacancy
  * @returns {Promise}
  * @example
  **/
@@ -23,26 +23,29 @@ const matchUsersWithVacancy = async (vacancy) => {
     // sum the number of words in the description and role
     const vacancySearchWords = descriptionSpliced.length + roleSpliced.length;
     console.log(descriptionSpliced, roleSpliced, vacancySearchWords);
+
     const users = await User.aggregate([
         {
-            $match: { blocked: false }
-        },
-        {
+            // make regex search for each word in the vacancySearchWords
             $match: {
                 $or: [
-                    // match with regex insensitive case and with all words spliced
-                    { description: { $regex: descriptionSpliced.join('|'), $options: 'i' } },
-                    { role: { $regex: roleSpliced.join('|'), $options: 'i' } },
-                    // skills are stored as an array of objects with the skill name and the level of proficiency as exither 'Iniciante', 'Intermediário', 'Avançado'
-                    // so we need to match the skill name with the wanted skills level(string of the same tye)
-                    { skills: { $elemMatch: { name: { $in: vacancy.wantedSkills }, level: vacancy.wantedSkillsLevel } } },
-                    { experiences: { role: { $regex: roleSpliced.join('|'), $options: 'i' } } },
-                    { experiences: { description: { $regex: descriptionSpliced.join('|'), $options: 'i' } } },
-                    { formations: { institution: { $regex: descriptionSpliced.join('|'), $options: 'i' } } },
-                    { formations: { description: { $regex: descriptionSpliced.join('|'), $options: 'i' } } },
-                    { yearsOfExperience: { $gte: vacancy.yearsOfExperience } },
-                ],
-            },
+                    { description: { $regex: descriptionSpliced.join("|"), $options: "i" } },
+                    { role: { $regex: roleSpliced.join("|"), $options: "i" } },
+                    { skills: { $regex: descriptionSpliced.join("|"), $options: "i" } },
+                    { skills: { $regex: roleSpliced.join("|"), $options: "i" } },
+                    { formations: { $regex: descriptionSpliced.join("|"), $options: "i" } },    
+                    { formations: { $regex: roleSpliced.join("|"), $options: "i" } },
+                    { experiences: { $regex: descriptionSpliced.join("|"), $options: "i" } },
+                    { experiences: { $regex: roleSpliced.join("|"), $options: "i" } },
+                    // match if any experience has the same company as the vacancy (which is referenced by company reference)
+                    { experiences: { $elemMatch: { 'company.name': vacancy.company } } },  
+                    // match if user has any experience which the finish date minus the start date number is equal or greater than yearsOfExperience
+                    //@todo: this is not working
+                ]
+            }
+        },
+        {
+            $match: { blocked: false }
         },
         {
             $project: {
@@ -51,36 +54,72 @@ const matchUsersWithVacancy = async (vacancy) => {
                 role: 1,
                 description: 1,
                 skills: 1,
-                yearsOfExperience: 1,
+                experiences: 1,
                 profilePicture: 1,
                 createdAt: 1,
             },
         }
     ]);
 
-    // // WIP
-    // // build a percentage of match for each user comparing the same things as que mongoose aggregation
-    // users.forEach(user => {
-    //     let matchedFeatures = 0;
-    //     console.log(user.description, descriptionSpliced.join('|'));
-    //     matchedFeatures += (user.description.match(new RegExp(descriptionSpliced.join('|'), 'i')) || []).length;
+    // build a percentage of match for each user comparing the same things as the mongoose aggregation
+    users.forEach(user => {
+        user.matchedFeatures = 0;
 
+        // regex search for each word in the vacancySearchWords
+        if (user.description.match(new RegExp(descriptionSpliced.join("|"), "i"))) {
+            user.matchedFeatures++;
+        }
+        if (user.role.match(new RegExp(roleSpliced.join("|"), "i"))) {
+            user.matchedFeatures++;
+        }
+        if (user.skills)
+        user.skills.forEach(skill => {
+            if (skill.name.match(new RegExp(descriptionSpliced.join("|"), "i"))) {
+                user.matchedFeatures++;
+            }
+            if (skill.level.match(new RegExp(roleSpliced.join("|"), "i"))) {
+                user.matchedFeatures++;
+            }
+        });
 
-    //     if (user.description && user.description.match(new RegExp(descriptionSpliced.join('|'), 'i'))) matchedFeatures++;
-    //     if (user.role && user.role.match(new RegExp(roleSpliced.join('|'), 'i'))) matchedFeatures += user.role.match(new RegExp(roleSpliced.join('|'), 'i')).length;
-    //     if (user.skills && user.skills.find(skill => skill.name && skill.level && skill.name.match(new RegExp(vacancy.wantedSkills.join('|'), 'i')) && skill.level === vacancy.wantedSkillsLevel)) matchedFeatures++;
-    //     if (user.experiences && user.experiences.find(experience => experience.role && experience.role.match(new RegExp(roleSpliced.join('|'), 'i')))) matchedFeatures++;
-    //     if (user.experiences && user.experiences.find(experience => experience.description && experience.description.match(new RegExp(descriptionSpliced.join('|'), 'i')))) matchedFeatures++;
-    //     if (user.formations && user.formations.find(formation => formation.institution && formation.institution.match(new RegExp(descriptionSpliced.join('|'), 'i')))) matchedFeatures++;
-    //     if (user.formations && user.formations.find(formation => formation.description && formation.description.match(new RegExp(descriptionSpliced.join('|'), 'i')))) matchedFeatures++;
-    //     if (user.yearsOfExperience && user.yearsOfExperience >= vacancy.yearsOfExperience) matchedFeatures++;
+        if (user.formations)
+            user.formations.forEach(formation => {
+                if (formation.name.match(new RegExp(descriptionSpliced.join("|"), "i"))) {
+                    user.matchedFeatures++;
+                }
+                if (formation.level.match(new RegExp(roleSpliced.join("|"), "i"))) {
+                    user.matchedFeatures++;
+                }
+            });
 
-    //     user.matchedFeatures = matchedFeatures;
-    //     user.matchPercentage = (matchedFeatures / vacancySearchWords) * 100;
-    // });
+        if (user.experiences)
+            user.experiences.forEach(experience => {
+                if (experience.description.match(new RegExp(descriptionSpliced.join("|"), "i"))) {
+                    user.matchedFeatures++;
+                }
+                if (experience.role.match(new RegExp(roleSpliced.join("|"), "i"))) {
+                    user.matchedFeatures++;
+                }
+                if (experience.company.match(new RegExp(vacancy.company, "i"))) {
+                    user.matchedFeatures++;
+                }
+
+                // match if user has equal or greater years of experience than the vacancy
+                const experienceYears = experience.finish.getFullYear() - experience.start.getFullYear();
+                if (experienceYears >= vacancy.yearsOfExperience) {
+                    user.matchedFeatures++;
+                }
+            });
+
+        // calculate the percentage of match
+        user.matchedPercentage = (user.matchedFeatures / vacancySearchWords) * 100;
+        if (user.matchedPercentage > 100) {
+            user.matchedPercentage = 100;
+        }
+    });
 
     // sort the users by the match percentage
-    return users
+    return users.sort((a, b) => b.matchedPercentage - a.matchedPercentage);
 };
 
 module.exports = {
