@@ -4,7 +4,7 @@ const ComplaintSchema = new Schema({
 	reason: {
 		type: String,
 		required: true,
-		enum: ['Conteúdo Inapropriado', 'Spam', 'Outros']
+		enum: ['Conteúdo Inapropriado', 'Spam', 'Outro']
 	},
 	description: {
 		type: String,
