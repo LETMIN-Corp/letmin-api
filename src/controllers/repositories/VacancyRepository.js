@@ -47,6 +47,7 @@ async function getAppliedVacancies (_id) {
 				salary: 1, 
 				currency: 1, 
 				region: 1, 
+				closed: 1,
 				candidates: {
 					$size: '$candidates'
 				}, 
