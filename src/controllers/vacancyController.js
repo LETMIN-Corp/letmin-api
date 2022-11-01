@@ -171,7 +171,7 @@ const closeVacancy = async (req, res) => {
 const updateVacancy = async (req, res) => {
 	const companyId = req.user._id;
 	const vacancyId = req.body._id;
-	console.log(req.body);
+
 	try {
 		Vacancy.findOneAndUpdate({ company: companyId, _id: vacancyId }, req.body, { new: true })
 			.then((vacancy) => {

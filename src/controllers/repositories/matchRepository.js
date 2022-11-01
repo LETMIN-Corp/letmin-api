@@ -22,7 +22,7 @@ const matchUsersWithVacancy = async (vacancy) => {
 
     // sum the number of words in the description and role
     const vacancySearchWords = descriptionSpliced.length + roleSpliced.length;
-    console.log(descriptionSpliced, roleSpliced, vacancySearchWords);
+    //console.log(descriptionSpliced, roleSpliced, vacancySearchWords);
 
     const users = await User.aggregate([
         {

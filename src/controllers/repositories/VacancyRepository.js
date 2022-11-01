@@ -109,11 +109,17 @@ async function searchVacancies(user_id, search) {
  * @return {object} - with the vacancy info and the candidates inside an array
  */
 async function getVacancyCandidates(_id) {
-	return await Vacancy.aggregate([
+
+	const { matchUsersWithVacancy } = require ('./matchRepository');
+
+	const vacancy = await Vacancy.findOne({ _id: ObjectId(_id) }).populate('company', 'company.name').lean();
+
+	const MatchedUsers = await matchUsersWithVacancy(vacancy);
+
+	const vacancy_candidates = await Vacancy.aggregate([
 		{ $match: { _id: ObjectId(_id) } },
 		{ $lookup: { from: 'users', localField: 'candidates', foreignField: '_id', as: 'candidates'} },
 		{ $match: { 'candidates.blocked': false } },
-		//{ $unwind: { path: '$candidates' } },
 		// return a single object with the vacancy info and the candidates inside an array
 		{
 			$project: {
@@ -128,6 +134,26 @@ async function getVacancyCandidates(_id) {
 			},
 		}
 	]);
+
+	// add the user info to the candidates array
+	vacancy_candidates.forEach((vacancy) => {
+		// if candidates include _id from MatchedUsers just complement data, if MatchedUser isn't
+		// present on candidates array, add it
+		MatchedUsers.forEach((user) => {
+			if (vacancy.candidates.includes(user._id)) {
+				vacancy.candidates.forEach((candidate) => {
+					if (candidate._id.equals(user._id)) {
+						candidate.match = user.match;
+						candidate.matched_skills = user.matched_skills;
+					}
+				});
+			} else {
+				vacancy.candidates.push(user);
+			}
+		})
+	});
+
+	return vacancy_candidates;
 }
 
 /**
