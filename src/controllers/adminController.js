@@ -303,6 +303,30 @@ const getUser = async (req, res) => {
 		});
 };
 
+const getCompany = async (req, res) => {
+
+	const { company_id } = req.body;
+
+	await Company.findById(company_id).populate('vacancies', 'role sector region description currency salary closed', { 
+		$and: [
+			{ closed: false },
+		],
+	}).select('company holder vacancies')
+		.then((company) => {
+			return res.status(200).json({
+				success: true,
+				message: 'Dados da empresa.',
+				company: company,
+			});
+		})
+		.catch((err) => {
+			return res.status(400).json({
+				success: false,
+				message: 'Error ' + err,
+			});
+		});
+};
+
 module.exports = {
 	adminRegister,
 	adminLogin,
@@ -314,4 +338,5 @@ module.exports = {
 	changeComplaintStatus,
 	removeComplaint,
 	getUser,
+	getCompany,
 };
