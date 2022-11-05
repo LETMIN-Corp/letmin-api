@@ -1,4 +1,7 @@
 const User = require('../../models/User');
+const Vacancy = require('../../models/Vacancy');
+
+const irrelevantWords = ["de", "a", "o", "que", "e", "do", "da", "em", "um", "para", "é", "com", "não", "uma", "os", "no", "se", "na", "por", "mais", "as", "dos", "como", "mas", "ao", "ele", "das", "à", "seu", "sua", "ou", "quando", "muito", "nos", "já", "eu", "também", "só", "pelo", "pela", "até", "isso", "ela", "entre", "era", "depois", "sem", "mesmo", "aos", "ter", "seus", "quem", "nas", "me", "esse", "eles", "estão", "você", "tinha", "foram", "essa", "num", "nem", "suas", "meu", "às", "minha", "têm", "numa", "pelos", "elas", "havia", "seja", "qual", "será", "nós", "tenho", "lhe", "deles", "essas", "esses", "pelas", "este", "fosse", "dele", "tu", "te", "vocês", "vos", "lhes", "meus", "minhas", "teu", "tua", "teus", "tuas", "nosso", "nossa", "nossos", "nossas", "dela", "delas", "esta", "estes", "estas", "aquele", "aquela", "aqueles", "aquelas", "isto", "aquilo", "estou", "está", "estamos", "estão", "estive", "esteve", "estivemos", "estiveram", "estava", "estávamos", "estavam", "estivera", "estivéramos", "esteja", "estejamos", "estejam", "estivesse", "estivéssemos", "estivessem", "estiver", "estivermos",]
 
 /**
  * Get candidates most suitable for a vacancy
@@ -15,9 +18,6 @@ const matchUsersWithVacancy = async (vacancy) => {
     roleSpliced = vacancy.role.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").split(" ");
 
     // agora remova as palavras comuns não relevantes em português apenas
-    const irrelevantWords = ["de", "a", "o", "que", "e", "do", "da", "em", "um", "para", "é", "com", "não", "uma", "os", "no", "se", "na", "por", "mais", "as", "dos", "como", "mas", "ao", "ele", "das", "à", "seu", "sua", "ou", "quando", "muito", "nos", "já", "eu", "também", "só", "pelo", "pela", "até", "isso", "ela", "entre", "era", "depois", "sem", "mesmo", "aos", "ter", "seus", "quem", "nas", "me", "esse", "eles", "estão", "você", "tinha", "foram", "essa", "num", "nem", "suas", "meu", "às", "minha", "têm", "numa", "pelos", "elas", "havia", "seja", "qual", "será", "nós", "tenho", "lhe", "deles", "essas", "esses", "pelas", "este", "fosse", "dele", "tu", "te", "vocês", "vos", "lhes", "meus", "minhas", "teu", "tua", "teus", "tuas", "nosso", "nossa", "nossos", "nossas", "dela", "delas", "esta", "estes", "estas", "aquele", "aquela", "aqueles", "aquelas", "isto", "aquilo", "estou", "está", "estamos", "estão", "estive", "esteve", "estivemos", "estiveram", "estava", "estávamos", "estavam", "estivera", "estivéramos", "esteja", "estejamos", "estejam", "estivesse", "estivéssemos", "estivessem", "estiver", "estivermos",]
-
-    // remove the irrelevant words from the description
     descriptionSpliced = descriptionSpliced.filter(word => !irrelevantWords.includes(word));
 
     // sum the number of words in the description and role
@@ -122,6 +122,113 @@ const matchUsersWithVacancy = async (vacancy) => {
     return users.sort((a, b) => b.matchedPercentage - a.matchedPercentage);
 };
 
+/**
+ * Check user Compatibility and return percentage
+ * @param {user} ObjectId
+ * @param {vacancy} ObjectId
+ * @returns {string}
+ **/
+const checkUserCompatibility = async (user_id, vacancy_id) => {
+
+    const user = await User.findById(user_id);
+
+    const vacancy = await Vacancy.findById(vacancy_id);
+
+    if (!user || !vacancy) {
+        console.log('ERROR')
+        return 0;
+    }
+
+    return matchVacancyDataWithUser(
+        user, 
+        vacancy,
+    );
+};
+
+function spliceVacancyData(vacancy) {
+    // remove newlines from description, trim the description, 
+    // remove special characters(like .,;:?!), and split it into words and remove irrelevant words
+    let descriptionSpliced = vacancy.description.replace(/(\r\n|\n|\r)/gm, " ")
+                                .trim()
+                                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").split(" ")
+                                .filter(word => !irrelevantWords.includes(word));
+
+    let roleSpliced = vacancy.role.trim()
+                                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").split(" ");
+
+    let SearchWords = [...descriptionSpliced, ...roleSpliced];
+
+    return { descriptionSpliced, roleSpliced, SearchWords };
+}
+
+function matchVacancyDataWithUser(user, vacancy) {
+    const {
+        descriptionSpliced,
+        roleSpliced,
+        SearchWords
+    } = spliceVacancyData(vacancy);
+
+    let matchedFeatures = 0;
+
+    // regex search for each word in the vacancySearchWords
+    if (user.description.match(new RegExp(descriptionSpliced.join("|"), "i"))) {
+        matchedFeatures++;
+    }
+    if (user.role.match(new RegExp(roleSpliced.join("|"), "i"))) {
+        matchedFeatures++;
+    }
+    if (user.skills)
+        user.skills.forEach(skill => {
+            if (skill.name.match(new RegExp(descriptionSpliced.join("|"), "i"))) {
+                matchedFeatures++;
+            }
+            if (skill.level.match(new RegExp(roleSpliced.join("|"), "i"))) {
+                matchedFeatures++;
+            }
+        });
+
+    if (user.formations)
+        user.formations.forEach(formation => {
+            if (formation.name.match(new RegExp(descriptionSpliced.join("|"), "i"))) {
+                matchedFeatures++;
+            }
+            if (formation.description.match(new RegExp(roleSpliced.join("|"), "i"))) {
+                matchedFeatures++;
+            }
+        });
+
+    if (user.experiences)
+        user.experiences.forEach(experience => {
+            if (experience.description.match(new RegExp(descriptionSpliced.join("|"), "i"))) {
+                matchedFeatures++;
+            }
+            if (experience.role.match(new RegExp(roleSpliced.join("|"), "i"))) {
+                matchedFeatures++;
+            }
+            if (experience.company.match(new RegExp(vacancy.company, "i"))) {
+                matchedFeatures++;
+            }
+
+            // match if user has equal or greater years of experience than the vacancy
+            const experienceYears = experience.finish.getFullYear() - experience.start.getFullYear();
+            if (experienceYears >= vacancy.yearsOfExperience) {
+                matchedFeatures++;
+            }
+        });
+
+    let searchLenght = Object.keys(SearchWords).length;
+
+    // calculate the percentage of match
+    let matchedPercentage = ((matchedFeatures / searchLenght ) * 100).toFixed(2);
+    if (matchedPercentage > 100) {
+        matchedPercentage = 100;
+    }
+    console.log('matched', matchedFeatures, 'percentage', searchLenght );
+
+    return matchedPercentage;
+}
+
 module.exports = {
     matchUsersWithVacancy,
+    checkUserCompatibility,
 };

@@ -365,12 +365,12 @@ const cancelApplyVacancy = async (req, res) => {
  **/
 const getAllCandidates = async (req, res) => {
 
-	const { getVacancyCandidates } = require('./repositories/VacancyRepository');
+	const { getVacancyWithCandidates } = require('./repositories/VacancyRepository');
 
 	try {
-		let candidates = await getVacancyCandidates(req.params.id);
+		let vacancy = await getVacancyWithCandidates(req.params.id);
 
-		if (!candidates || candidates.length == 0) {
+		if (!vacancy) {
 			return res.status(404).json({
 				success: false,
 				message: 'Vaga não encontrada.',
@@ -380,7 +380,7 @@ const getAllCandidates = async (req, res) => {
 		return res.json({
 			success: true,
 			message: 'Candidatos encontrados',
-			data: candidates[0]
+			data: vacancy
 		});
 	} catch (err) {
 		return res.status(400).json({

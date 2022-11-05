@@ -108,21 +108,22 @@ async function searchVacancies(user_id, search) {
  * @param {string} _id - vacancy id
  * @return {object} - with the vacancy info and the candidates inside an array
  */
-async function getVacancyCandidates(_id) {
-
+const getVacancyWithCandidates = async (_id) => {
 	const { matchUsersWithVacancy } = require ('./matchRepository');
 
 	const vacancy = await Vacancy.findOne({ _id: ObjectId(_id) }).populate('company', 'company.name').lean();
 
 	const MatchedUsers = await matchUsersWithVacancy(vacancy);
 
+	const { checkUserCompatibility } = require ('./matchRepository');
+
 	const vacancy_candidates = await Vacancy.aggregate([
 		{ $match: { _id: ObjectId(_id) } },
 		{ $lookup: { from: 'users', localField: 'candidates', foreignField: '_id', as: 'candidates'} },
 		{ $match: { 'candidates.blocked': false } },
-		// return a single object with the vacancy info and the candidates inside an array
 		{
 			$project: {
+				_id: 1,
 				role: 1,
 				description: 1,
 				sector: 1,
@@ -130,31 +131,48 @@ async function getVacancyCandidates(_id) {
 				salary: 1,
 				currency: 1,
 				region: 1,
-				candidates: 1
+				candidates: {
+					$map: {
+						input: '$candidates',
+						as: 'candidate',
+						in: {
+							_id: '$$candidate._id',
+							name: '$$candidate.name',
+							email: '$$candidate.email',
+							picture: '$$candidate.picture',
+						}
+					}
+				},
 			},
 		}
 	]);
 
-	// add the user info to the candidates array
-	vacancy_candidates.forEach((vacancy) => {
-		// if candidates include _id from MatchedUsers just complement data, if MatchedUser isn't
-		// present on candidates array, add it
-		MatchedUsers.forEach((user) => {
-			if (vacancy.candidates.includes(user._id)) {
-				vacancy.candidates.forEach((candidate) => {
-					if (candidate._id.equals(user._id)) {
-						candidate.match = user.match;
-						candidate.matched_skills = user.matched_skills;
-					}
-				});
-			} else {
-				vacancy.candidates.push(user);
-			}
-		})
-	});
+	if (vacancy_candidates.length == 0) {
+		console.log('No candidates found');
+		return {};
+	}
 
-	return vacancy_candidates;
-}
+	candidates = vacancy_candidates[0].candidates;
+
+	for(const candidate of MatchedUsers) {
+
+		if (vacancy.candidates.includes(candidate._id)) {
+			candidate.matched = true;
+		} else {
+			candidate.matched = false;
+		}
+
+		candidate.compatibility = await checkUserCompatibility(candidate._id, vacancy._id);
+		candidate.matched = MatchedUsers.includes(candidate._id.toString());
+
+		console.log(MatchedUsers);
+	}
+
+	return {
+		...vacancy_candidates[0],
+		candidates: MatchedUsers
+	}
+};
 
 /**
  * Get Vacancy Info to show to company and candidate
@@ -251,7 +269,7 @@ module.exports = {
 	getCandidateInfo,
 	getAppliedVacancies,
 	searchVacancies,
-	getVacancyCandidates,
+	getVacancyWithCandidates,
 	userGetVacancy,
 	companyGetVacancy,
 };
