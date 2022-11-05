@@ -1,9 +1,10 @@
 
 // return options of the email
-const email = (user, company, text) => {
+const email = (message, user) => {
+    console.log('zzzzzzzzz', message, user)
 	const options = {
 		email: user.email,
-		subject: 'Letmin - Contato Vaga',
+		subject: message.subject,
 		html: `<html>
         <head>
             <meta charset="utf-8">
@@ -36,16 +37,6 @@ const email = (user, company, text) => {
                     text-align: center;
                     padding: 10px;
                 }
-                button, a {
-                    background-color: #9C37EB;
-                    color: #fff;
-                    border: none;
-                    padding: 10px;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    text-decoration: none;
-                    font-weigth: 500;
-                }
             </style>
         </head>
         <body>
@@ -54,8 +45,8 @@ const email = (user, company, text) => {
                     <h1>Letmin - Recuperação de Senha</h1>
                 </div>
                 <div style="padding: 0 12px;">
-                    <h2>Olá administrador da ${ company.company.name },</h2>
-                    <p>${ text }</p>
+                    <h2>Caro ${ user.name },</h2>
+                    <p>${ message.text }</p>
                     <p>Atenciosamente,</p>
                     <p>
                         <b>Equipe Letmin</b>

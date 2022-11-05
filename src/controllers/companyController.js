@@ -495,6 +495,53 @@ const companyGetVacancy = async (req, res) => {
 	}
 };
 
+const sendCandidateContactEmail = async (req, res) => {
+
+	const { message, user_id } = req.body;
+
+	if (!message, !user_id) {
+		return res.status(400).json({
+			success: false,
+			message: 'Mensagens e usuário alvo são obrigatórias'
+		});
+	}
+
+	const user = await User.findById(user_id).select('name email')
+
+	if (!user) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao encontrar usuário'
+		});
+	}
+
+	try {
+		const contactEmail = require('../utils/emailTemplates/contactUser')(message, user);
+
+		await sendEmail(contactEmail)
+			.then(async (info, err) => {
+				if (err) {
+					return res.status(400).json({
+						success: false,
+						message: 'Error ' + err,
+					});
+				}
+
+				return res.status(200).json({
+					success: true,
+					message: 'Sucesso no envio do email ao candidato',
+				});
+				
+			});
+
+	} catch (err) {
+		return res.status(500).json({
+			success: false,
+			message: 'Erro ao enviar email' + err
+		});
+	}
+};
+
 module.exports = {
 	registerCompany,
 	loginCompany,
@@ -509,4 +556,5 @@ module.exports = {
 	checkRecoveryToken,
 	resetPassword,
 	companyGetVacancy,
+	sendCandidateContactEmail,
 };
