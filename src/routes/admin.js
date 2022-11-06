@@ -1,6 +1,10 @@
 const router = require('express').Router();
 
 const { 
+	userGetVacancy, 
+} = require('../controllers/vacancyController');
+
+const { 
 	getAllCompanies,
 	changeCompanyBlockStatus,
 	getAllUsers,
@@ -31,5 +35,7 @@ router.delete('/remove-complaint', removeComplaint);
 
 router.post('/get-user', getUser);
 router.post('/get-company', getCompany);
+
+router.get('/get-vacancy/:id', userGetVacancy);
 
 module.exports = router;
