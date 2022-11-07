@@ -64,8 +64,8 @@ const matchUsersWithVacancy = async (vacancy) => {
         user.matchPercentage = matchVacancyDataWithUser(user, vacancy, SearchWords, vacancySearchWords);
     });
 
-    // sort the users by the match percentage
-    return users.sort((a, b) => b.matchedPercentage - a.matchedPercentage);
+    // sort the users by the match percentage and remove percentages lower than 50%
+    return users.sort((a, b) => b.matchPercentage - a.matchPercentage).filter(user => user.matchPercentage >= 50);
 };
 
 /**
