@@ -153,19 +153,19 @@ const getVacancyWithCandidates = async (_id) => {
 	}
 
 	candidates = vacancy_candidates[0].candidates;
+	console.log('candidates:', Object.values(candidates))
 
 	for(const candidate of MatchedUsers) {
 
-		if (vacancy.candidates.includes(candidate._id)) {
-			candidate.matched = true;
-		} else {
-			candidate.matched = false;
-		}
-
+		// if (vacancy.candidates.includes(candidate._id)) {
+		// 	candidate.matched = true;
+		// } else {
+		// 	candidate.matched = false;
+		// }
+		
 		candidate.compatibility = await checkUserCompatibility(candidate._id, vacancy._id);
-		candidate.matched = MatchedUsers.includes(candidate._id.toString());
-
-		//console.log(MatchedUsers);
+		candidate.matched = candidates.find(c => c._id.toString() == candidate._id.toString()) ? false : true;
+		console.log(candidate._id);
 	}
 
 	return {

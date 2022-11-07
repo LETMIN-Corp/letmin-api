@@ -11,19 +11,15 @@ const irrelevantWords = ["de", "a", "o", "que", "e", "do", "da", "em", "um", "pa
  * @example
  **/
 const matchUsersWithVacancy = async (vacancy) => {
-    // remove newlines from description
-    const description = vacancy.description.replace(/(\r\n|\n|\r)/gm, " ");
 
-    // trim the description, remove special characters(like .,;:?!), and split it into words
-    descriptionSpliced = description.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").split(" ");
-    roleSpliced = vacancy.role.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").split(" ");
+    const {
+        descriptionSpliced,
+        roleSpliced,
+        SearchWords
+    } = spliceVacancyData(vacancy);
 
-    // agora remova as palavras comuns não relevantes em português apenas
-    descriptionSpliced = descriptionSpliced.filter(word => !irrelevantWords.includes(word));
 
-    // sum the number of words in the description and role
-    const vacancySearchWords = descriptionSpliced.length + roleSpliced.length;
-    //console.log(descriptionSpliced, roleSpliced, vacancySearchWords);
+    vacancySearchWords = Object.keys(SearchWords).length;
 
     const users = await User.aggregate([
         {
