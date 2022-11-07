@@ -166,7 +166,9 @@ const searchCompany = async (req, res) => {
 			{ 'company.name': { $regex: search, $options: 'i' } },
 			{ 'company.address': { $regex: search, $options: 'i' } },
 		],
-		
+		$and: [
+			{ 'company.status.blocked': false }
+		]
 	}).select('_id company.name company.address').sort({ createdAt: -1 })
 		.then((companies) => { 
 			if (!companies) {
