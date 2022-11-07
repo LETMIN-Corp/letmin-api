@@ -51,6 +51,7 @@ const matchUsersWithVacancy = async (vacancy) => {
                 role: 1,
                 description: 1,
                 skills: 1,
+                picture: 1,
                 experiences: 1,
                 profilePicture: 1,
                 createdAt: 1,
@@ -58,61 +59,9 @@ const matchUsersWithVacancy = async (vacancy) => {
         }
     ]);
 
-    // build a percentage of match for each user comparing the same things as the mongoose aggregation
-    users.forEach(user => {
-        user.matchedFeatures = 0;
-
-        // regex search for each word in the vacancySearchWords
-        if (user.description.match(new RegExp(descriptionSpliced.join("|"), "i"))) {
-            user.matchedFeatures++;
-        }
-        if (user.role.match(new RegExp(roleSpliced.join("|"), "i"))) {
-            user.matchedFeatures++;
-        }
-        if (user.skills)
-        user.skills.forEach(skill => {
-            if (skill.name.match(new RegExp(descriptionSpliced.join("|"), "i"))) {
-                user.matchedFeatures++;
-            }
-            if (skill.level.match(new RegExp(roleSpliced.join("|"), "i"))) {
-                user.matchedFeatures++;
-            }
-        });
-
-        if (user.formations)
-            user.formations.forEach(formation => {
-                if (formation.name.match(new RegExp(descriptionSpliced.join("|"), "i"))) {
-                    user.matchedFeatures++;
-                }
-                if (formation.level.match(new RegExp(roleSpliced.join("|"), "i"))) {
-                    user.matchedFeatures++;
-                }
-            });
-
-        if (user.experiences)
-            user.experiences.forEach(experience => {
-                if (experience.description.match(new RegExp(descriptionSpliced.join("|"), "i"))) {
-                    user.matchedFeatures++;
-                }
-                if (experience.role.match(new RegExp(roleSpliced.join("|"), "i"))) {
-                    user.matchedFeatures++;
-                }
-                if (experience.company.match(new RegExp(vacancy.company, "i"))) {
-                    user.matchedFeatures++;
-                }
-
-                // match if user has equal or greater years of experience than the vacancy
-                const experienceYears = experience.finish.getFullYear() - experience.start.getFullYear();
-                if (experienceYears >= vacancy.yearsOfExperience) {
-                    user.matchedFeatures++;
-                }
-            });
-
-        // calculate the percentage of match
-        user.matchedPercentage = (user.matchedFeatures / vacancySearchWords) * 100;
-        if (user.matchedPercentage > 100) {
-            user.matchedPercentage = 100;
-        }
+    // build a percentage of match for each user using matchVacancyDataWithUser(user, vacancy);
+    users.map(user => {
+        user.matchPercentage = matchVacancyDataWithUser(user, vacancy, SearchWords, vacancySearchWords);
     });
 
     // sort the users by the match percentage

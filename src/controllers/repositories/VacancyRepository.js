@@ -1,3 +1,4 @@
+const { listenerCount } = require('../../app');
 const User = require('../../models/User');
 const Vacancy = require('../../models/Vacancy');
 const ObjectId = require('mongoose').Types.ObjectId;
@@ -104,7 +105,8 @@ async function searchVacancies(user_id, search) {
 }
 
 /**
- * Get all candidates that applied to the vacancy (not blocked) to show to company with basic info about the role and the users
+ * Get all candidates that applied to the vacancy (not blocked) 
+ * and all possible matches of the system to the company
  * @param {string} _id - vacancy id
  * @return {object} - with the vacancy info and the candidates inside an array
  */
@@ -147,30 +149,32 @@ const getVacancyWithCandidates = async (_id) => {
 		}
 	]);
 
-	if (vacancy_candidates.length == 0) {
-		//console.log('No candidates found');
-		return {};
-	}
-
 	candidates = vacancy_candidates[0].candidates;
-	console.log('candidates:', Object.values(candidates))
 
-	for(const candidate of MatchedUsers) {
-
-		// if (vacancy.candidates.includes(candidate._id)) {
-		// 	candidate.matched = true;
-		// } else {
-		// 	candidate.matched = false;
-		// }
+	for(let candidate of candidates) {
+		// check if the user is within the matched users and if so, remove him from the matched users array
+		const index = MatchedUsers.findIndex(user => user._id.toString() === candidate._id.toString());
+		if (index > -1) {
+			MatchedUsers.splice(index, 1);
+		}
 		
 		candidate.compatibility = await checkUserCompatibility(candidate._id, vacancy._id);
-		candidate.matched = candidates.find(c => c._id.toString() == candidate._id.toString()) ? false : true;
-		console.log(candidate._id);
+	}
+	for(let candidate of MatchedUsers) {
+		candidate.compatibility = await checkUserCompatibility(candidate._id, vacancy._id);
+
+		MatchedUsers[MatchedUsers.indexOf(candidate)] = {
+			_id: candidate._id,
+			name: candidate.name,
+			picture: candidate.picture,
+			compatibility: candidate.compatibility,
+		}
 	}
 
 	return {
 		...vacancy_candidates[0],
-		candidates: MatchedUsers
+		candidates: candidates,
+		matches: MatchedUsers,
 	}
 };
 
@@ -181,10 +185,7 @@ const getVacancyWithCandidates = async (_id) => {
  */
 async function userGetVacancy(_id, user_id) {
 	const vacancy = await Vacancy.aggregate([
-		{ $match: {
-			_id: ObjectId(_id),
-			closed: false
-		} },
+		{ $match: { _id: ObjectId(_id), closed: false } },
 		{ $lookup: { from: 'companies', localField: 'company', foreignField: '_id', as: 'companyInfo'} },
 		{ $unwind: { path: '$companyInfo' } },
 		{
