@@ -9,6 +9,8 @@ const {
 	changeComplaintStatus,
 	removeComplaint,
 	getUser,
+	getAllLogs,
+	cleanLogs,
 } = require('../controllers/adminController');
 
 // Companies Management Routes
@@ -29,5 +31,8 @@ router.patch('/resolve-complaint', changeComplaintStatus);
 router.delete('/remove-complaint', removeComplaint);
 
 router.post('/get-user', getUser);
+
+router.get('/get-all-logs', getAllLogs);
+router.delete('/clean-logs', cleanLogs);
 
 module.exports = router;

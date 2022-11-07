@@ -10,6 +10,7 @@ const {
 } = require('../utils/jwt');
 const User = require('../models/User');
 const Complaints = require('../models/Complaint');
+const Log = require('../models/Log');
 
 /**
  * @DESC To register the admin
@@ -303,6 +304,39 @@ const getUser = async (req, res) => {
 		});
 };
 
+const getAllLogs = async (req, res) => {
+	try {
+		const logs = await Log.find();
+
+		return res.json({
+			success: true,
+			message: 'Logs encontrados com sucesso',
+			logs,
+		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar logs' + err,
+		});
+	}
+};
+
+const cleanLogs = async (req, res) => {
+	try {
+		await Log.deleteMany();
+
+		return res.json({
+			success: true,
+			message: 'Logs limpos com sucesso',
+		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao limpar logs' + err,
+		});
+	}
+};
+
 module.exports = {
 	adminRegister,
 	adminLogin,
@@ -314,4 +348,6 @@ module.exports = {
 	changeComplaintStatus,
 	removeComplaint,
 	getUser,
+	getAllLogs,
+	cleanLogs,
 };
