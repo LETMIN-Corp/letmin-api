@@ -148,7 +148,7 @@ const getVacancyWithCandidates = async (_id) => {
 	]);
 
 	if (vacancy_candidates.length == 0) {
-		console.log('No candidates found');
+		//console.log('No candidates found');
 		return {};
 	}
 
@@ -165,7 +165,7 @@ const getVacancyWithCandidates = async (_id) => {
 		candidate.compatibility = await checkUserCompatibility(candidate._id, vacancy._id);
 		candidate.matched = MatchedUsers.includes(candidate._id.toString());
 
-		console.log(MatchedUsers);
+		//console.log(MatchedUsers);
 	}
 
 	return {

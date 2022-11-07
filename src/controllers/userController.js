@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const { success, error } = require('consola');
 const { USER } = require('../utils/constants');
 const { SECRET } = require('../config');
+const consola = require('consola');
 
 const {
 	generateToken,
@@ -120,9 +121,10 @@ const userLogin = async (req, res) => {
 			});
 		})
 		.catch((err) => {
+			consola.error(err);
 			return res.status(400).json({
 				success: false,
-				message: 'Error ' + err,
+				message: 'Erro ao logar usuário',
 			});
 		});
 };
@@ -148,8 +150,9 @@ const getUserData = async (req, res) => {
 			});
 		})
 		.catch((err) => {
+			consola.error(err);
 			return res.status(400).json({
-				message: 'Error ' + err,
+				message: 'Erro ao buscar usuário.',
 				success: false
 			});
 		});
@@ -180,9 +183,10 @@ const searchCompany = async (req, res) => {
 			});
 		})
 		.catch((err) => {
+			consola.error(err);
 			return res.status(400).json({
 				success: false,
-				message: 'Erro ao buscar empresas.' + err,
+				message: 'Erro ao buscar empresas',
 			});
 		});
 };
@@ -202,9 +206,10 @@ const getCompany = async (req, res) => {
 			});
 		})
 		.catch((err) => {
+			consola.error(err);
 			return res.status(400).json({
 				success: false,
-				message: 'Error ' + err,
+				message: 'Erro ao buscar empresa.',
 			});
 		});
 };
@@ -231,8 +236,9 @@ const updateUser = async (req, res) => {
 		});
 	})
 		.catch((err) => {
+			consola.error(err);
 			return res.status(400).json({
-				message: 'Error ' + err,
+				message: 'Erro ao atualizar os dados do usuário.',
 				success: false
 			});
 		});
@@ -275,10 +281,10 @@ const deleteUserAccount = async (req, res) => {
 		});
 
 	} catch (err) {
-		console.log(err);
+		consola.error(err);
 		return res.status(400).json({
 			success: false,
-			message: 'Error ' + err,
+			message: 'Erro ao deletar usuário.',
 		});
 	}
 };

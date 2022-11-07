@@ -1,7 +1,6 @@
 
 // return options of the email
 const email = (message, user) => {
-    console.log('zzzzzzzzz', message, user)
 	const options = {
 		email: user.email,
 		subject: message.subject,

@@ -1,5 +1,6 @@
 const User = require('../../models/User');
 const Vacancy = require('../../models/Vacancy');
+const consola = require('consola');
 
 const irrelevantWords = ["de", "a", "o", "que", "e", "do", "da", "em", "um", "para", "é", "com", "não", "uma", "os", "no", "se", "na", "por", "mais", "as", "dos", "como", "mas", "ao", "ele", "das", "à", "seu", "sua", "ou", "quando", "muito", "nos", "já", "eu", "também", "só", "pelo", "pela", "até", "isso", "ela", "entre", "era", "depois", "sem", "mesmo", "aos", "ter", "seus", "quem", "nas", "me", "esse", "eles", "estão", "você", "tinha", "foram", "essa", "num", "nem", "suas", "meu", "às", "minha", "têm", "numa", "pelos", "elas", "havia", "seja", "qual", "será", "nós", "tenho", "lhe", "deles", "essas", "esses", "pelas", "este", "fosse", "dele", "tu", "te", "vocês", "vos", "lhes", "meus", "minhas", "teu", "tua", "teus", "tuas", "nosso", "nossa", "nossos", "nossas", "dela", "delas", "esta", "estes", "estas", "aquele", "aquela", "aqueles", "aquelas", "isto", "aquilo", "estou", "está", "estamos", "estão", "estive", "esteve", "estivemos", "estiveram", "estava", "estávamos", "estavam", "estivera", "estivéramos", "esteja", "estejamos", "estejam", "estivesse", "estivéssemos", "estivessem", "estiver", "estivermos",]
 
@@ -135,7 +136,7 @@ const checkUserCompatibility = async (user_id, vacancy_id) => {
     const vacancy = await Vacancy.findById(vacancy_id);
 
     if (!user || !vacancy) {
-        console.log('ERROR')
+        consola.error('ERROR finding user or vacancy');
         return 0;
     }
 
@@ -223,7 +224,7 @@ function matchVacancyDataWithUser(user, vacancy) {
     if (matchedPercentage > 100) {
         matchedPercentage = 100;
     }
-    console.log('matched', matchedFeatures, 'percentage', searchLenght );
+    //console.log('matched', matchedFeatures, 'percentage', searchLenght );
 
     return matchedPercentage;
 }
