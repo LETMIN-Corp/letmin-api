@@ -40,12 +40,14 @@ const loginCompany = async (req, res) => {
 					message: 'Credenciais incorretas',
 				});
 			}
+
+			await Company.findByIdAndUpdate(company._id, { $set: { lastLogin: Date.now() } });
+
 			let token = generateToken(company, ROLES.COMPANY);
 
 			return res.header('Authorization', token).status(200).json({
 				success: true,
 				message: 'Parabéns! Você está logado.',
-				token: token,
 			});
 		})
 		.catch((err) => {

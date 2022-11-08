@@ -124,6 +124,11 @@ const CompanySchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref: 'User',
 	}],
+	lastLogin: {
+		type: Date,
+		required: false,
+		default: Date.now
+	},
 });
 
 // pre insert hook

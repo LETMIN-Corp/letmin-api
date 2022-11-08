@@ -65,18 +65,12 @@ const userLogin = async (req, res) => {
 				}
 
 				const token = generateToken(user, USER);
+
+				await User.findByIdAndUpdate(user._id, { lastLogin: Date.now() });
   
-				let result = {
-					username: user.username,
-					role: user.role,
-					picture: user.picture,
-					email: user.email,
-					token: token,
-				};
 				return res.header('Authorization', token).status(200).json({
 					success: true,
 					message: 'Parabéns! Você está logado.',
-					...result,
 				});
 			}
 			// User does not exist
@@ -89,7 +83,7 @@ const userLogin = async (req, res) => {
 				picture
 			});
   
-			newUser.save((err, user) => {
+			newUser.save(async (err, user) => {
 				const token = generateToken(user, USER);
   
 				const sendMail = require('../utils/mailer');
@@ -107,16 +101,9 @@ const userLogin = async (req, res) => {
 					});
 				});
 
-				let result = {
-					username: user.username,  
-					role: USER,
-					email: user.email,
-					token: token,
-				};
-				return res.header('Authorization', result.token).status(200).json({
-					...result,
+				return res.header('Authorization', token).status(200).json({
+					success: true,
 					message: 'Parabéns! Você está logado.',
-					success: true
 				});
 			});
 		})

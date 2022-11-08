@@ -33,6 +33,6 @@ router.delete('/remove-complaint', removeComplaint);
 router.post('/get-user', getUser);
 
 router.get('/get-all-logs', getAllLogs);
-router.delete('/clean-logs', cleanLogs);
+router.delete('/delete-all-logs', cleanLogs);
 
 module.exports = router;
