@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const { success, error } = require('consola');
 const { USER } = require('../utils/constants');
 const { SECRET } = require('../config');
+const consola = require('consola');
 
 const {
 	generateToken,
@@ -64,18 +65,12 @@ const userLogin = async (req, res) => {
 				}
 
 				const token = generateToken(user, USER);
+
+				await User.findByIdAndUpdate(user._id, { lastLogin: Date.now() });
   
-				let result = {
-					username: user.username,
-					role: user.role,
-					picture: user.picture,
-					email: user.email,
-					token: token,
-				};
 				return res.header('Authorization', token).status(200).json({
 					success: true,
 					message: 'Parabéns! Você está logado.',
-					...result,
 				});
 			}
 			// User does not exist
@@ -88,7 +83,7 @@ const userLogin = async (req, res) => {
 				picture
 			});
   
-			newUser.save((err, user) => {
+			newUser.save(async (err, user) => {
 				const token = generateToken(user, USER);
   
 				const sendMail = require('../utils/mailer');
@@ -106,109 +101,125 @@ const userLogin = async (req, res) => {
 					});
 				});
 
-				let result = {
-					username: user.username,  
-					role: USER,
-					email: user.email,
-					token: token,
-				};
-				return res.header('Authorization', result.token).status(200).json({
-					...result,
+				return res.header('Authorization', token).status(200).json({
+					success: true,
 					message: 'Parabéns! Você está logado.',
-					success: true
 				});
 			});
 		})
 		.catch((err) => {
+			consola.error(err);
 			return res.status(400).json({
 				success: false,
-				message: 'Error ' + err,
+				message: 'Erro ao logar usuário',
 			});
 		});
 };
 
 /**
- * Get user by id (On JWT)
+ * Get user data by id on token
  * @route GET /user/get-user
  */
 const getUserData = async (req, res) => {
-	const { id } = req.user;
+	try {
+		const { id } = req.user;
 
-	User.findById(id).select('-password -blocked -__v')
-		.then((user) => {
-			if (!user) {
-				return res.status(400).json({
-					message: 'Usuário não encontrado.',
-					success: false
-				});
-			}
-			return res.status(200).json({
-				user,
-				success: true
-			});
-		})
-		.catch((err) => {
+		const user = await User.findById(id).select('-password -blocked -__v');
+
+		if (!user) {
 			return res.status(400).json({
-				message: 'Error ' + err,
+				message: 'Usuário não encontrado.',
 				success: false
 			});
+		}
+		return res.status(200).json({
+			user,
+			success: true
 		});
+
+	} catch (err) {
+		consola.error(err);
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar usuário',
+		});
+	}
 };
 
+/**
+ * Get all companies to show to the user
+ * @route GET /user/company
+ */
 const searchCompany = async (req, res) => {
-	let search = req.params.search? req.params.search.trim() : '';
+	try {
 
-	Company.find({	
-		$or: [
-			{ 'company.name': { $regex: search, $options: 'i' } },
-			{ 'company.address': { $regex: search, $options: 'i' } },
-		],
-		
-	}).select('_id company.name company.address').sort({ createdAt: -1 })
-		.then((companies) => { 
-			if (!companies) {
-				return res.status(404).json({
-					success: false,
-					message: 'Empresa não encontrada.',
-				});
-			}
+		let search = req.params.search? req.params.search.trim() : '';
 
-			return res.status(200).json({
-				success: true,
-				message: 'Empresas encontradas.',
-				companies: companies
-			});
-		})
-		.catch((err) => {
-			return res.status(400).json({
+		let companies = await Company.find({
+			$or: [
+				{ 'company.name': { $regex: search, $options: 'i' } },
+				{ 'company.address': { $regex: search, $options: 'i' } },
+			],
+			$and: [
+				{ 'company.status.blocked': false }
+			]
+		}).select('_id company.name company.address').sort({ createdAt: -1 });
+
+		if (!companies) {
+			return res.status(404).json({
 				success: false,
-				message: 'Erro ao buscar empresas.' + err,
+				message: 'Empresa não encontrada.',
 			});
+		}
+
+		return res.status(200).json({
+			success: true,
+			message: 'Empresas encontradas.',
+			companies: companies
 		});
+
+	} catch (err) {
+		consola.error(err);
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar empresa',
+		});
+	}		
 };
 
+/**
+ * Get company data receiving the id
+ * @route GET /user/get-company/:id
+ * @param {string} id
+ */
 const getCompany = async (req, res) => {
+	try {
 
-	await Company.findById(req.params.id).populate('vacancies', 'role sector region description currency salary closed', { 
-		$and: [
-			{ closed: false },
-		],
-	}).select('company holder vacancies')
-		.then((company) => {
-			return res.status(200).json({
-				success: true,
-				message: 'Dados da empresa.',
-				data: company,
-			});
-		})
-		.catch((err) => {
-			return res.status(400).json({
+		let company = await Company.findOne({ _id: req.params.id, 'company.status.blocked': false })
+			.populate('vacancies', 'role sector region description currency salary closed')
+			.select('company holder vacancies');
+
+		if (!company) {
+			return res.status(404).json({
 				success: false,
-				message: 'Error ' + err,
+				message: 'Empresa não encontrada.',
 			});
-		});
-};
+		}
 
+		return res.status(200).json({
+			success: true,
+			message: 'Dados da empresa.',
+			data: company,
+		});
+
+	} catch (err) {
+		consola.error(err);
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar dados da empresa',
+		});
+	}
+};
 
 /**
  * Update user data
@@ -231,8 +242,9 @@ const updateUser = async (req, res) => {
 		});
 	})
 		.catch((err) => {
+			consola.error(err);
 			return res.status(400).json({
-				message: 'Error ' + err,
+				message: 'Erro ao atualizar os dados do usuário.',
 				success: false
 			});
 		});
@@ -275,10 +287,10 @@ const deleteUserAccount = async (req, res) => {
 		});
 
 	} catch (err) {
-		console.log(err);
+		consola.error(err);
 		return res.status(400).json({
 			success: false,
-			message: 'Error ' + err,
+			message: 'Erro ao deletar usuário.',
 		});
 	}
 };

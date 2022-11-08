@@ -13,6 +13,8 @@ const {
 	changeComplaintStatus,
 	removeComplaint,
 	getUser,
+	getAllLogs,
+	cleanLogs,
 	getCompany,
 } = require('../controllers/adminController');
 
@@ -37,5 +39,8 @@ router.post('/get-user', getUser);
 router.post('/get-company', getCompany);
 
 router.get('/get-vacancy/:id', userGetVacancy);
+
+router.get('/get-all-logs', getAllLogs);
+router.delete('/delete-all-logs', cleanLogs);
 
 module.exports = router;

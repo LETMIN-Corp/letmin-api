@@ -7,6 +7,7 @@ const sendEmail = require('../utils/mailer');
 
 const { generateToken } = require('../utils/jwt');
 const { companySearchUsers } = require('./repositories/UserRepository');
+const { default: mongoose } = require('mongoose');
 
 /**
  * Login company
@@ -39,12 +40,14 @@ const loginCompany = async (req, res) => {
 					message: 'Credenciais incorretas',
 				});
 			}
+
+			await Company.findByIdAndUpdate(company._id, { $set: { lastLogin: Date.now() } });
+
 			let token = generateToken(company, ROLES.COMPANY);
 
 			return res.header('Authorization', token).status(200).json({
 				success: true,
 				message: 'Parabéns! Você está logado.',
-				token: token,
 			});
 		})
 		.catch((err) => {
@@ -494,6 +497,53 @@ const companyGetVacancy = async (req, res) => {
 	}
 };
 
+const sendCandidateContactEmail = async (req, res) => {
+
+	const { message, user_id } = req.body;
+
+	if (!message, !user_id) {
+		return res.status(400).json({
+			success: false,
+			message: 'Mensagens e usuário alvo são obrigatórias'
+		});
+	}
+
+	const user = await User.findById(user_id).select('name email')
+
+	if (!user) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao encontrar usuário'
+		});
+	}
+
+	try {
+		const contactEmail = require('../utils/emailTemplates/contactUser')(message, user);
+
+		await sendEmail(contactEmail)
+			.then(async (info, err) => {
+				if (err) {
+					return res.status(400).json({
+						success: false,
+						message: 'Error ' + err,
+					});
+				}
+
+				return res.status(200).json({
+					success: true,
+					message: 'Sucesso no envio do email ao candidato',
+				});
+				
+			});
+
+	} catch (err) {
+		return res.status(500).json({
+			success: false,
+			message: 'Erro ao enviar email' + err
+		});
+	}
+};
+
 module.exports = {
 	registerCompany,
 	loginCompany,
@@ -508,4 +558,5 @@ module.exports = {
 	checkRecoveryToken,
 	resetPassword,
 	companyGetVacancy,
+	sendCandidateContactEmail,
 };

@@ -1,6 +1,8 @@
 const Company = require('../models/Company');
 const Complaint = require('../models/Complaint');
 const User = require('../models/User');
+const Log = require('../models/Log');
+const { Consola } = require('consola');
 
 /**
  * Create a complaint against a user or company
@@ -57,12 +59,25 @@ const createComplaint = async (req, res) => {
 
 		await newComplaint.save();
 
+		// Create a log
+		await new Log({
+			action: 'Create',
+			target: {
+				foreignKey: newComplaint._id,
+				role: 'Complaint'
+			},
+			description: `A empresa ${req.user.company.name}(${req.user._id}) criou uma denúncia contra o usuário ${user.name}(${user._id})`,
+			ip: req.ip,
+			userAgent: req.headers['user-agent'],
+		}).save();
+
 		return res.status(201).json({
 			success: true,
 			message: 'Denúncia criada com sucesso',
 			newComplaint,
 		});
 	} catch (err) {
+		Consola.error(err);
 		return res.status(400).json({
 			success: false,
 			message: 'Erro ao criar denúncia: ' + err,

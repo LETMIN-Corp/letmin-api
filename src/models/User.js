@@ -11,10 +11,9 @@ const UserSchema = new Schema({
 		type: String,
 		required: true
 	},
-	role: {
+	password: {
 		type: String,
-		default: '',
-		required: false,
+		required: true
 	},
 	username: {
 		type: String,
@@ -25,9 +24,10 @@ const UserSchema = new Schema({
 		required: false,
 		default: ''
 	},
-	password: {
+	phone: {
 		type: String,
-		required: true
+		required: false,
+		default: ''
 	},
 	picture: {
 		type: String,
@@ -39,7 +39,7 @@ const UserSchema = new Schema({
 		},
 		level: {
 			type: String,
-			enum: ['Iniciante', 'Intermediário', 'Avançado'],
+			//enum: ['Iniciante', 'Intermediário', 'Avançado'],
 		},
 	}],
 	formations: [{
@@ -76,6 +76,11 @@ const UserSchema = new Schema({
 			type: String,
 		},
 	}],
+	lastLogin: {
+		type: Date,
+		required: false,
+		default: Date.now
+	},
 	blocked: {
 		required: true,
 		type: Boolean,

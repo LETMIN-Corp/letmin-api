@@ -13,6 +13,16 @@ const AdminSchema = new Schema(
 		password: {
 			type: String,
 			required: true
+		},
+		lastLogin: {
+			type: Date,
+			required: false,
+			default: Date.now
+		},
+		active: {
+			type: Boolean,
+			required: true,
+			default: true
 		}
 	},
 	{ timestamps: true }

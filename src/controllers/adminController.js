@@ -10,6 +10,7 @@ const {
 } = require('../utils/jwt');
 const User = require('../models/User');
 const Complaints = require('../models/Complaint');
+const Log = require('../models/Log');
 
 /**
  * @DESC To register the admin
@@ -57,37 +58,42 @@ const adminRegister = async (req, res) => {
  * @ACCESS Public
  */
 const adminLogin = async (req, res) => {
-	let { email, password } = req.body;
-    
-	// First Check if the email is in the database
-	let user = await Admin.findOne({ email });
-	if (!user) {
-		return res.status(404).json({
-			success: false,
-			message: 'Email não encontrado.',
-		});
-	}
-	// Now check for the password
-	let isMatch = await bcrypt.compare(password, user.password);
-	if (!isMatch) {
-		return res.status(400).json({
-			success: false,
-			message: 'Senha incorreta.',
-		});
-	}
+	try {
+		let { email, password } = req.body;
+		
+		// First Check if the email is in the database
+		let user = await Admin.findOne({ email });
+		if (!user) {
+			return res.status(404).json({
+				success: false,
+				message: 'Email não encontrado.',
+			});
+		}
+		// Now check for the password
+		let isMatch = await bcrypt.compare(password, user.password);
+		if (!isMatch) {
+			return res.status(400).json({
+				success: false,
+				message: 'Senha incorreta.',
+			});
+		}
 
-	// Sign in the token and issue it to the user
-	let token = generateToken(user, ADMIN);
-	let result = {
-		name: user.name,
-		email: user.email,
-		token: token,
-	};
-	return res.header('Authorization', token).status(200).json({
-		success: true,
-		message: 'Parabéns! Você está logado.',
-		...result,
-	});
+		await Admin.findByIdAndUpdate(user._id, { lastLogin: Date.now() });
+
+		// Sign in the token and issue it to the user
+		let token = generateToken(user, ADMIN);
+
+		return res.header('Authorization', token).status(200).json({
+			success: true,
+			message: 'Parabéns! Você está logado.',
+		});
+	} catch (err) {
+		return res.status(500).json({
+			success: false,
+			message: 'Não foi possivel logar.',
+			error: err,
+		});
+	}
 };
 
 const getAllCompanies = async (req, res) => {
@@ -303,6 +309,39 @@ const getUser = async (req, res) => {
 		});
 };
 
+const getAllLogs = async (req, res) => {
+	try {
+		const logs = await Log.find();
+
+		return res.json({
+			success: true,
+			message: 'Logs encontrados com sucesso',
+			logs,
+		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao buscar logs' + err,
+		});
+	}
+};
+
+const cleanLogs = async (req, res) => {
+	try {
+		await Log.deleteMany();
+
+		return res.json({
+			success: true,
+			message: 'Logs limpos com sucesso',
+		});
+	} catch (err) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao limpar logs' + err,
+		});
+	}
+};
+
 const getCompany = async (req, res) => {
 
 	const { company_id } = req.body;
@@ -338,5 +377,7 @@ module.exports = {
 	changeComplaintStatus,
 	removeComplaint,
 	getUser,
+	getAllLogs,
+	cleanLogs,
 	getCompany,
 };
