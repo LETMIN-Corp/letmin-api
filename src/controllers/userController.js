@@ -52,7 +52,7 @@ const userLogin = async (req, res) => {
 				if (user.blocked) {
 					return res.status(401).json({
 						success: false,
-						message: 'Usuário bloqueado, entre em contato com o adminsitrador.',
+						message: 'Usuário bloqueado, entre em contato com o administrador.',
 					});
 				}
 

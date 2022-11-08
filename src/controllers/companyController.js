@@ -28,7 +28,7 @@ const loginCompany = async (req, res) => {
 			if (company.status.blocked) {
 				return res.status(401).json({
 					success: false,
-					message: 'Empresa bloqueada, entre em contato com o adminsitrador.',
+					message: 'Empresa bloqueada, entre em contato com o administrador.',
 				});
 			}
 
