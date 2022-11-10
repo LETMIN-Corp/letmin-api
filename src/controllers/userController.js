@@ -152,18 +152,26 @@ const getUserData = async (req, res) => {
  */
 const searchCompany = async (req, res) => {
 	try {
-
-		let search = req.params.search? req.params.search.trim() : '';
-
-		let companies = await Company.find({
-			$or: [
-				{ 'company.name': { $regex: search, $options: 'i' } },
-				{ 'company.address': { $regex: search, $options: 'i' } },
-			],
-			$and: [
-				{ 'company.status.blocked': false }
-			]
-		}).select('_id company.name company.address').sort({ createdAt: -1 });
+		let companies = await Company.aggregate([
+			{
+				$project: {
+					_id: 1,
+					name: '$company.name',
+					address: '$company.address',
+					description: '$company.description',
+					// company: {
+					// 	name: 1,
+					// 	address: 1,
+					// 	description: 1
+					// }
+				}
+			},
+			{
+				$sort: {
+					createdAt: -1
+				}
+			}
+		]);
 
 		if (!companies) {
 			return res.status(404).json({
