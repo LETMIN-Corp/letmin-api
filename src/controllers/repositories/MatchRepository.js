@@ -112,7 +112,7 @@ function matchVacancyDataWithUser(user, vacancy) {
 	} = spliceVacancyData(vacancy);
 
 	let matchedFeatures = 0;
-	console.log(user);
+
 	// regex search for each word in the vacancySearchWords
 	if (user.description.match(new RegExp(descriptionSpliced.join('|'), 'i'))) {
 		matchedFeatures++;
@@ -120,8 +120,8 @@ function matchVacancyDataWithUser(user, vacancy) {
 	if (user.role.match(new RegExp(roleSpliced.join('|'), 'i'))) {
 		matchedFeatures++;
 	}
-	if (user.skills)
-		user.skills.forEach(skill => {
+	if (user.skills) {
+        user.skills.forEach(skill => {
 			if (skill.name.match(new RegExp(descriptionSpliced.join('|'), 'i'))) {
 				matchedFeatures++;
 			}
@@ -129,9 +129,10 @@ function matchVacancyDataWithUser(user, vacancy) {
 				matchedFeatures++;
 			}
 		});
+    }	
 
-	if (user.formations)
-		user.formations.forEach(formation => {
+	if (user.formations) {
+        user.formations.forEach(formation => {
 			if (formation.name.match(new RegExp(descriptionSpliced.join('|'), 'i'))) {
 				matchedFeatures++;
 			}
@@ -139,9 +140,10 @@ function matchVacancyDataWithUser(user, vacancy) {
 				matchedFeatures++;
 			}
 		});
+    }
 
-	if (user.experiences)
-		user.experiences.forEach(experience => {
+	if (user.experiences) {
+        user.experiences.forEach(experience => {
 			if (experience.description.match(new RegExp(descriptionSpliced.join('|'), 'i'))) {
 				matchedFeatures++;
 			}
@@ -158,6 +160,7 @@ function matchVacancyDataWithUser(user, vacancy) {
 				matchedFeatures++;
 			}
 		});
+    }
 
 	let searchLenght = Object.keys(SearchWords).length;
 
