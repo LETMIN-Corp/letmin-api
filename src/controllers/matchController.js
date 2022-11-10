@@ -5,15 +5,15 @@ const Vacancy = require('../models/Vacancy');
 const matchCandidates = async (req, res) => {
 	const { vacancy_id } = req.body;
 
-    try {
+	try {
 		const vacancy = await Vacancy.findById(vacancy_id);
 
-        if (!vacancy) {
-            return res.status(400).json({
-                success: false,
-                message: 'Vaga não encontrada.',
-            });
-        }
+		if (!vacancy) {
+			return res.status(400).json({
+				success: false,
+				message: 'Vaga não encontrada.',
+			});
+		}
 
 		const { matchUsersWithVacancy } = require('./repositories/MatchRepository');
 

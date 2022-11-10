@@ -56,6 +56,6 @@ router.post('/remove-from-talent-bank', removeFromTalentBank);
 router.get('/get-talent-bank', getTalentBank);
 
 router.post('/match-candidates', matchCandidates);
-router.post('/send-candidate-email', sendCandidateContactEmail)
+router.post('/send-candidate-email', sendCandidateContactEmail);
 
 module.exports = router;

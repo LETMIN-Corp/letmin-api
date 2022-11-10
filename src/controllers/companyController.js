@@ -7,7 +7,6 @@ const sendEmail = require('../utils/mailer');
 
 const { generateToken } = require('../utils/jwt');
 const { companySearchUsers } = require('./repositories/UserRepository');
-const { default: mongoose } = require('mongoose');
 
 /**
  * Login company
@@ -508,7 +507,7 @@ const sendCandidateContactEmail = async (req, res) => {
 		});
 	}
 
-	const user = await User.findById(user_id).select('name email')
+	const user = await User.findById(user_id).select('name email');
 
 	if (!user) {
 		return res.status(400).json({

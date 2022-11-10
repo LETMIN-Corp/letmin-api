@@ -18,7 +18,6 @@ const matchUsersWithVacancy = async (vacancy) => {
         SearchWords
     } = spliceVacancyData(vacancy);
 
-
     vacancySearchWords = Object.keys(SearchWords).length;
 
     const users = await User.aggregate([

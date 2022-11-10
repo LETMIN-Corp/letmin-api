@@ -32,6 +32,9 @@
         ],
         "no-unused-vars": [
             "warn"
+        ],
+        "no-useless-escape": [
+            "off"
         ]
     }
 }

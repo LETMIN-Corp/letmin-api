@@ -1,4 +1,3 @@
-const { listenerCount } = require('../../app');
 const User = require('../../models/User');
 const Vacancy = require('../../models/Vacancy');
 const ObjectId = require('mongoose').Types.ObjectId;
@@ -150,7 +149,7 @@ const getVacancyWithCandidates = async (_id) => {
 		}
 	]);
 
-	candidates = vacancy_candidates[0].candidates;
+	let candidates = vacancy_candidates[0].candidates;
 
 	for(let candidate of candidates) {
 		// check if the user is within the matched users and if so, remove him from the matched users array
@@ -169,14 +168,14 @@ const getVacancyWithCandidates = async (_id) => {
 			name: candidate.name,
 			picture: candidate.picture,
 			compatibility: candidate.compatibility,
-		}
+		};
 	}
 
 	return {
 		...vacancy_candidates[0],
 		candidates: candidates,
 		matches: MatchedUsers,
-	}
+	};
 };
 
 /**
