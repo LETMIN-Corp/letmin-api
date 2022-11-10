@@ -4,17 +4,17 @@ const LogsSchema = new Schema({
     action: {
         type: String,
         required: true,
-        enum: ['Create', 'Update', 'Delete']
+        //enum: ['Create', 'Update', 'Delete']
     },
     target: {
         foreignKey: {
             ref: 'User' || 'Company' || 'Admin' || 'Complaint',
             type: Schema.Types.ObjectId,
-            required: true
+            required: false,
         },
         role: {
             type: String,
-            required: true,
+            required: false,
             enum: ['User', 'Company', 'Admin', 'Complaint']
         }
     },

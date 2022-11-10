@@ -15,7 +15,7 @@ const matchCandidates = async (req, res) => {
             });
         }
 
-		const { matchUsersWithVacancy } = require('./repositories/matchRepository');
+		const { matchUsersWithVacancy } = require('./repositories/MatchRepository');
 
 		const candidates = await matchUsersWithVacancy(vacancy);
 

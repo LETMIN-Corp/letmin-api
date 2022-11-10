@@ -112,13 +112,13 @@ async function searchVacancies(user_id, search) {
  * @return {object} - with the vacancy info and the candidates inside an array
  */
 const getVacancyWithCandidates = async (_id) => {
-	const { matchUsersWithVacancy } = require ('./matchRepository');
+	const { matchUsersWithVacancy } = require ('./MatchRepository');
 
 	const vacancy = await Vacancy.findOne({ _id: ObjectId(_id) }).populate('company', 'company.name').lean();
 
 	const MatchedUsers = await matchUsersWithVacancy(vacancy);
 
-	const { checkUserCompatibility } = require ('./matchRepository');
+	const { checkUserCompatibility } = require ('./MatchRepository');
 
 	const vacancy_candidates = await Vacancy.aggregate([
 		{ $match: { _id: ObjectId(_id) } },

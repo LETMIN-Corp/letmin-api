@@ -1,5 +1,6 @@
 const Vacancy = require('../models/Vacancy');
 const Company = require('../models/Company');
+const Log = require('../models/Log');
 
 /**
  * Insert a new vacancy in the database
@@ -383,6 +384,14 @@ const getAllCandidates = async (req, res) => {
 			data: vacancy
 		});
 	} catch (err) {
+		// Create a log
+		await new Log({
+			action: 'Read',
+			description: `O Match de candidatos da vaga falhou: ${err}`,
+			ip: req.ip,
+			userAgent: req.headers['user-agent'],
+		}).save();
+
 		return res.status(400).json({
 			success: false,
 			message: 'Erro ao buscar candidatos.' + err,
