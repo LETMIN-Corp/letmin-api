@@ -149,7 +149,7 @@ const getVacancyWithCandidates = async (_id) => {
 		}
 	]);
 
-	let candidates = vacancy_candidates[0].candidates;
+	let candidates = vacancy_candidates.length ? vacancy_candidates[0].candidates : [];
 
 	for(let candidate of candidates) {
 		// check if the user is within the matched users and if so, remove him from the matched users array
