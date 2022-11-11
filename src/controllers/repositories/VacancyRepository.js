@@ -160,6 +160,7 @@ const getVacancyWithCandidates = async (_id) => {
 		
 		candidate.compatibility = await checkUserCompatibility(candidate._id, vacancy._id);
 	}
+
 	for(let candidate of MatchedUsers) {
 		candidate.compatibility = await checkUserCompatibility(candidate._id, vacancy._id);
 
@@ -171,8 +172,10 @@ const getVacancyWithCandidates = async (_id) => {
 		};
 	}
 
+	let details = candidates.length ? vacancy_candidates[0] : vacancy;
+
 	return {
-		...vacancy_candidates[0],
+		...details,
 		candidates: candidates,
 		matches: MatchedUsers,
 	};
