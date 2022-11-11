@@ -28,11 +28,11 @@ module.exports = (passport) => {
 
 		try {
 			if (role === USER) {
-				user = await User.findById(jwt_payload.user_id);
+				user = await User.findById(jwt_payload.user_id).select('name email _id username picture');
 			} else if (role === COMPANY) {
-				user = await Company.findById(jwt_payload.user_id);
+				user = await Company.findById(jwt_payload.user_id).select('company holder status _id');
 			} else if (role === ADMIN) {
-				user = await Admin.findById(jwt_payload.user_id);
+				user = await Admin.findById(jwt_payload.user_id).select('name email _id');
 			}
 		} catch (err) {
 			return done(err, false);

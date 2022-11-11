@@ -47,6 +47,7 @@ async function getAppliedVacancies (_id) {
 				salary: 1, 
 				currency: 1, 
 				region: 1, 
+				closed: 1,
 				candidates: {
 					$size: '$candidates'
 				}, 
@@ -104,17 +105,89 @@ async function searchVacancies(user_id, search) {
 }
 
 /**
- * Get all candidates that applied to the vacancy (not blocked) to show to company with basic info about the role and the users
+ * Get all candidates that applied to the vacancy (not blocked) 
+ * and all possible matches of the system to the company
  * @param {string} _id - vacancy id
  * @return {object} - with the vacancy info and the candidates inside an array
  */
-async function getVacancyCandidates(_id) {
-	return await Vacancy.aggregate([
+const getVacancyWithCandidates = async (_id) => {
+	const { matchUsersWithVacancy } = require ('./MatchRepository');
+
+	const vacancy = await Vacancy.findOne({ _id: ObjectId(_id) }).populate('company', 'company.name').lean();
+
+	const MatchedUsers = await matchUsersWithVacancy(vacancy);
+
+	const { checkUserCompatibility } = require ('./MatchRepository');
+
+	const vacancy_candidates = await Vacancy.aggregate([
 		{ $match: { _id: ObjectId(_id) } },
 		{ $lookup: { from: 'users', localField: 'candidates', foreignField: '_id', as: 'candidates'} },
 		{ $match: { 'candidates.blocked': false } },
-		//{ $unwind: { path: '$candidates' } },
-		// return a single object with the vacancy info and the candidates inside an array
+		{
+			$project: {
+				_id: 1,
+				role: 1,
+				description: 1,
+				sector: 1,
+				views: 1,
+				salary: 1,
+				currency: 1,
+				region: 1,
+				candidates: {
+					$map: {
+						input: '$candidates',
+						as: 'candidate',
+						in: {
+							_id: '$$candidate._id',
+							name: '$$candidate.name',
+							email: '$$candidate.email',
+							picture: '$$candidate.picture',
+						}
+					}
+				},
+			},
+		}
+	]);
+
+	let candidates = vacancy_candidates[0].candidates;
+
+	for(let candidate of candidates) {
+		// check if the user is within the matched users and if so, remove him from the matched users array
+		const index = MatchedUsers.findIndex(user => user._id.toString() === candidate._id.toString());
+		if (index > -1) {
+			MatchedUsers.splice(index, 1);
+		}
+		
+		candidate.compatibility = await checkUserCompatibility(candidate._id, vacancy._id);
+	}
+	for(let candidate of MatchedUsers) {
+		candidate.compatibility = await checkUserCompatibility(candidate._id, vacancy._id);
+
+		MatchedUsers[MatchedUsers.indexOf(candidate)] = {
+			_id: candidate._id,
+			name: candidate.name,
+			picture: candidate.picture,
+			compatibility: candidate.compatibility,
+		};
+	}
+
+	return {
+		...vacancy_candidates[0],
+		candidates: candidates,
+		matches: MatchedUsers,
+	};
+};
+
+/**
+ * Get Vacancy Info to show to company and candidate
+ * @param {string} _id 
+ * @returns 
+ */
+async function userGetVacancy(_id, user_id) {
+	const vacancy = await Vacancy.aggregate([
+		{ $match: { _id: ObjectId(_id), closed: false } },
+		{ $lookup: { from: 'companies', localField: 'company', foreignField: '_id', as: 'companyInfo'} },
+		{ $unwind: { path: '$companyInfo' } },
 		{
 			$project: {
 				role: 1,
@@ -124,15 +197,80 @@ async function getVacancyCandidates(_id) {
 				salary: 1,
 				currency: 1,
 				region: 1,
-				candidates: 1
-			},
+				workload: 1,
+				wantedSkills: 1,
+				yearsOfExperience: 1,
+				type: 1,
+				candidates: {
+					$size: '$candidates'
+				},
+				company: {
+					_id: '$companyInfo._id',
+					name: '$companyInfo.company.name'
+				},
+				user_applied: {
+					$in: [new ObjectId(user_id), '$candidates']
+				}
+			}
 		}
 	]);
+
+	// if vacancy exists, increment views
+	if (vacancy.length > 0) {
+		await Vacancy.updateOne({ _id: ObjectId(_id) }, { $inc: { views: 1 } });
+	}
+
+	return vacancy[0];
 }
+
+const companyGetVacancy = async (_id) => {
+	const vacancy = await Vacancy.aggregate([
+		{ $match: { _id: ObjectId(_id) } },
+		{ $lookup: { from: 'companies', localField: 'company', foreignField: '_id', as: 'companyInfo'} },
+		{ $unwind: { path: '$companyInfo' } },
+		{
+			$project: {
+				role: 1,
+				description: 1,
+				sector: 1,
+				views: 1,
+				salary: 1,
+				currency: 1,
+				region: 1,
+				workload: 1,
+				wantedSkills: {
+					$map: {
+						input: '$wantedSkills',
+						as: 'skill',
+						in: {
+							name: '$$skill.name',
+							level: '$$skill.level'
+						}
+					}
+				},
+				yearsOfExperience: 1,
+				type: 1,
+				candidates: 1,
+				number_candidates: {
+					$size: '$candidates'
+				},
+				company: {
+					_id: '$companyInfo._id',
+					name: '$companyInfo.company.name'
+				},
+				
+			}
+		}
+	]);
+
+	return vacancy[0];
+};
 
 module.exports = {
 	getCandidateInfo,
 	getAppliedVacancies,
 	searchVacancies,
-	getVacancyCandidates,
+	getVacancyWithCandidates,
+	userGetVacancy,
+	companyGetVacancy,
 };

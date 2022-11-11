@@ -13,7 +13,8 @@ const VacancySchema = new Schema({
 		enum: ['Recursos Humanos', 'Tecnologia', 'Administrativo', 'Financeiro', 'Operacional', 'Comércio', 'Serviços', 'Saúde', 'Industrial', 'Construção'],
 	},
 	description: {
-		index: true,
+		index: true, 
+		text: true,
 		type: String,
 		required: true
 	},
@@ -56,7 +57,7 @@ const VacancySchema = new Schema({
 	}],
 	yearsOfExperience: {
 		type: Number,
-		required: true
+		default: 0
 	},
 	candidates: [{
 		type: Schema.Types.ObjectId,
@@ -76,6 +77,8 @@ const VacancySchema = new Schema({
 	timestamps: true
 }
 );
+
+VacancySchema.index({ role: 'text', description: 'text' });
 
 /**
  * Find vacancy with the same id and that is from the company_id and toggle it to the opposite value

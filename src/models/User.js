@@ -11,9 +11,9 @@ const UserSchema = new Schema({
 		type: String,
 		required: true
 	},
-	role: {
+	password: {
 		type: String,
-		required: false,
+		required: true
 	},
 	username: {
 		type: String,
@@ -21,11 +21,18 @@ const UserSchema = new Schema({
 	},
 	description: {
 		type: String,
-		required: false
+		required: false,
+		default: ''
 	},
-	password: {
+	role: {
 		type: String,
-		required: true
+		required: false,
+		default: ''
+	},
+	phone: {
+		type: String,
+		required: false,
+		default: ''
 	},
 	picture: {
 		type: String,
@@ -37,7 +44,7 @@ const UserSchema = new Schema({
 		},
 		level: {
 			type: String,
-			enum: ['Iniciante', 'Intermediário', 'Avançado'],
+			//enum: ['Iniciante', 'Intermediário', 'Avançado'],
 		},
 	}],
 	formations: [{
@@ -74,6 +81,11 @@ const UserSchema = new Schema({
 			type: String,
 		},
 	}],
+	lastLogin: {
+		type: Date,
+		required: false,
+		default: Date.now
+	},
 	blocked: {
 		required: true,
 		type: Boolean,
@@ -82,6 +94,8 @@ const UserSchema = new Schema({
 },
 { timestamps: true }
 );
+
+UserSchema.index({role: 'text', name: 'text', username: 'text', description: 'text', formations: 'text', experiences: 'text', skills: 'text'});
 
 UserSchema.pre('save', async function (next) {
 	var user = this;

@@ -1,4 +1,6 @@
 const { Schema, model } = require('mongoose');
+const SALT_WORK_FACTOR = 10;
+const bcrypt = require('bcryptjs');
 
 const CompanySchema = new Schema({
 	company: {
@@ -9,6 +11,11 @@ const CompanySchema = new Schema({
 		cnpj: {
 			type: String,
 			required: true
+		},
+		description: {
+			type: String,
+			default: '',
+			required: false,
 		},
 		email: {
 			type: String,
@@ -117,6 +124,30 @@ const CompanySchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref: 'User',
 	}],
+	lastLogin: {
+		type: Date,
+		required: false,
+		default: Date.now
+	},
+});
+
+// pre insert hook
+CompanySchema.pre('save', async function (next) {
+	var company = this;
+	// only hash the password if it has been modified (or is new)
+	if (!company.isModified('holder.password')) return next();
+	// generate a salt
+	bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
+		if (err) return next(err);
+        
+		// hash the password using our new salt
+		bcrypt.hash(company.holder.password, salt, function(err, hash) {
+			if (err) return next(err);
+			// override the cleartext password with the hashed one
+			company.holder.password = hash;
+			next();
+		});
+	});
 });
 
 module.exports = model('Company', CompanySchema, 'companies');

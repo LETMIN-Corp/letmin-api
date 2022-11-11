@@ -1,5 +1,6 @@
 const Vacancy = require('../models/Vacancy');
 const Company = require('../models/Company');
+const Log = require('../models/Log');
 
 /**
  * Insert a new vacancy in the database
@@ -73,27 +74,25 @@ const getAllCompanyVacancies = async (req, res) => {
  * @route GET api/company/get-vacancy/:id
  * @route GET api/user/get-vacancy/:id
  */
-const getVacancy = async (req, res) => {
+const userGetVacancy = async (req, res) => {
+
+	const { userGetVacancy } = require('./repositories/VacancyRepository');
+
 	try {
-		// get vacancy and only one company
-		Vacancy.findById(req.params.id).populate('company candidates', 'company.name')
-			.then((vacancy) => {
-				if (!vacancy) {
-					return res.status(404).json({
-						success: false,
-						message: 'Vaga não encontrada.',
-					});
-				}
-
-				vacancy.views += 1;
-				vacancy.save();
-
-				return res.json({
-					success: true,
-					message: 'Vaga encontrada com sucesso',
-					vacancy,
-				});
+		const vacancy = await userGetVacancy(req.params.id, req.user._id);
+		
+		if (!vacancy) {
+			return res.status(404).json({
+				success: false,
+				message: 'Vaga não encontrada.',
 			});
+		}
+
+		return res.json({
+			success: true,
+			message: 'Vaga encontrada com sucesso',
+			vacancy: vacancy,
+		});
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
@@ -118,7 +117,7 @@ const confirmVacancy = async (req, res) => {
 	const companyId = req.user._id;
 
 	try {
-		const result = await Vacancy.findByIdAndToggleClosed(req.params.id, companyId)
+		const result = await Vacancy.findByIdAndToggleClosed(req.params.id, companyId);
 
 		if (!result) {
 			return res.status(404).json({
@@ -367,12 +366,12 @@ const cancelApplyVacancy = async (req, res) => {
  **/
 const getAllCandidates = async (req, res) => {
 
-	const { getVacancyCandidates } = require('./repositories/VacancyRepository');
+	const { getVacancyWithCandidates } = require('./repositories/VacancyRepository');
 
 	try {
-		let candidates = await getVacancyCandidates(req.params.id);
+		let vacancy = await getVacancyWithCandidates(req.params.id);
 
-		if (!candidates || candidates.length == 0) {
+		if (!vacancy) {
 			return res.status(404).json({
 				success: false,
 				message: 'Vaga não encontrada.',
@@ -382,9 +381,17 @@ const getAllCandidates = async (req, res) => {
 		return res.json({
 			success: true,
 			message: 'Candidatos encontrados',
-			data: candidates[0]
+			data: vacancy
 		});
 	} catch (err) {
+		// Create a log
+		await new Log({
+			action: 'Read',
+			description: `O Match de candidatos da vaga falhou: ${err}`,
+			ip: req.ip,
+			userAgent: req.headers['user-agent'],
+		}).save();
+
 		return res.status(400).json({
 			success: false,
 			message: 'Erro ao buscar candidatos.' + err,
@@ -452,7 +459,7 @@ module.exports = {
 	insertVacancy,
 	getVacanciesCompany,
 	getAllCompanyVacancies,
-	getVacancy,
+	userGetVacancy,
 	confirmVacancy,
 	closeVacancy,
 	updateVacancy,

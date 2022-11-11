@@ -1,7 +1,5 @@
 const Company = require('../models/Company');
-const Vacancy = require('../models/Vacancy');
 const bcrypt = require('bcryptjs');
-const ObjectId = require('mongoose').Types.ObjectId;
 const User = require('../models/User');
 const ROLES = require('../utils/constants');
 const { CLIENT_URL } = require('../config');
@@ -29,7 +27,7 @@ const loginCompany = async (req, res) => {
 			if (company.status.blocked) {
 				return res.status(401).json({
 					success: false,
-					message: 'Empresa bloqueada, entre em contato com o adminsitrador.',
+					message: 'Empresa bloqueada, entre em contato com o administrador.',
 				});
 			}
 
@@ -41,12 +39,14 @@ const loginCompany = async (req, res) => {
 					message: 'Credenciais incorretas',
 				});
 			}
+
+			await Company.findByIdAndUpdate(company._id, { $set: { lastLogin: Date.now() } });
+
 			let token = generateToken(company, ROLES.COMPANY);
 
 			return res.header('Authorization', token).status(200).json({
 				success: true,
 				message: 'Parabéns! Você está logado.',
-				token: token,
 			});
 		})
 		.catch((err) => {
@@ -64,42 +64,39 @@ const loginCompany = async (req, res) => {
 const registerCompany = async (req, res) => {
 	let credentials = req.body;
   
-	let company = await Company.findOne({
-		'company.cnpj' : credentials.company.cnpj,
-		'company.email' : credentials.company.email 
-	}).select('+company.cnpj +company.email');
+	try {
+		let company = await Company.findOne({
+			'company.cnpj' : credentials.company.cnpj,
+			'company.email' : credentials.company.email 
+		}).select('+company.cnpj +company.email');
 
-	if (company) {
+		if (company) {
+			return res.status(400).json({
+				success: false,
+				message: 'CNPJ ou email já foi cadastrado.',
+			});
+		}
+	
+		credentials.holder.password = await bcrypt.hash(credentials.holder.password, 12);
+
+		company = new Company(credentials);
+	
+		await company.save();
+
+		let token = generateToken(company, ROLES.COMPANY);
+
+		return res.header('Authorization', token).status(201).json({
+			success: true,
+			message: 'Parabéns! Você está cadastrado e logado.',
+			token: token,
+		});
+
+	} catch (err) {
 		return res.status(400).json({
 			success: false,
-			message: 'CNPJ ou email já foi cadastrado.',
+			message: 'Error ' + err,
 		});
 	}
-  
-	credentials.holder.password = await bcrypt.hash(credentials.holder.password, 12);
-  
-	company = new Company({
-		...credentials,
-		role: ROLES.COMPANY,
-	});
-  
-	company.save()
-		.then(company => {
-  
-			let token = generateToken(company, ROLES.COMPANY);
-
-			return res.header('Authorization', token).status(201).json({
-				success: true,
-				message: 'Parabéns! Você está cadastrado e logado.',
-				token: token,
-			});
-		}).catch(err => {
-			return res.status(500).json({
-				success: false,
-				message: 'Não foi possivel cadastrar a empresa.',
-				error: err,
-			});
-		});
 };
 
 /**
@@ -329,7 +326,8 @@ const updateCompanyData = async (req, res) => {
 			'company.cnpj': credentials.company.cnpj,
 			'company.email': credentials.company.email,
 			'company.phone': credentials.company.phone,
-			'company.address': credentials.company.address
+			'company.address': credentials.company.address,
+			'company.description': credentials.company.description,
 		}).then((company) => {
 			if (!company) {
 				return res.status(404).json({
@@ -338,8 +336,9 @@ const updateCompanyData = async (req, res) => {
 				});
 			}
 
-			return res.status(201).json({
+			return res.status(200).json({
 				success: true,
+				message: 'Empresa atualizada com sucesso.',
 				company,
 			});
 		});
@@ -371,8 +370,9 @@ const updateHolderData = async (req, res) => {
 				});
 			}
 
-			return res.status(201).json({
+			return res.status(200).json({
 				success: true,
+				message: 'Dados do responsável atualizados com sucesso.',
 				company,
 			});
 		});
@@ -468,27 +468,77 @@ const getTalentBank = async (req, res) => {
 		});
 };
 
-const getVacancy = async (req, res) => {
-	try {
-		Vacancy.findById(req.params.id).populate('company', 'company.name').populate('candidates').select('-wantedSkills._id')
-			.then((vacancy) => {
-				if (!vacancy) {
-					return res.status(404).json({
-						success: false,
-						message: 'Vaga não encontrada.',
-					});
-				}
+const companyGetVacancy = async (req, res) => {
+	
+	const { companyGetVacancy } = require('./repositories/VacancyRepository');
 
-				return res.json({
-					success: true,
-					message: 'Vaga encontrada com sucesso',
-					vacancy,
-				});
+	try {
+		const vacancy = await companyGetVacancy(req.params.id);
+
+		if (!vacancy) {
+			return res.status(404).json({
+				success: false,
+				message: 'Vaga não encontrada.',
 			});
+		}
+
+		return res.json({
+			success: true,
+			message: 'Vaga encontrada com sucesso',
+			vacancy: vacancy,
+		});
+
 	} catch (err) {
 		return res.status(400).json({
 			success: false,
 			message: 'Erro ao buscar vaga' + err,
+		});
+	}
+};
+
+const sendCandidateContactEmail = async (req, res) => {
+
+	const { message, user_id } = req.body;
+
+	if (!message, !user_id) {
+		return res.status(400).json({
+			success: false,
+			message: 'Mensagens e usuário alvo são obrigatórias'
+		});
+	}
+
+	const user = await User.findById(user_id).select('name email');
+
+	if (!user) {
+		return res.status(400).json({
+			success: false,
+			message: 'Erro ao encontrar usuário'
+		});
+	}
+
+	try {
+		const contactEmail = require('../utils/emailTemplates/contactUser')(message, user);
+
+		await sendEmail(contactEmail)
+			.then(async (info, err) => {
+				if (err) {
+					return res.status(400).json({
+						success: false,
+						message: 'Error ' + err,
+					});
+				}
+
+				return res.status(200).json({
+					success: true,
+					message: 'Sucesso no envio do email ao candidato',
+				});
+				
+			});
+
+	} catch (err) {
+		return res.status(500).json({
+			success: false,
+			message: 'Erro ao enviar email' + err
 		});
 	}
 };
@@ -506,5 +556,6 @@ module.exports = {
 	createForgotPasswordToken,
 	checkRecoveryToken,
 	resetPassword,
-	getVacancy,
+	companyGetVacancy,
+	sendCandidateContactEmail,
 };

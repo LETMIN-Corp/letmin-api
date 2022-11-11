@@ -11,6 +11,10 @@ const registerCompanyValidator = Joi.object({
 			'any.required': 'CNPJ é obrigatório',
 			'string.pattern.base': 'CNPJ inválido'
 		}),
+		description: Joi.string().allow('').messages({
+			'string.empty': 'Descrição não pode ser vazia',
+			'any.required': 'Descrição é obrigatória'
+		}),
 		email: Joi.string().email().required().messages({
 			'string.empty': 'Email não pode ser vazio',
 			'any.required': 'Email é obrigatório',
@@ -104,6 +108,10 @@ const updateCompanyValidator = Joi.object({
 			'string.empty': 'Email não pode ser vazio',
 			'any.required': 'Email é obrigatório',
 			'string.email': 'Email inválido'
+		}),
+		description: Joi.string().allow('').messages({
+			'string.empty': 'Descrição não pode ser vazia',
+			'any.required': 'Descrição é obrigatória'
 		}),
 		// regex for (44) 44444-4444 or (44) 4444-4444 allowing spaces
 		phone: Joi.string().required().regex(/^\([0-9]{2}\)\s?[0-9]{4,5}-[0-9]{4}$/).messages({

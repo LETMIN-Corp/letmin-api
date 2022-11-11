@@ -5,7 +5,7 @@ const { updateUser, getUserData, deleteUserAccount, searchCompany, getCompany } 
 const { 
 	searchVacancies, 
 	getCandidateVacancies,
-	getVacancy, 
+	userGetVacancy, 
 	applyToVacancy, 
 	getAppliedVacancies,
 	cancelApplyVacancy
@@ -18,7 +18,7 @@ const confirmCheck = require('../middlewares/confirmCheck');
 // Vacancy Routes
 router.get('/vacancy', searchVacancies);
 router.get('/vacancy-candidate', getCandidateVacancies);
-router.get('/get-vacancy/:id', getVacancy);
+router.get('/get-vacancy/:id', userGetVacancy);
 router.post('/apply-vacancy', applyToVacancy);
 router.post('/cancel-apply-vacancy', cancelApplyVacancy);
 
