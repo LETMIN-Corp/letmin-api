@@ -17,6 +17,7 @@ async function getCandidateInfo(_id) {
 				picture: 1,
 				formations: 1,
 				experiences: 1,
+				skills: 1,
 				phone: 1,
 				createdAt: 1,
 				updatedAt: 1,

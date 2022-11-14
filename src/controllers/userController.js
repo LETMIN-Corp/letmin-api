@@ -203,9 +203,11 @@ const searchCompany = async (req, res) => {
 const getCompany = async (req, res) => {
 	try {
 
-		let company = await Company.findOne({ _id: req.params.id, 'company.status.blocked': false })
-			.populate('vacancies', 'role sector region description currency salary closed')
-			.select('company holder vacancies');
+		let company = await Company.findById(req.params.id).populate('vacancies', 'role sector region description currency salary closed', { 
+				$and: [
+					{ closed: false },
+				],
+			}).select('company holder vacancies');
 
 		if (!company) {
 			return res.status(404).json({
