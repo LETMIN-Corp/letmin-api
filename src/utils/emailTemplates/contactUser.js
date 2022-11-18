@@ -41,7 +41,7 @@ const email = (message, user) => {
         <body>
             <div class="email-content">
                 <div class="top-bar">
-                    <h1>Letmin - Recuperação de Senha</h1>
+                    <h1>Letmin - Contato para emprego</h1>
                 </div>
                 <div style="padding: 0 12px;">
                     <h2>Caro ${ user.name },</h2>
