@@ -7,6 +7,8 @@ const sendEmail = require('../utils/mailer');
 
 const { generateToken } = require('../utils/jwt');
 const { companySearchUsers } = require('./repositories/UserRepository');
+const { Consola } = require('consola');
+const Log = require('../models/Log');
 
 /**
  * Login company
@@ -88,13 +90,22 @@ const registerCompany = async (req, res) => {
 		return res.header('Authorization', token).status(201).json({
 			success: true,
 			message: 'Parabéns! Você está cadastrado e logado.',
-			token: token,
 		});
 
 	} catch (err) {
+		Consola.error(err);
+
+		Log.create({
+			action: 'registerCompany',
+			target: {},
+			description: err,
+			ip: req.ip,
+			userAgent: req.headers['user-agent'],
+		});
+
 		return res.status(400).json({
 			success: false,
-			message: 'Error ' + err,
+			message: 'Erro ao cadastrar empresa.',
 		});
 	}
 };
@@ -233,6 +244,16 @@ const createForgotPasswordToken = async (req, res) => {
 					});
 			});
 	} catch (err) {
+		Consola.error(err);
+
+		Log.create({
+			action: 'createForgotPasswordToken',
+			target: {},
+			description: err,
+			ip: req.ip,
+			userAgent: req.headers['user-agent'],
+		});
+
 		return res.status(400).json({
 			success: false,
 			message: 'Error ' + err,

@@ -4,7 +4,6 @@ const LogsSchema = new Schema({
 	action: {
 		type: String,
 		required: true,
-		//enum: ['Create', 'Update', 'Delete']
 	},
 	target: {
 		foreignKey: {
