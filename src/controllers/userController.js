@@ -11,6 +11,7 @@ const {
 } = require('../utils/jwt');
 const Vacancy = require('../models/Vacancy');
 const Company = require('../models/Company');
+const Log = require('../models/Log');
 
 /**
  * User Login/Registration via Google
@@ -291,13 +292,35 @@ const deleteUserAccount = async (req, res) => {
 			{ multi: true }
 		);
 
+		// Log action on database
+		await Log.create({
+			action: 'delete',
+			target: {
+				foreignKey: _id,
+				role: 'User',
+			},
+			description: 'Usuário deletou sua conta.',
+			ip: req.ip,
+			userAgent: req.headers['user-agent'],
+		});
+
 		return res.status(200).json({
 			success: true,
 			message: 'Usuário deletado com sucesso!',
 		});
 
 	} catch (err) {
-		consola.error(err);
+		await Log.create({
+			action: 'error',
+			target: {
+				foreignKey: _id,
+				role: 'User',
+			},
+			description: 'Erro ao deletar usuário: ' + err,
+			ip: req.ip,
+			userAgent: req.headers['user-agent'],
+		});
+
 		return res.status(400).json({
 			success: false,
 			message: 'Erro ao deletar usuário.',
