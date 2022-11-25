@@ -81,9 +81,10 @@ const companyValidator = Joi.object({
 			'string.empty': 'Código de segurança não pode ser vazio',
 			'any.required': 'Código de segurança é obrigatório'
 		}),
-		expiration: Joi.string().required().messages({
+		expiration: Joi.string().required().regex(/^([0][1-9]|[1][0-2])\/[0-9]{2}$/).messages({
 			'string.empty': 'Data de vencimento não pode ser vazia',
-			'any.required': 'Data de vencimento é obrigatória'
+			'any.required': 'Data de vencimento é obrigatória',
+			'string.pattern.base': 'Data de vencimento inválida'
 		}),
 		owner: Joi.string().required().messages({
 			'string.empty': 'Nome do Titular não pode ser vazio',
