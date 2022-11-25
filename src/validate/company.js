@@ -55,10 +55,10 @@ const companyValidator = Joi.object({
 			'string.empty': 'Senha do Titular não pode ser vazia',
 			'any.required': 'Senha do Titular é obrigatória'
 		}),
-		confirmPassword: Joi.string().required().messages({
-			'string.empty': 'Confirmação de senha do Titular não pode ser vazia',
-			'any.required': 'Confirmação de senha do Titular é obrigatória'
-		}),
+		confirmPassword: Joi.any().valid(Joi.ref('password')).required().messages({
+			'any.only': 'Senhas não conferem',
+			'any.required': 'Confirmação de senha é obrigatória'
+		})
 	},
 	plan: {
 		selected: Joi.string().required().valid('Semestral', 'Anual').messages({
