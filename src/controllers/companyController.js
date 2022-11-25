@@ -17,46 +17,52 @@ const Log = require('../models/Log');
 const loginCompany = async (req, res) => {
 	const credentials = req.body;
   
-	Company.findOne({ 'company.email' : credentials.email }).select('-company.holder.password')
-		.then(async (company) => {
-			if (!company) {
-				return res.status(404).json({
-					success: false,
-					message: 'Email ou senha incorretos.',
-				});
-			}
+	try {
 
-			if (company.status.blocked) {
-				return res.status(401).json({
-					success: false,
-					message: 'Empresa bloqueada, entre em contato com o administrador.',
-				});
-			}
+		const company = await Company.findOne({
+			'company.email' : credentials.email,
+		}).select('+company.email +holder.password');
 
-			let isMatch = await bcrypt.compare(credentials.password, company.holder.password);
-
-			if(!isMatch){
-				return res.status(400).json({
-					success: false,
-					message: 'Credenciais incorretas',
-				});
-			}
-
-			await Company.findByIdAndUpdate(company._id, { $set: { lastLogin: Date.now() } });
-
-			let token = generateToken(company, ROLES.COMPANY);
-
-			return res.header('Authorization', token).status(200).json({
-				success: true,
-				message: 'Parabéns! Você está logado.',
-			});
-		})
-		.catch((err) => {
+		if (!company) {
 			return res.status(400).json({
 				success: false,
-				message: 'Error ' + err,
+				message: 'Email ou senha incorretos.',
 			});
+		}
+
+		const isMatch = await bcrypt.compare(credentials.password, company.holder.password);
+
+		if (!isMatch) {
+			return res.status(400).json({
+				success: false,
+				message: 'Email ou senha incorretos.',
+			});
+		}
+
+		if (company.status.blocked) {
+			return res.status(401).json({
+				success: false,
+				message: 'Empresa bloqueada, entre em contato com o administrador.',
+			});
+		}
+
+		await Company.findByIdAndUpdate(company._id, { $set: { lastLogin: Date.now() } });
+
+		let token = generateToken(company, ROLES.COMPANY);
+
+		return res.header('Authorization', token).status(200).json({
+			success: true,
+			message: 'Logado com sucesso.',
 		});
+
+	} catch (err) {
+		Consola.error(err);
+
+		return res.status(400).json({
+			success: false,
+			message: 'Error ' + err,
+		});
+	}
 };
 
 /**
@@ -98,7 +104,7 @@ const registerCompany = async (req, res) => {
 		Log.create({
 			action: 'registerCompany',
 			target: {},
-			description: err,
+			description: 'Erro ao cadastrar empresa: ' + err,
 			ip: req.ip,
 			userAgent: req.headers['user-agent'],
 		});
