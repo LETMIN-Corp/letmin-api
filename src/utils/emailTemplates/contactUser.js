@@ -44,7 +44,7 @@ const email = (message, user) => {
                     <h1>Letmin - Contato para emprego</h1>
                 </div>
                 <div style="padding: 0 12px;">
-                    <h2>Caro ${ user.name },</h2>
+                    <h2>Caro(a) ${ user.name },</h2>
                     <p>${ message.text }</p>
                     <p>Atenciosamente,</p>
                     <p>
